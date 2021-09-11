@@ -99,6 +99,19 @@ export function multiLayerPerceptronRegressionModel2Hidden() {
   return model;
 };
 
+export function multiLayerPerceptronRegressionModel1HiddenNoSigmoid() {
+  const model = tf.sequential();
+  model.add(tf.layers.dense({
+    inputShape: [bostonData.numFeatures],
+    units: 50,
+    // activation: 'sigmoid',
+    kernelInitializer: 'leCunNormal'
+  }));
+  model.add(tf.layers.dense({units: 1}));
+
+  model.summary();
+  return model;
+};
 
 /**
  * Describe the current linear weights for a human to read.

@@ -1,15 +1,8 @@
-# TensorFlow.js Example: Multivariate Regression for browser
+# TensorFlow.js 예제: 다중 회귀
 
-This example shows you how to perform regression with more than one input feature using [Boston Housing Dataset](https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html) which is a famous dataset derived from information collected by the U.S. Census Service concerning housing in the area of Boston Massachusetts.
+이 예제는 미국 인구 조사국이 수집한 매사추세츠주의 보스톤 지역의 주택 정보로 만든 유명한 데이터셋인 [보스턴 주택 데이터셋](https://www.cs.toronto.edu/~delve/data/boston/bostonDetail.html)을 사용해 하나 이상의 입력 특성을 가진 회귀를 수행하는 방법을 보여줍니다.
 
-Prepare the environment:
+실행 방법:
 ```sh
-$ npm install
-# Or
-$ yarn
-```
-
-To build and watch the example, run:
-```sh
-$ yarn watch
+$ npx http-server
 ```

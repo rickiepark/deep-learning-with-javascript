@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {linearRegressionModel, multiLayerPerceptronRegressionModel1Hidden, multiLayerPerceptronRegressionModel2Hidden, run} from './index.js';
+import {linearRegressionModel, multiLayerPerceptronRegressionModel1Hidden, multiLayerPerceptronRegressionModel2Hidden, multiLayerPerceptronRegressionModel1HiddenNoSigmoid, run} from './index.js';
 
 const statusElement = document.getElementById('status');
 export function updateStatus(message) {
@@ -72,6 +72,8 @@ export async function setup() {
       document.getElementById('nn-mlr-1hidden');
   const trainNeuralNetworkLinearRegression2Hidden =
       document.getElementById('nn-mlr-2hidden');
+  const trainNeuralNetworkLinearRegression1HiddenNoSigmoid =
+      document.getElementById('nn-mlr-1hidden-no-sigmoid');
 
   trainSimpleLinearRegression.addEventListener('click', async (e) => {
     const model = linearRegressionModel();
@@ -88,5 +90,11 @@ export async function setup() {
       'click', async () => {
         const model = multiLayerPerceptronRegressionModel2Hidden();
         await run(model, 'twoHidden', false);
+      }, false);
+
+  trainNeuralNetworkLinearRegression1HiddenNoSigmoid.addEventListener(
+      'click', async () => {
+        const model = multiLayerPerceptronRegressionModel1HiddenNoSigmoid();
+        await run(model, 'nosigHidden', false);
       }, false);
 };

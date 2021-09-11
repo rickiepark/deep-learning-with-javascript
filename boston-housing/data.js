@@ -15,9 +15,6 @@
  * =============================================================================
  */
 
-const Papa = require('papaparse');
-
-
 // Boston Housing data constants:
 const BASE_URL =
     'https://storage.googleapis.com/tfjs-examples/multivariate-linear-regression/data/';

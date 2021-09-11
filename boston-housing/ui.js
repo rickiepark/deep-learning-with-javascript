@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {linearRegressionModel, multiLayerPerceptronRegressionModel1Hidden, multiLayerPerceptronRegressionModel2Hidden, run} from '.';
+import {linearRegressionModel, multiLayerPerceptronRegressionModel1Hidden, multiLayerPerceptronRegressionModel2Hidden, run} from './index.js';
 
 const statusElement = document.getElementById('status');
 export function updateStatus(message) {

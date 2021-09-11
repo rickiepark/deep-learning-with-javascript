@@ -15,12 +15,9 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-import * as tfvis from '@tensorflow/tfjs-vis';
-
-import {BostonHousingDataset, featureDescriptions} from './data';
-import * as normalization from './normalization';
-import * as ui from './ui';
+import {BostonHousingDataset, featureDescriptions} from './data.js';
+import * as normalization from './normalization.js';
+import * as ui from './ui.js';
 
 // Some hyperparameters for model training.
 const NUM_EPOCHS = 200;

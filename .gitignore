@@ -11,3 +11,4 @@ yalc.lock
 *firebase-debug.log
 **/.parcel-cache
 .idea
+deploy.sh

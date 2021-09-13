@@ -19,7 +19,7 @@ import {BostonHousingDataset, featureDescriptions} from './data.js';
 import * as normalization from './normalization.js';
 import * as ui from './ui.js';
 
-// Some hyperparameters for model training.
+// 모델 훈련을 위한 하이퍼파라미터
 const NUM_EPOCHS = 200;
 const BATCH_SIZE = 40;
 const LEARNING_RATE = 0.01;
@@ -27,14 +27,13 @@ const LEARNING_RATE = 0.01;
 const bostonData = new BostonHousingDataset();
 const tensors = {};
 
-// Convert loaded data into tensors and creates normalized versions of the
-// features.
+// 로딩된 데이터를 텐서로 변환하고 특성을 정규화합니다.
 export function arraysToTensors() {
   tensors.rawTrainFeatures = tf.tensor2d(bostonData.trainFeatures);
   tensors.trainTarget = tf.tensor2d(bostonData.trainTarget);
   tensors.rawTestFeatures = tf.tensor2d(bostonData.testFeatures);
   tensors.testTarget = tf.tensor2d(bostonData.testTarget);
-  // Normalize mean and standard deviation of data.
+  // 평균과 표준 편차로 정규화합니다.
   let {dataMean, dataStd} =
       normalization.determineMeanAndStddev(tensors.rawTrainFeatures);
 
@@ -45,9 +44,9 @@ export function arraysToTensors() {
 };
 
 /**
- * Builds and returns Linear Regression Model.
+ * 선형 회귀 모델을 만들어 반환합니다.
  *
- * @returns {tf.Sequential} The linear regression model.
+ * @returns {tf.Sequential} 선형 회귀 모델
  */
 export function linearRegressionModel() {
   const model = tf.sequential();
@@ -58,10 +57,9 @@ export function linearRegressionModel() {
 };
 
 /**
- * Builds and returns Multi Layer Perceptron Regression Model
- * with 1 hidden layers, each with 10 units activated by sigmoid.
+ * 50개의 유닛과 시그모이드 함수를 가진 1개의 은닉층이 있는 다층 퍼셉트론 회귀 모델을 만들어 반환합니다.
  *
- * @returns {tf.Sequential} The multi layer perceptron regression model.
+ * @returns {tf.Sequential} 다층 퍼셉트론 회귀 모델
  */
 export function multiLayerPerceptronRegressionModel1Hidden() {
   const model = tf.sequential();
@@ -78,10 +76,9 @@ export function multiLayerPerceptronRegressionModel1Hidden() {
 };
 
 /**
- * Builds and returns Multi Layer Perceptron Regression Model
- * with 2 hidden layers, each with 10 units activated by sigmoid.
+ * 50개의 유닛과 시그모이드 함수를 가진 2개의 은닉층이 있는 다층 퍼셉트론 회귀 모델을 만들어 반환합니다.
  *
- * @returns {tf.Sequential} The multi layer perceptron regression mode  l.
+ * @returns {tf.Sequential} 다층 퍼셉트론 회귀 모델
  */
 export function multiLayerPerceptronRegressionModel2Hidden() {
   const model = tf.sequential();
@@ -99,6 +96,12 @@ export function multiLayerPerceptronRegressionModel2Hidden() {
   return model;
 };
 
+/**
+ * 50개의 유닛을 가진 2개의 은닉층이 있는 다층 퍼셉트론 회귀 모델을 만들어 반환합니다.
+ * (시그모이드 활성화 함수 사용하지 않음)
+ *
+ * @returns {tf.Sequential} 다층 퍼셉트론 회귀 모델
+ */
 export function multiLayerPerceptronRegressionModel1HiddenNoSigmoid() {
   const model = tf.sequential();
   model.add(tf.layers.dense({
@@ -114,16 +117,15 @@ export function multiLayerPerceptronRegressionModel1HiddenNoSigmoid() {
 };
 
 /**
- * Describe the current linear weights for a human to read.
+ * 현재 가중치를 읽기 쉬운 형태로 출력합니다.
  *
- * @param {Array} kernel Array of floats of length 12.  One value per feature.
- * @returns {List} List of objects, each with a string feature name, and value
- *     feature weight.
+ * @param {Array} kernel 길이가 13인 실수 배열. 원소 하나가 한 개의 특성에 해당합니다.
+ * @returns {List} 특성 이름과 특성의 가중치로 이루어진 객체의 리스트
  */
 export function describeKernelElements(kernel) {
   tf.util.assert(
       kernel.length == 12,
-      `kernel must be a array of length 12, got ${kernel.length}`);
+      `커널 배열의 길이는 12여야 하는데 ${kernel.length}입니다`);
   const outList = [];
   for (let idx = 0; idx < kernel.length; idx++) {
     outList.push({description: featureDescriptions[idx], value: kernel[idx]});
@@ -132,12 +134,11 @@ export function describeKernelElements(kernel) {
 }
 
 /**
- * Compiles `model` and trains it using the train data and runs model against
- * test data. Issues a callback to update the UI after each epcoh.
+ * `model`을 컴파일한 후 훈련 데이터에서 훈련하고 테스트 데이터에서 모델을 실행합니다.
+ * 에포크마다 UI를 업데이트하기 위해 콜백을 지정합니다.
  *
- * @param {tf.Sequential} model Model to be trained.
- * @param {boolean} weightsIllustration Whether to print info about the learned
- *  weights.
+ * @param {tf.Sequential} model 훈련할 모델
+ * @param {boolean} weightsIllustration 훈련된 가중치에 대한 정보를 출력할지 여부
  */
 export async function run(model, modelName, weightsIllustration) {
   model.compile(
@@ -200,8 +201,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   ui.updateStatus(
       '데이터가 텐서로 변환되었습니다..\n' +
       '훈련 버튼을 눌러 시작하세요.');
-  // TODO Explain what baseline loss is. How it is being computed in this
-  // Instance
   ui.updateBaselineStatus('기준 손실을 추정합니다.');
   computeBaseline();
   await ui.setup();

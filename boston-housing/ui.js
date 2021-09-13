@@ -34,22 +34,21 @@ export function updateModelStatus(message, modelName) {
 
 const NUM_TOP_WEIGHTS_TO_DISPLAY = 5;
 /**
- * Updates the weights output area to include information about the weights
- * learned in a simple linear model.
- * @param {List} weightsList list of objects with 'value':number and
- *     'description':string
+ * 간단한 선형 모델에서 학습된 가중치에 관한 정보를 업데이트합니다.
+ *
+ * @param {List} weightsList 'value':number 와 'description':string 의 객체 리스트
  */
 export function updateWeightDescription(weightsList) {
   const inspectionHeadlineElement =
       document.getElementById('inspectionHeadline');
   inspectionHeadlineElement.innerText =
       `가장 큰 가중치 상위 ${NUM_TOP_WEIGHTS_TO_DISPLAY}개`;
-  // Sort weights objects by descending absolute value.
+  // 절댓값 크기로 가중치를 정렬합니다.
   weightsList.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
   var table = document.getElementById('myTable');
-  // Clear out table contents
+  // 테이블을 초기화합니다.
   table.innerHTML = '';
-  // Add new rows to table.
+  // 테이블에 행을 추가합니다.
   weightsList.forEach((weight, i) => {
     if (i < NUM_TOP_WEIGHTS_TO_DISPLAY) {
       let row = table.insertRow(-1);

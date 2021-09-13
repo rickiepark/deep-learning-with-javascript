@@ -16,15 +16,14 @@
  */
 
 /**
- * Calculates the mean and standard deviation of each column of a data array.
+ * 데이터 배열에 있는 각 열의 평균과 표준 편차를 계산합니다.
  *
- * @param {Tensor2d} data: 각 열의 평균과 표준 편차를 독립적으로 계산하기 위한 데이터셋
+ * @param {Tensor2d} data 각 열의 평균과 표준 편차를 독립적으로 계산하기 위한 데이터셋
   *
- * @returns {Object}: 각 열의 평균과 표준 편차를 1d 텐서로 포함하고 있는 객체
+ * @returns {Object} 각 열의 평균과 표준 편차를 1d 텐서로 포함하고 있는 객체
  */
 export function determineMeanAndStddev(data) {
   const dataMean = data.mean(0);
-  // TODO(bileschi): Simplify when and if tf.var / tf.std added to the API.
   const diffFromMean = data.sub(dataMean);
   const squaredDiffFromMean = diffFromMean.square();
   const variance = squaredDiffFromMean.mean(0);
@@ -35,11 +34,11 @@ export function determineMeanAndStddev(data) {
 /**
  * 평균과 표준 편차가 주어지면 평균을 빼고 표준 편차로 나누어 정규화합니다.
  *
- * @param {Tensor2d} data: 정규화할 데이터. 크기: [batch, numFeatures].
- * @param {Tensor1d} dataMean: 데이터의 평균. 크기 [numFeatures].
- * @param {Tensor1d} dataStd: 데이터의 표준 편차. 크기 [numFeatures]
+ * @param {Tensor2d} data 정규화할 데이터. 크기: [batch, numFeatures].
+ * @param {Tensor1d} dataMean 데이터의 평균. 크기 [numFeatures].
+ * @param {Tensor1d} dataStd 데이터의 표준 편차. 크기 [numFeatures]
  *
- * @returns {Tensor2d}: data와 동일한 크기의 텐서이지만,
+ * @returns {Tensor2d} data와 동일한 크기의 텐서이지만,
  * 각 열은 평균이 0이고 단위 표준 편차를 가지도록 정규화되어 있습니다.
  */
 export function normalizeTensor(data, dataMean, dataStd) {

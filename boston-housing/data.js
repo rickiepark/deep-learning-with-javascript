@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-// Boston Housing data constants:
+// 보스턴 주택 데이터 경로:
 const BASE_URL =
     'https://storage.googleapis.com/tfjs-examples/multivariate-linear-regression/data/';
 
@@ -25,11 +25,11 @@ const TEST_FEATURES_FN = 'test-data.csv';
 const TEST_TARGET_FN = 'test-target.csv';
 
 /**
- * Given CSV data returns an array of arrays of numbers.
+ * 이 CSV 데이터는 숫자 배열의 배열을 반환합니다.
  *
- * @param {Array<Object>} data Downloaded data.
+ * @param {Array<Object>} data 다운로드된 데이터.
  *
- * @returns {Promise.Array<number[]>} Resolves to data with values parsed as floats.
+ * @returns {Promise.Array<number[]>} 실수 값으로 파싱된 데이터.
  */
 const parseCsv = async (data) => {
   return new Promise(resolve => {
@@ -41,17 +41,17 @@ const parseCsv = async (data) => {
 };
 
 /**
- * Downloads and returns the csv.
+ * csv를 다운로드하여 반환합니다.
  *
- * @param {string} filename Name of file to be loaded.
+ * @param {string} filename 다운로드할 파일 이름.
  *
- * @returns {Promise.Array<number[]>} Resolves to parsed csv data.
+ * @returns {Promise.Array<number[]>} 파싱된 csv 데이터.
  */
 export const loadCsv = async (filename) => {
   return new Promise(resolve => {
     const url = `${BASE_URL}${filename}`;
 
-    console.log(`  * Downloading data from: ${url}`);
+    console.log(`  * 다음 주소에서 데이터 다운로드 중: ${url}`);
     Papa.parse(url, {
       download: true,
       header: true,
@@ -62,10 +62,10 @@ export const loadCsv = async (filename) => {
   });
 };
 
-/** Helper class to handle loading training and test data. */
+/** 훈련 데이터와 테스트 데이터 적재를 위한 헬퍼 클래스 */
 export class BostonHousingDataset {
   constructor() {
-    // Arrays to hold the data.
+    // 데이터를 담을 배열
     this.trainFeatures = null;
     this.trainTarget = null;
     this.testFeatures = null;
@@ -73,14 +73,14 @@ export class BostonHousingDataset {
   }
 
   get numFeatures() {
-    // If numFetures is accessed before the data is loaded, raise an error.
+    // 데이터를 로드하기 전에 numFetures를 참조하면 에러를 발생시킵니다.
     if (this.trainFeatures == null) {
-      throw new Error('\'loadData()\' must be called before numFeatures')
+      throw new Error('numFeatures 전에 \'loadData()\'를 호출해야 합니다.')
     }
     return this.trainFeatures[0].length;
   }
 
-  /** Loads training and test data. */
+  /** 훈련 데이터와 테스트 데이터를 적재합니다. */
   async loadData() {
     [this.trainFeatures, this.trainTarget, this.testFeatures, this.testTarget] =
         await Promise.all([
@@ -101,8 +101,7 @@ export const featureDescriptions = [
 ];
 
 /**
- * Shuffles data and target (maintaining alignment) using Fisher-Yates
- * algorithm.flab
+ * Fisher-Yates 알고리즘을 사용하여 데이터와 타깃의 쌍을 섞습니다.
  */
 function shuffle(data, target) {
   let counter = data.length;
@@ -111,11 +110,11 @@ function shuffle(data, target) {
   while (counter > 0) {
     index = (Math.random() * counter) | 0;
     counter--;
-    // data:
+    // 데이터:
     temp = data[counter];
     data[counter] = data[index];
     data[index] = temp;
-    // target:
+    // 타깃:
     temp = target[counter];
     target[counter] = target[index];
     target[index] = temp;

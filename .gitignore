@@ -12,3 +12,5 @@ yalc.lock
 **/.parcel-cache
 .idea
 deploy.sh
+.DS_Store
+.idea

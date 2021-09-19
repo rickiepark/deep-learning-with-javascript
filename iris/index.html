@@ -1,0 +1,250 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<html>
+
+<head>
+  <title>TensorFlow.js: 붓꽃 품종 분류하기</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js" integrity="sha512-EbdJQSugx0nVWrtyK3JdQQ/03mS3Q1UiAhRtErbwl1YL/+e2hZdlIcSURxxh7WXHTzn83sjlh2rysACoJGfb6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="index.js"></script>
+</head>
+
+<body>
+
+  <style>
+
+    input {
+      width: 75px;
+    }
+
+    .input-div {
+      padding: 5px;
+      font-family: monospace;
+      font-size: 16px;
+    }
+
+    .input-label {
+      display: inline-block;
+      width: 160px;
+    }
+
+    td {
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 5px;
+    }
+
+    #predict-header {
+      font-weight: bold;
+    }
+
+    .output-div {
+      padding: 5px;
+      padding-top: 20px;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    #evaluate-table {
+      display: inline-block;
+    }
+
+    #evaluate-table td, #evaluate-table th {
+      font-family: monospace;
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    #evaluate-table th {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      text-align: left;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .region {
+      border-left: 1px dashed #ccc;
+      margin-bottom: 5px;
+      padding-left: 24px;
+      margin-left: -24px;
+    }
+
+    .load-save-section {
+      padding-top: 3px;
+      padding-bottom: 3px;
+    }
+
+    .logit-span {
+      padding-right: 1em;
+    }
+    .correct-prediction {
+      background-color: greenyellow
+    }
+    .wrong-prediction {
+      background-color: red;
+    }
+  </style>
+
+  <body>
+    <div class='tfjs-example-container'>
+      <section class='title-area'>
+        <h1>TensorFlow.js: 붓꽃 품종 분류하기</h1>
+        <p class='subtitle'>신경망으로 구조적인 (표 형식) 데이터를 분류하기</p>
+      </section>
+
+      <section>
+        <p class='section-head'>설명</p>
+        <p>
+          이 예제는 신경망을 사용해 여러 종류의 꽃이 담긴 표 형식 데이터를 분류합니다.
+          각 꽃의 데이터는 꽃잎 길이와 너비, 꽃받침 길이와 너비입니다.
+          모델의 목표는 샘플의 이런 특성을 바탕으로 꽃의 품종을 예측하는 것입니다.
+          이 데이터는 유명한 <a href="https://en.wikipedia.org/wiki/Iris_flower_data_set">붓꽃 데이터셋</a>에서 가져왔습니다.
+        </p>
+      </section>
+
+      <section>
+        <p class='section-head'>안내</p>
+        <p>
+          아래 버튼을 사용해 밑바닥부터 새로운 모델을 훈련하거나 사전에 훈련된 모델을 로드하여 성능을 테스트할 수 있습니다.
+        </p>
+        <p>
+          모델을 밑바닥부터 훈련하는 경우 브라우저 로컬 저장소에 저장할 수도 있습니다.
+        </p>
+        <p>
+          사전 훈련된 모델을 로드한다면 "샘플 테스트"의 첫 번째 행에 있는 속성을 수정해 이 샘플에 대한 예측을 만들 수 있습니다.
+        </p>
+      </section>
+
+      <section>
+        <p class='section-head'>제어</p>
+
+        <div class="region">
+          <h3>모델 훈련</h3>
+          <div class="create-model">
+            <div class="input-div">
+              <label class="input-label">훈련 에포크:</label>
+              <input id="train-epochs" type="number" value="40"></input>
+            </div>
+            <div class="input-div">
+              <span class="input-label">학습률:</span>
+              <input id="learning-rate" type="number" value="0.01"></input>
+            </div>
+            <button id="train-from-scratch">밑바닥부터 모델 훈련하기</button>
+          </div>
+        </div>
+
+        <div class="region">
+          <h3>모델 저장/로딩</h3>
+          <div class="load-save-section">
+            <button id="load-pretrained-remote">사전 훈련된 모델 로드하기</button>
+          </div>
+
+          <div class="load-save-section">
+            <button id="load-local" disabled="true">로컬에 저장된 모델 로드하기</button>
+            <button id="save-local" disabled="true">로컬에 모델 저장하기</button>
+            <button id="remove-local" disabled="true">로컬 모델 삭제하기</button>
+            <span id='local-model-status'>상태 확인 불가능.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class='section-head'>상태</p>
+        <div>
+          <span id="demo-status">대기</span>
+        </div>
+      </section>
+
+      <section>
+        <p class='section-head'>훈련 과정</p>
+        <div class='with-cols'>
+          <div>
+            <h4>손실</h4>
+            <div class="canvases" id="lossCanvas"></div>
+          </div>
+          <div>
+            <h4>정확도</h4>
+            <div class="canvases" id="accuracyCanvas"></div>
+          </div>
+          <div>
+            <h4>오차 행렬 (검증 세트 기반)</h4>
+            <div id="confusion-matrix"></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p class='section-head'>테스트 샘플</p>
+
+        <div id="evaluate">
+          <table id="evaluate-table">
+            <tr>
+              <th>꽃잎 길이</th>
+              <th>꽃잎 너비</th>
+              <th>꽃받침 길이</th>
+              <th>꽃받침 너비</th>
+              <th>진짜 클래스</th>
+              <th>예측 클래스</th>
+              <th>클래스 확률</th>
+            </tr>
+            <tbody id="evaluate-tbody">
+              <tr>
+                <td>
+                  <input id="petal-length" value="5.1"></input>
+                  <button id="petal-length-inc">+</button>
+                  <button id="petal-length-dec">-</button>
+                </td>
+                <td>
+                  <input id="petal-width" value="3.5"></input>
+                  <button id="petal-width-inc">+</button>
+                  <button id="petal-width-dec">-</button>
+                </td>
+                <td>
+                  <input id="sepal-length" value="1.4"></input>
+                  <button id="sepal-length-inc">+</button>
+                  <button id="sepal-length-dec">-</button>
+                </td>
+                <td>
+                  <input id="sepal-width" value="0.2"></input>
+                  <button id="sepal-width-inc">+</button>
+                  <button id="sepal-width-dec">-</button>
+                </td>
+                <td></td>
+                <td id="winner"></td>
+                <td id="logits"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div>
+        <div class="horizontal-section">
+          <div id="horizontal-section">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </body>
+
+</html>

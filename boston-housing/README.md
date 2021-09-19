@@ -6,3 +6,4 @@
 ```sh
 $ npx http-server
 ```
+지금 바로 [온라인 데모](http://ml-ko.kr/tfjs/boston-housing/)를 확인할 수도 있습니다!

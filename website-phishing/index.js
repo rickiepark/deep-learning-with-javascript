@@ -107,8 +107,8 @@ data.loadData().then(async () => {
 
   await ui.updateStatus('훈련을 시작합니다...');
   await model.fit(trainData.data, trainData.target, {
-    batchSize,
-    epochs,
+    batchSize: batchSize,
+    epochs: epochs,
     validationSplit: 0.2,
     callbacks: {
       onEpochBegin: async (epoch) => {

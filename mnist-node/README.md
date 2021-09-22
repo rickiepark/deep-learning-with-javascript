@@ -1,29 +1,28 @@
-# TensorFlow.js Example: Training MNIST with Node.js
+# TensorFlow.js 예제: Node.js로 MNIST 모델 훈련하기
 
-This example shows you how to train MNIST (using the layers API) under Node.js.
+이 예제는 Node.js로 (layers API를 사용한) MNIST 모델을 훈련하는 방법을 보여줍니다.
 
-This model will compute accuracy after one pass through the training dataset
-(60,000 samples) and evaluate 50 images from the test data set for accuracy after each epoch.
+이 모델은 훈련 데이터셋(60,000개 샘플)을 한 번 처리한 후 에포크마다 정확도를 계산하기 위해 테스트 데이터셋 중에서 50개의 샘플을 평가합니다.
 
-Prepare the node environment:
+node 환경을 준비합니다:
 ```sh
 $ npm install
-# Or
+# 또는
 $ yarn
 ```
 
-Run the training script:
+훈련 스크립트를 실행합니다:
 ```sh
 $ node main.js
 ```
 
-If you are running on a Linux system that is [CUDA compatible](https://www.tensorflow.org/install/install_linux), try installing the GPU
-package and replacing the require statement:
+[CUDA 호환](https://www.tensorflow.org/install/install_linux) 리눅스에서 실행한다면,
+GPU 패키지를 설치하고 require 문을 다음처럼 교체하세요:
 
 ```sh
 $ npm install @tensorflow/tfjs-node-gpu
-# Or
+# 또는
 $ yarn add @tensorflow/tfjs-node-gpu
 ```
 
-After installing the package, replace `require('@tensorflow/tfjs-node')` with `require('@tensorflow/tfjs-node-gpu');` in main.js
+패키지를 설치한 후에 main.js 파일에서 `require('@tensorflow/tfjs-node')`를 `require('@tensorflow/tfjs-node-gpu');`로 교체하세요.

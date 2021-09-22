@@ -44,33 +44,33 @@ async function run(epochs, batchSize, modelSavePath) {
   const evalOutput = model.evaluate(testImages, testLabels);
 
   console.log(
-      `\nEvaluation result:\n` +
+      `\n평가 결과:\n` +
       `  Loss = ${evalOutput[0].dataSync()[0].toFixed(3)}; `+
       `Accuracy = ${evalOutput[1].dataSync()[0].toFixed(3)}`);
 
   if (modelSavePath != null) {
     await model.save(`file://${modelSavePath}`);
-    console.log(`Saved model to path: ${modelSavePath}`);
+    console.log(`다음 경로에 모델을 저장합니다: ${modelSavePath}`);
   }
 }
 
 const parser = new argparse.ArgumentParser({
-  description: 'TensorFlow.js-Node MNIST Example.',
+  description: 'TensorFlow.js-Node MNIST 예제',
   addHelp: true
 });
 parser.addArgument('--epochs', {
   type: 'int',
   defaultValue: 20,
-  help: 'Number of epochs to train the model for.'
+  help: '모델을 훈련할 에포크 횟수'
 });
 parser.addArgument('--batch_size', {
   type: 'int',
   defaultValue: 128,
-  help: 'Batch size to be used during model training.'
+  help: '모델 훈련에 사용할 배치 크기'
 })
 parser.addArgument('--model_save_path', {
   type: 'string',
-  help: 'Path to which the model will be saved after training.'
+  help: '훈련이 끝난 후 모델을 저장할 경로'
 });
 const args = parser.parseArgs();
 

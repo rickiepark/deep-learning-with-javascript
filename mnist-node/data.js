@@ -24,7 +24,7 @@ const zlib = require('zlib');
 
 const readFile = util.promisify(fs.readFile);
 
-// MNIST data constants:
+// MNIST 데이터
 const BASE_URL = 'https://storage.googleapis.com/cvdf-datasets/mnist/';
 const TRAIN_IMAGES_FILE = 'train-images-idx3-ubyte';
 const TRAIN_LABELS_FILE = 'train-labels-idx1-ubyte';
@@ -40,7 +40,7 @@ const LABEL_HEADER_BYTES = 8;
 const LABEL_RECORD_BYTE = 1;
 const LABEL_FLAT_SIZE = 10;
 
-// Downloads a test file only once and returns the buffer for the file.
+// 파일을 한 번만 다운로드하고 파일에 대한 버퍼를 반환합니다.
 async function fetchOnceAndSaveToDiskWithBuffer(filename) {
   return new Promise(resolve => {
     const url = `${BASE_URL}${filename}.gz`;
@@ -49,7 +49,7 @@ async function fetchOnceAndSaveToDiskWithBuffer(filename) {
       return;
     }
     const file = fs.createWriteStream(filename);
-    console.log(`  * Downloading from: ${url}`);
+    console.log(`  * 다음 경로에서 파일을 다운로드합니다: ${url}`);
     https.get(url, (response) => {
       const unzip = zlib.createGunzip();
       response.pipe(unzip).pipe(file);
@@ -63,7 +63,7 @@ async function fetchOnceAndSaveToDiskWithBuffer(filename) {
 function loadHeaderValues(buffer, headerLength) {
   const headerValues = [];
   for (let i = 0; i < headerLength / 4; i++) {
-    // Header data is stored in-order (aka big-endian)
+    // 헤더 데이터는 빅엔디안으로 저장되어 있습니다.
     headerValues[i] = buffer.readUInt32BE(i * 4);
   }
   return headerValues;
@@ -85,8 +85,7 @@ async function loadImages(filename) {
   while (index < buffer.byteLength) {
     const array = new Float32Array(recordBytes);
     for (let i = 0; i < recordBytes; i++) {
-      // Normalize the pixel values into the 0-1 interval, from
-      // the original 0-255 interval.
+      // 원본 픽셀 값의 0~255 범위를 0~1 범위로 정규화합니다.
       array[i] = buffer.readUInt8(index++) / 255;
     }
     images.push(array);
@@ -119,7 +118,7 @@ async function loadLabels(filename) {
   return labels;
 }
 
-/** Helper class to handle loading training and test data. */
+/** 훈련 데이터와 테스트 데이터를 로딩하기 위한 헬퍼 클래스 */
 class MnistDataset {
   constructor() {
     this.dataset = null;
@@ -129,7 +128,7 @@ class MnistDataset {
     this.testBatchIndex = 0;
   }
 
-  /** Loads training and test data. */
+  /** 훈련 데이터와 테스트 데이터를 로드합니다. */
   async loadData() {
     this.dataset = await Promise.all([
       loadImages(TRAIN_IMAGES_FILE), loadLabels(TRAIN_LABELS_FILE),
@@ -160,10 +159,10 @@ class MnistDataset {
     const size = this.dataset[imagesIndex].length;
     tf.util.assert(
         this.dataset[labelsIndex].length === size,
-        `Mismatch in the number of images (${size}) and ` +
-            `the number of labels (${this.dataset[labelsIndex].length})`);
+        `이미지 개수(${size})와 ` +
+            `레이블 개수(${this.dataset[labelsIndex].length})가 맞지 않습니다.`);
 
-    // Only create one big array to hold batch of images.
+    // 이미지 배치를 담기 위한 배열을 만듭니다.
     const imagesShape = [size, IMAGE_HEIGHT, IMAGE_WIDTH, 1];
     const images = new Float32Array(tf.util.sizeFromShape(imagesShape));
     const labels = new Int32Array(tf.util.sizeFromShape([size, 1]));

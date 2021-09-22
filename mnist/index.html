@@ -1,0 +1,134 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<html>
+
+<head>
+  <title>TensorFlow.js: MNIST 숫자 분류하기</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.1.0"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js" integrity="sha512-EbdJQSugx0nVWrtyK3JdQQ/03mS3Q1UiAhRtErbwl1YL/+e2hZdlIcSURxxh7WXHTzn83sjlh2rysACoJGfb6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script type="module" src="index.js"></script>
+
+  <style>
+    #train {
+      margin-top: 10px;
+    }
+
+    label {
+      display: inline-block;
+      width: 250px;
+      padding: 6px 0 6px 0;
+    }
+
+    .canvases {
+      display: inline-block;
+    }
+
+    .prediction-canvas {
+      width: 100px;
+    }
+
+    .pred {
+      font-size: 20px;
+      line-height: 25px;
+      width: 100px;
+    }
+
+    .pred-correct {
+      background-color: #00cf00;
+    }
+
+    .pred-incorrect {
+      background-color: red;
+    }
+
+    .pred-container {
+      display: inline-block;
+      width: 100px;
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="tfjs-example-container">
+    <section class='title-area'>
+      <h1>TensorFlow.js: MNIST 숫자 분류하기</h1>
+      <p class='subtitle'>tf.layers API를 사용해 MNIST 데이터베이스의 손글씨 숫자를 인식하는 모델을 훈련합니다.
+      </p>
+    </section>
+
+    <section>
+      <p class='section-head'>설명</p>
+      <p>
+        이 예제는 합성곱 신경망(ConvNet 또는 CNN)이나 완전 연결 신경망(DenseNet)을 사용해
+        손글씨 숫자를 인식하는 모델을 훈련합니다.
+      </p>
+      <p>훈련 데이터로 MNIST 데이터셋을 사용합니다.</p>
+    </section>
+
+    <section>
+      <p class='section-head'>훈련 파라미터</p>
+      <div>
+        <label>모델 종류:</label>
+        <select id="model-type">
+          <option value="ConvNet">합성곱 신경망</option>
+          <option value="DenseNet">완전 연결 신경망</option>
+        </select>
+      </div>
+
+      <div>
+        <label>훈련 에포크 횟수:</label>
+        <input id="train-epochs" value="3">
+      </div>
+
+      <button id="train">데이터 로딩과 모델 훈련</button>
+    </section>
+
+    <section>
+      <p class='section-head'>훈련 과정</p>
+      <p id="status"></p>
+      <p id="message"></p>
+
+      <div id="stats">
+        <div class="canvases">
+          <label id="loss-label"></label>
+          <div id="loss-canvas"></div>
+        </div>
+        <div class="canvases">
+          <label id="accuracy-label"></label>
+          <div id="accuracy-canvas"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <p class='section-head'>추론</p>
+      <div id="images"></div>
+    </section>
+
+
+  </div>
+
+</body>
+
+</html>

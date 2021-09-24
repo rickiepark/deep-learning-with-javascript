@@ -35,9 +35,9 @@ async function run(epochs, batchSize, modelSavePath) {
   const numTrainBatchesPerEpoch =
       Math.ceil(numTrainExamplesPerEpoch / batchSize);
   await model.fit(trainImages, trainLabels, {
-    epochs,
-    batchSize,
-    validationSplit
+    epochs: epochs,
+    batchSize: batchSize,
+    validationSplit: validationSplit
   });
 
   const {images: testImages, labels: testLabels} = data.getTestData();
@@ -45,8 +45,8 @@ async function run(epochs, batchSize, modelSavePath) {
 
   console.log(
       `\n평가 결과:\n` +
-      `  Loss = ${evalOutput[0].dataSync()[0].toFixed(3)}; `+
-      `Accuracy = ${evalOutput[1].dataSync()[0].toFixed(3)}`);
+      ` 손실 = ${evalOutput[0].dataSync()[0].toFixed(3)}; `+
+      `정확도 = ${evalOutput[1].dataSync()[0].toFixed(3)}`);
 
   if (modelSavePath != null) {
     await model.save(`file://${modelSavePath}`);

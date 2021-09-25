@@ -45,7 +45,7 @@ async function run(epochs, batchSize, modelSavePath) {
 
   console.log(
       `\n평가 결과:\n` +
-      ` 손실 = ${evalOutput[0].dataSync()[0].toFixed(3)}; `+
+      `  손실 = ${evalOutput[0].dataSync()[0].toFixed(3)}; `+
       `정확도 = ${evalOutput[1].dataSync()[0].toFixed(3)}`);
 
   if (modelSavePath != null) {

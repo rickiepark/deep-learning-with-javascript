@@ -15,6 +15,7 @@ function predictWord() {
 async function app() {
  recognizer = speechCommands.create('BROWSER_FFT');
  await recognizer.ensureModelLoaded();
+ document.querySelector('#note').textContent = '모델이 준비되었습니다. 단어를 말해 보세요.'
  predictWord();
 }
 

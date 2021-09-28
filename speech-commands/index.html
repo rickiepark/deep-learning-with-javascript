@@ -1,11 +1,64 @@
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <title>TensorFlow.js: 단어 음성 인식하기</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
     <script type="module" src="index.js"></script>
+
+    <style>
+      #train {
+        margin-top: 10px;
+      }
+
+      label {
+        display: inline-block;
+        width: 250px;
+        padding: 6px 0 6px 0;
+      }
+
+      .canvases {
+        display: inline-block;
+      }
+
+      .prediction-canvas {
+        width: 100px;
+      }
+
+      .pred {
+        font-size: 20px;
+        line-height: 25px;
+        width: 100px;
+      }
+
+      .pred-correct {
+        background-color: #00cf00;
+      }
+
+      .pred-incorrect {
+        background-color: red;
+      }
+
+      .pred-container {
+        display: inline-block;
+        width: 100px;
+        margin: 10px;
+      }
+    </style>
   </head>
+
   <body>
-    <div id="note">모델을 다운로드하는데 시간이 걸립니다. 잠시 기다려 주세요...</div>
-    <div id="console"></div>
+    <div class="tfjs-example-container">
+      <section class='title-area'>
+        <h1>TensorFlow.js: 단어 음성 인식하기</h1>
+        </p>
+      </section>
+
+      <div id="note">모델을 다운로드하는데 시간이 걸립니다. 잠시 기다려 주세요...</div>
+      <div>&nbsp;</div>
+      <div id="console"></div>
+    </div>
   </body>
 </html>

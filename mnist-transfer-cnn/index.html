@@ -1,0 +1,241 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<!doctype html>
+
+<head>
+  <title>TensorFlow.js: MNIST CNN 전이 학습</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+  <script type="module" src="index.js"></script>
+</head>
+
+<style>
+  .tfjs-example-container {
+    width: calc(100vw - 600px);
+  }
+
+  .input-div {
+    padding: 5px;
+    font-family: monospace;
+  }
+
+  .predict-div {
+    padding: 5px;
+    padding-top: 20px;
+  }
+
+  .predict-table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 1px solid black;
+  }
+
+  .predict-table td {
+    padding: 5px;
+  }
+
+  td {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+  }
+
+  #predict-header {
+    font-weight: bold;
+  }
+
+  .output-div {
+    padding: 5px;
+    padding-top: 20px;
+    font-weight: bold;
+  }
+
+  #trainProg {
+    margin-top: 20px;
+    display: inline-block;
+  }
+
+  #image-input {
+    font-family: monospace;
+    position: relative;
+    width: 100%;
+    margin-top: 10px;
+    min-width: 800px;
+  }
+</style>
+
+<body>
+  <div class="tfjs-example-container">
+    <section class='title-area'>
+      <h1>TensorFlow.js: MNIST CNN 전이 학습</h1>
+    </section>
+
+    <section>
+      <p class='section-head'>설명</p>
+      <p>
+        이 예제는 브라우저에서 사전 훈련된 모델을 다시 훈련합니다.
+        이 모델은 파이썬에서 훈련되어 TensorFlow.js 포맷으로 변환된 것입니다.
+        그다음 브라우저에서 데이터를 사용해 추가적으로 훈련할 수 있습니다.
+        이미 훈련된 신경망을 재훈련하는 것을 전이 학습(transfer learning)이라고 부릅니다.
+      </p>
+      <p>
+        여기에서는 사전 훈련된 모델이 MNIST 데이터 중 숫자 0~4에서만 훈련되었습니다.
+        브라우저에서 전이 학습에 사용할 데이터는 숫자 5~9로 이루어져 입니다.
+        이 예는 사전 훈련된 모델의 처음 몇 개의 층을 전이 학습을 통해 새로운 데이터에 대한 특성 추출기로 사용할 수 있다는 것을 보여줍니다.
+        그 결과로 새로운 데이터에 대한 훈련 속도를 높일 수 있습니다.
+      </p>
+    </section>
+
+    <section>
+      <p class='section-head'>상태</p>
+      <span id="status"></span>
+    </section>
+
+
+    <section>
+      <p class='section-head'>모델 적재</p>
+      <div class="create-model">
+        <button id="load-pretrained-remote" style="display:none">사전 훈련된 원격 모델 불러오기</button>
+        <button id="load-pretrained-local" style="display:none">사전 훈련된 로컬 모델 불러오기</button>
+      </div>
+
+      <p class='section-head'>모델 재훈련</p>
+      <p>
+        모델을 재훈련하는 방법은 세 가지입니다.
+        <ul>
+          <li>
+            <strong>베이스 모델을 동결하기:</strong> 가장 일반적인 전이 학습 방법입니다.
+            여기에서는 베이스 모델의 처음 일곱 개 층을 동결하고 마지막 다섯 개의 층을 새로운 데이터에서 훈련합니다.
+          </li>
+          <li><strong>베이스 모델을 동결하지 않기:</strong>
+            기본 설정으로 비교하려면 이 옵션을 선택하세요.
+            주의해야 할 점은 모델이 수렴하는데 더 오래 걸리고 훈련이 진행됨에 따라 가중치(그리고 손실 값)에 변동이 큽니다.
+          </li>
+          <li><strong>가중치를 다시 초기화하기:</strong> 모든 가중치를 초기화하여 모델을 밑바닥부터 훈련합니다.
+        </ul>
+      </p>
+
+      <div class="retrain-div">
+        <div>
+          <span>훈련 모드:</span>
+          <select id="training-mode" class="form-control">
+            <option value="freeze-feature-layers">베이스 모델을 동결하기</option>
+            <option value="no-freezing">베이스 모델을 동결하지 않기</option>
+            <option value="reinitialize-weights">가중치를 다시 초기화하기</option>
+          </select>
+          <br>
+          <label>에포크:</label>
+          <input class="input" id="epochs" value="10" style="width:3em">
+
+          <br><br>
+
+          <button class="btn btn-primary" id="retrain" disabled="true"><span>재훈련</span></button>
+        </div>
+        <div>
+
+        </div>
+        <progress id="trainProg" value="0" max="100" style="width:35%"></progress>
+      </div>
+    </section>
+
+
+    <section>
+      <p class="section-head">모델 테스트</p>
+      <p>
+        아래는 전이 학습 데이터셋(숫자 5~9)에 있는 숫자 샘플의 "ASCII" 비트맵입니다.
+        화면의 수치는 이미지에서 가져온 흑백 채널의 정수 값입니다.
+        이 값을 수정하여 모델이 출력한 분류 확률에 영향을 미치는지 확인할 수 있습니다.
+      </p>
+
+      <select id="test-image-select" class="form-control" disabled="true">
+        <option class="head">테스트 샘플 선택하기</option>
+        <option value="5_1">5_1</option>
+        <option value="5_2">5_2</option>
+        <option value="5_3">5_3</option>
+        <option value="5_4">5_4</option>
+        <option value="5_5">5_5</option>
+        <option value="5_6">5_6</option>
+        <option value="5_7">5_7</option>
+        <option value="5_8">5_8</option>
+        <option value="5_9">5_9</option>
+        <option value="5_10">5_10</option>
+        <option value="6_1">6_1</option>
+        <option value="6_2">6_2</option>
+        <option value="6_3">6_3</option>
+        <option value="6_4">6_4</option>
+        <option value="6_5">6_5</option>
+        <option value="6_6">6_6</option>
+        <option value="6_7">6_7</option>
+        <option value="6_8">6_8</option>
+        <option value="6_9">6_9</option>
+        <option value="6_10">6_10</option>
+        <option value="7_1">7_1</option>
+        <option value="7_2">7_2</option>
+        <option value="7_3">7_3</option>
+        <option value="7_4">7_4</option>
+        <option value="7_5">7_5</option>
+        <option value="7_6">7_6</option>
+        <option value="7_7">7_7</option>
+        <option value="7_8">7_8</option>
+        <option value="7_9">7_9</option>
+        <option value="7_10">7_10</option>
+        <option value="8_1">8_1</option>
+        <option value="8_2">8_2</option>
+        <option value="8_3">8_3</option>
+        <option value="8_4">8_4</option>
+        <option value="8_5">8_5</option>
+        <option value="8_6">8_6</option>
+        <option value="8_7">8_7</option>
+        <option value="8_8">8_8</option>
+        <option value="8_9">8_9</option>
+        <option value="8_10">8_10</option>
+        <option value="9_1">9_1</option>
+        <option value="9_2">9_2</option>
+        <option value="9_3">9_3</option>
+        <option value="9_4">9_4</option>
+        <option value="9_5">9_5</option>
+        <option value="9_6">9_6</option>
+        <option value="9_7">9_7</option>
+        <option value="9_8">9_8</option>
+        <option value="9_9">9_9</option>
+        <option value="9_10">9_10</option>
+      </select>
+
+      <textarea id="image-input" rows="28"></textarea>
+
+      <p class="section-head">모델 출력</p>
+      <div class="predict-div">
+        <table class="predict-table">
+          <tr id="predict-header">
+          </tr>
+          <tr id="predict-values">
+          </tr>
+        </table>
+      </div>
+
+      <div class="output-div">
+        <span class="output-label">출력 클래스: </span>
+        <span id="winner"></input>
+      </div>
+    </section>
+  </div>
+
+</body>

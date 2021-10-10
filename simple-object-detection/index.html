@@ -1,0 +1,75 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<!doctype html>
+<head>
+  <title>TensorFlow.js 예제: 간단한 객체 탐지</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script type="module" src="index.js"></script>
+</head>
+
+<body>
+  <div class="tfjs-example-container centered-container">
+    <section class='title-area'>
+      <h1>TensorFlow.js 예제: 간단한 객체 탐지</h1>
+      <p class='subtitle'>삼각형과 직사각형을 분류하고 위치를 감지하는 모델을 훈련합니다.</p>
+    </section>
+
+    <p class='section-head'>설명</p>
+      <p>
+        이 페이지는 간단한 합성 장면에서 타깃 도형을 분류하고 위치를 감지하는 사전 훈련된 객체 탐지 모델의 추론을 수행합니다.
+        모델은 tfjs-node로 훈련했습니다(<a
+        href='https://github.com/rickiepark/deep-learning-with-javascript/blob/main/simple-object-detection/train.js'
+        target='_blank'>train.js</a> 참조).
+      </p>
+      <p>
+        감지하려는 타깃 객체는 삼각형과 직사각형입니다.
+        배경에는 모델이 무시해야 할 선분과 원이 등장합니다.
+        각 합성 장면은 하나의 타깃 객체만 포함합니다.
+        모델이 추론을 통해 생성한 (파란 상자로 표시된) 타깃 객체의 바운딩 박스를 (빨간 상자로 표시된)
+        정답 바운딩 박스와 비교할 수 있습니다.
+        또한 추론의 출력에는 도형의 클래스(삼각형 또는 직사각형)가 포함되어 있습니다.
+      </p>
+    </p>
+
+    <div id="status">모델 로딩중...</div>
+    <button id="load-hosted-model" disabled="true">호스팅된 모델을 로드합니다</button>
+    <button id="test" disabled="true">모델 테스트</button>
+
+    <div>
+      <canvas id="data-canvas" width="224" height="224"></canvas>
+    </div>
+
+    <div>
+      <div>
+        <span>추론 시간 (ms):</span>
+        <span id="inference-time-ms"></span>
+      </div>
+      <div>
+        <span>객체의 정답 클래스:</span>
+        <span class="shape-class" id="true-object-class"></span>
+      </div>
+      <div>
+        <span>객체의 예측 클래스:</span>
+        <span class="shape-class" id="predicted-object-class"></span>
+      </div>
+    </div>
+  </div>
+</body>

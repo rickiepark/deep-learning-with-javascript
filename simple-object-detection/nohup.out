@@ -1,0 +1,1220 @@
+yarn run v1.22.15
+$ node train.js --numExamples 20000 --initialTransferEpochs 100 --fineTuningEpochs 200
+Training using CPU.
+2021-10-05 09:32:51.945069: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+Generating 20000 training examples...
+(node:13398) DeprecationWarning: _ActionsContainer.addArgument() is renamed to _ActionsContainer.add_argument()
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:13398) DeprecationWarning: {action: "storeTrue"} is renamed to {action: "store_true"}
+(node:13398) DeprecationWarning: add_argument(): following options are renamed: 'defaultValue' -> 'default'
+(node:13398) DeprecationWarning: ArgumentParser.parseArgs() is renamed to ArgumentParser.parse_args()
+(node:13398) DeprecationWarning: use {type:"str"} or {type:String} instead of {type:"string"}
+2021-10-05 09:33:37.383077: W tensorflow/core/framework/cpu_allocator_impl.cc:80] Allocation of 12042240000 exceeds 10% of free system memory.
+_________________________________________________________________
+Layer (type)                 Output shape              Param #   
+=================================================================
+input_1 (InputLayer)         [null,224,224,3]          0         
+_________________________________________________________________
+conv1 (Conv2D)               [null,112,112,8]          216       
+_________________________________________________________________
+conv1_bn (BatchNormalization [null,112,112,8]          32        
+_________________________________________________________________
+conv1_relu (Activation)      [null,112,112,8]          0         
+_________________________________________________________________
+conv_dw_1 (DepthwiseConv2D)  [null,112,112,8]          72        
+_________________________________________________________________
+conv_dw_1_bn (BatchNormaliza [null,112,112,8]          32        
+_________________________________________________________________
+conv_dw_1_relu (Activation)  [null,112,112,8]          0         
+_________________________________________________________________
+conv_pw_1 (Conv2D)           [null,112,112,16]         128       
+_________________________________________________________________
+conv_pw_1_bn (BatchNormaliza [null,112,112,16]         64        
+_________________________________________________________________
+conv_pw_1_relu (Activation)  [null,112,112,16]         0         
+_________________________________________________________________
+conv_dw_2 (DepthwiseConv2D)  [null,56,56,16]           144       
+_________________________________________________________________
+conv_dw_2_bn (BatchNormaliza [null,56,56,16]           64        
+_________________________________________________________________
+conv_dw_2_relu (Activation)  [null,56,56,16]           0         
+_________________________________________________________________
+conv_pw_2 (Conv2D)           [null,56,56,32]           512       
+_________________________________________________________________
+conv_pw_2_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_pw_2_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_dw_3 (DepthwiseConv2D)  [null,56,56,32]           288       
+_________________________________________________________________
+conv_dw_3_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_dw_3_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_pw_3 (Conv2D)           [null,56,56,32]           1024      
+_________________________________________________________________
+conv_pw_3_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_pw_3_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_dw_4 (DepthwiseConv2D)  [null,28,28,32]           288       
+_________________________________________________________________
+conv_dw_4_bn (BatchNormaliza [null,28,28,32]           128       
+_________________________________________________________________
+conv_dw_4_relu (Activation)  [null,28,28,32]           0         
+_________________________________________________________________
+conv_pw_4 (Conv2D)           [null,28,28,64]           2048      
+_________________________________________________________________
+conv_pw_4_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_pw_4_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_dw_5 (DepthwiseConv2D)  [null,28,28,64]           576       
+_________________________________________________________________
+conv_dw_5_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_dw_5_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_pw_5 (Conv2D)           [null,28,28,64]           4096      
+_________________________________________________________________
+conv_pw_5_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_pw_5_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_dw_6 (DepthwiseConv2D)  [null,14,14,64]           576       
+_________________________________________________________________
+conv_dw_6_bn (BatchNormaliza [null,14,14,64]           256       
+_________________________________________________________________
+conv_dw_6_relu (Activation)  [null,14,14,64]           0         
+_________________________________________________________________
+conv_pw_6 (Conv2D)           [null,14,14,128]          8192      
+_________________________________________________________________
+conv_pw_6_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_6_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_7 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_7_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_7_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_7 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_7_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_7_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_8 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_8_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_8_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_8 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_8_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_8_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_9 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_9_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_9_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_9 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_9_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_9_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_10 (DepthwiseConv2D) [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_10_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_10_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_10 (Conv2D)          [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_10_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_10_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_11 (DepthwiseConv2D) [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_11_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_11_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_11 (Conv2D)          [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_11_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_11_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+sequential_1 (Sequential)    [null,5]                  5018805   
+=================================================================
+Total params: 5132005
+Trainable params: 5018805
+Non-trainable params: 113200
+_________________________________________________________________
+Phase 1 of 2: initial transfer learning
+Epoch 1 / 100
+
+87216ms 5130us/step - loss=30074.64 val_loss=5192.18 
+Epoch 2 / 100
+
+85474ms 5028us/step - loss=4251.11 val_loss=3696.45 
+Epoch 3 / 100
+
+84163ms 4951us/step - loss=3655.53 val_loss=3212.14 
+Epoch 4 / 100
+
+85680ms 5040us/step - loss=3166.80 val_loss=2882.33 
+Epoch 5 / 100
+
+85424ms 5025us/step - loss=2938.86 val_loss=2328.58 
+Epoch 6 / 100
+
+84175ms 4951us/step - loss=2805.64 val_loss=3945.05 
+Epoch 7 / 100
+
+84083ms 4946us/step - loss=2738.17 val_loss=3309.18 
+Epoch 8 / 100
+
+84776ms 4987us/step - loss=2597.98 val_loss=2428.75 
+Epoch 9 / 100
+
+84118ms 4948us/step - loss=2488.52 val_loss=3484.45 
+Epoch 10 / 100
+
+86187ms 5070us/step - loss=2417.80 val_loss=2354.26 
+Epoch 11 / 100
+
+85722ms 5042us/step - loss=2383.16 val_loss=2373.93 
+Epoch 12 / 100
+
+86334ms 5078us/step - loss=2318.32 val_loss=2491.37 
+Epoch 13 / 100
+
+87482ms 5146us/step - loss=2271.13 val_loss=2467.76 
+Epoch 14 / 100
+
+86729ms 5102us/step - loss=2248.03 val_loss=2309.29 
+Epoch 15 / 100
+
+85954ms 5056us/step - loss=2188.41 val_loss=3034.57 
+Epoch 16 / 100
+
+86977ms 5116us/step - loss=2143.41 val_loss=1787.84 
+Epoch 17 / 100
+
+84964ms 4998us/step - loss=2095.80 val_loss=2177.05 
+Epoch 18 / 100
+
+83810ms 4930us/step - loss=2055.52 val_loss=2234.04 
+Epoch 19 / 100
+
+84821ms 4989us/step - loss=2064.20 val_loss=1808.61 
+Epoch 20 / 100
+
+89773ms 5281us/step - loss=2020.18 val_loss=2901.39 
+Epoch 21 / 100
+
+86654ms 5097us/step - loss=1984.27 val_loss=2302.94 
+Epoch 22 / 100
+
+86390ms 5082us/step - loss=1971.08 val_loss=2372.12 
+Epoch 23 / 100
+
+87444ms 5144us/step - loss=1918.76 val_loss=1983.34 
+Epoch 24 / 100
+
+87257ms 5133us/step - loss=1901.15 val_loss=2794.89 
+Epoch 25 / 100
+
+86793ms 5105us/step - loss=1883.91 val_loss=2011.25 
+Epoch 26 / 100
+
+88197ms 5188us/step - loss=1849.68 val_loss=1854.32 
+Epoch 27 / 100
+
+87302ms 5135us/step - loss=1825.86 val_loss=1635.61 
+Epoch 28 / 100
+
+88825ms 5225us/step - loss=1786.74 val_loss=1875.81 
+Epoch 29 / 100
+
+86991ms 5117us/step - loss=1807.79 val_loss=1690.63 
+Epoch 30 / 100
+
+87706ms 5159us/step - loss=1732.70 val_loss=2405.58 
+Epoch 31 / 100
+
+86600ms 5094us/step - loss=1728.25 val_loss=1727.31 
+Epoch 32 / 100
+
+95761ms 5633us/step - loss=1728.99 val_loss=3120.41 
+Epoch 33 / 100
+
+92041ms 5414us/step - loss=1749.71 val_loss=1673.56 
+Epoch 34 / 100
+
+92270ms 5428us/step - loss=1694.51 val_loss=2524.72 
+Epoch 35 / 100
+
+88083ms 5181us/step - loss=1658.21 val_loss=2318.99 
+Epoch 36 / 100
+
+87303ms 5135us/step - loss=1646.14 val_loss=2061.28 
+Epoch 37 / 100
+
+87120ms 5125us/step - loss=1646.26 val_loss=2033.51 
+Epoch 38 / 100
+
+87255ms 5133us/step - loss=1628.04 val_loss=1702.98 
+Epoch 39 / 100
+
+86818ms 5107us/step - loss=1600.99 val_loss=1701.03 
+Epoch 40 / 100
+
+86791ms 5105us/step - loss=1603.94 val_loss=2065.35 
+Epoch 41 / 100
+
+87176ms 5128us/step - loss=1593.13 val_loss=2596.67 
+Epoch 42 / 100
+
+86773ms 5104us/step - loss=1587.49 val_loss=2527.38 
+Epoch 43 / 100
+
+86991ms 5117us/step - loss=1555.37 val_loss=2654.01 
+Epoch 44 / 100
+
+87048ms 5120us/step - loss=1547.99 val_loss=1888.16 
+Epoch 45 / 100
+
+87856ms 5168us/step - loss=1540.48 val_loss=1738.31 
+Epoch 46 / 100
+
+87465ms 5145us/step - loss=1511.11 val_loss=2208.97 
+Epoch 47 / 100
+
+87181ms 5128us/step - loss=1529.93 val_loss=1613.53 
+Epoch 48 / 100
+
+87369ms 5139us/step - loss=1491.41 val_loss=1654.04 
+Epoch 49 / 100
+
+88456ms 5203us/step - loss=1460.46 val_loss=1672.57 
+Epoch 50 / 100
+
+89579ms 5269us/step - loss=1494.76 val_loss=2589.32 
+Epoch 51 / 100
+
+89876ms 5287us/step - loss=1471.30 val_loss=1466.45 
+Epoch 52 / 100
+
+89714ms 5277us/step - loss=1453.40 val_loss=1691.18 
+Epoch 53 / 100
+
+88761ms 5221us/step - loss=1434.25 val_loss=2160.54 
+Epoch 54 / 100
+
+88498ms 5206us/step - loss=1429.15 val_loss=1584.46 
+Epoch 55 / 100
+
+87548ms 5150us/step - loss=1431.41 val_loss=1557.52 
+Epoch 56 / 100
+
+86901ms 5112us/step - loss=1396.09 val_loss=1618.79 
+Epoch 57 / 100
+
+88112ms 5183us/step - loss=1413.70 val_loss=3058.40 
+Epoch 58 / 100
+
+92236ms 5426us/step - loss=1383.39 val_loss=1580.26 
+Epoch 59 / 100
+
+89096ms 5241us/step - loss=1404.88 val_loss=1462.22 
+Epoch 60 / 100
+
+88784ms 5223us/step - loss=1363.02 val_loss=1932.11 
+Epoch 61 / 100
+
+88503ms 5206us/step - loss=1373.58 val_loss=1812.35 
+Epoch 62 / 100
+
+87352ms 5138us/step - loss=1349.76 val_loss=1834.93 
+Epoch 63 / 100
+
+89168ms 5245us/step - loss=1350.73 val_loss=1541.84 
+Epoch 64 / 100
+
+89533ms 5267us/step - loss=1331.66 val_loss=1598.95 
+Epoch 65 / 100
+
+88972ms 5234us/step - loss=1341.15 val_loss=2180.52 
+Epoch 66 / 100
+
+88569ms 5210us/step - loss=1358.13 val_loss=1721.03 
+Epoch 67 / 100
+
+88316ms 5195us/step - loss=1327.89 val_loss=1579.96 
+Epoch 68 / 100
+
+88539ms 5208us/step - loss=1303.36 val_loss=1799.60 
+Epoch 69 / 100
+
+89509ms 5265us/step - loss=1286.84 val_loss=2343.03 
+Epoch 70 / 100
+
+88444ms 5203us/step - loss=1309.80 val_loss=2027.45 
+Epoch 71 / 100
+
+88037ms 5179us/step - loss=1296.48 val_loss=1466.47 
+Epoch 72 / 100
+
+87979ms 5175us/step - loss=1289.35 val_loss=1418.82 
+Epoch 73 / 100
+
+87812ms 5165us/step - loss=1268.84 val_loss=1471.83 
+Epoch 74 / 100
+
+88020ms 5178us/step - loss=1265.85 val_loss=1564.05 
+Epoch 75 / 100
+
+88453ms 5203us/step - loss=1279.68 val_loss=2895.14 
+Epoch 76 / 100
+
+87360ms 5139us/step - loss=1246.74 val_loss=2673.31 
+Epoch 77 / 100
+
+87260ms 5133us/step - loss=1278.40 val_loss=2128.57 
+Epoch 78 / 100
+
+86881ms 5111us/step - loss=1241.50 val_loss=1677.99 
+Epoch 79 / 100
+
+86913ms 5113us/step - loss=1242.98 val_loss=1446.97 
+Epoch 80 / 100
+
+87278ms 5134us/step - loss=1247.26 val_loss=1416.52 
+Epoch 81 / 100
+
+87057ms 5121us/step - loss=1252.72 val_loss=2007.84 
+Epoch 82 / 100
+
+87636ms 5155us/step - loss=1232.66 val_loss=1619.85 
+Epoch 83 / 100
+
+86872ms 5110us/step - loss=1223.06 val_loss=1406.81 
+Epoch 84 / 100
+
+87814ms 5166us/step - loss=1214.09 val_loss=1616.02 
+Epoch 85 / 100
+
+87232ms 5131us/step - loss=1188.98 val_loss=2226.02 
+Epoch 86 / 100
+
+86830ms 5108us/step - loss=1205.96 val_loss=1700.57 
+Epoch 87 / 100
+
+87193ms 5129us/step - loss=1207.89 val_loss=1718.63 
+Epoch 88 / 100
+
+88132ms 5184us/step - loss=1199.35 val_loss=1830.82 
+Epoch 89 / 100
+
+88159ms 5186us/step - loss=1193.78 val_loss=1621.82 
+Epoch 90 / 100
+
+87513ms 5148us/step - loss=1189.33 val_loss=1361.41 
+Epoch 91 / 100
+
+86815ms 5107us/step - loss=1160.24 val_loss=1389.17 
+Epoch 92 / 100
+
+87142ms 5126us/step - loss=1178.71 val_loss=1496.76 
+Epoch 93 / 100
+
+86722ms 5101us/step - loss=1155.56 val_loss=1678.41 
+Epoch 94 / 100
+
+87068ms 5122us/step - loss=1154.16 val_loss=1991.14 
+Epoch 95 / 100
+
+87779ms 5163us/step - loss=1163.19 val_loss=1440.65 
+Epoch 96 / 100
+
+87991ms 5176us/step - loss=1147.62 val_loss=1745.61 
+Epoch 97 / 100
+
+88127ms 5184us/step - loss=1140.01 val_loss=1406.72 
+Epoch 98 / 100
+
+86211ms 5071us/step - loss=1148.29 val_loss=1859.40 
+Epoch 99 / 100
+
+87296ms 5135us/step - loss=1130.63 val_loss=1597.28 
+Epoch 100 / 100
+
+87003ms 5118us/step - loss=1117.64 val_loss=1675.10 
+_________________________________________________________________
+Layer (type)                 Output shape              Param #   
+=================================================================
+input_1 (InputLayer)         [null,224,224,3]          0         
+_________________________________________________________________
+conv1 (Conv2D)               [null,112,112,8]          216       
+_________________________________________________________________
+conv1_bn (BatchNormalization [null,112,112,8]          32        
+_________________________________________________________________
+conv1_relu (Activation)      [null,112,112,8]          0         
+_________________________________________________________________
+conv_dw_1 (DepthwiseConv2D)  [null,112,112,8]          72        
+_________________________________________________________________
+conv_dw_1_bn (BatchNormaliza [null,112,112,8]          32        
+_________________________________________________________________
+conv_dw_1_relu (Activation)  [null,112,112,8]          0         
+_________________________________________________________________
+conv_pw_1 (Conv2D)           [null,112,112,16]         128       
+_________________________________________________________________
+conv_pw_1_bn (BatchNormaliza [null,112,112,16]         64        
+_________________________________________________________________
+conv_pw_1_relu (Activation)  [null,112,112,16]         0         
+_________________________________________________________________
+conv_dw_2 (DepthwiseConv2D)  [null,56,56,16]           144       
+_________________________________________________________________
+conv_dw_2_bn (BatchNormaliza [null,56,56,16]           64        
+_________________________________________________________________
+conv_dw_2_relu (Activation)  [null,56,56,16]           0         
+_________________________________________________________________
+conv_pw_2 (Conv2D)           [null,56,56,32]           512       
+_________________________________________________________________
+conv_pw_2_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_pw_2_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_dw_3 (DepthwiseConv2D)  [null,56,56,32]           288       
+_________________________________________________________________
+conv_dw_3_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_dw_3_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_pw_3 (Conv2D)           [null,56,56,32]           1024      
+_________________________________________________________________
+conv_pw_3_bn (BatchNormaliza [null,56,56,32]           128       
+_________________________________________________________________
+conv_pw_3_relu (Activation)  [null,56,56,32]           0         
+_________________________________________________________________
+conv_dw_4 (DepthwiseConv2D)  [null,28,28,32]           288       
+_________________________________________________________________
+conv_dw_4_bn (BatchNormaliza [null,28,28,32]           128       
+_________________________________________________________________
+conv_dw_4_relu (Activation)  [null,28,28,32]           0         
+_________________________________________________________________
+conv_pw_4 (Conv2D)           [null,28,28,64]           2048      
+_________________________________________________________________
+conv_pw_4_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_pw_4_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_dw_5 (DepthwiseConv2D)  [null,28,28,64]           576       
+_________________________________________________________________
+conv_dw_5_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_dw_5_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_pw_5 (Conv2D)           [null,28,28,64]           4096      
+_________________________________________________________________
+conv_pw_5_bn (BatchNormaliza [null,28,28,64]           256       
+_________________________________________________________________
+conv_pw_5_relu (Activation)  [null,28,28,64]           0         
+_________________________________________________________________
+conv_dw_6 (DepthwiseConv2D)  [null,14,14,64]           576       
+_________________________________________________________________
+conv_dw_6_bn (BatchNormaliza [null,14,14,64]           256       
+_________________________________________________________________
+conv_dw_6_relu (Activation)  [null,14,14,64]           0         
+_________________________________________________________________
+conv_pw_6 (Conv2D)           [null,14,14,128]          8192      
+_________________________________________________________________
+conv_pw_6_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_6_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_7 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_7_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_7_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_7 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_7_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_7_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_8 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_8_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_8_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_8 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_8_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_8_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_9 (DepthwiseConv2D)  [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_9_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_9_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_9 (Conv2D)           [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_9_bn (BatchNormaliza [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_9_relu (Activation)  [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_10 (DepthwiseConv2D) [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_10_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_10_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_10 (Conv2D)          [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_10_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_10_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_dw_11 (DepthwiseConv2D) [null,14,14,128]          1152      
+_________________________________________________________________
+conv_dw_11_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_dw_11_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+conv_pw_11 (Conv2D)          [null,14,14,128]          16384     
+_________________________________________________________________
+conv_pw_11_bn (BatchNormaliz [null,14,14,128]          512       
+_________________________________________________________________
+conv_pw_11_relu (Activation) [null,14,14,128]          0         
+_________________________________________________________________
+sequential_1 (Sequential)    [null,5]                  5018805   
+=================================================================
+Total params: 5132005
+Trainable params: 5068725
+Non-trainable params: 63280
+_________________________________________________________________
+Phase 2 of 2: fine-tuning phase
+Epoch 1 / 200
+
+161468ms 9498us/step - loss=926.24 val_loss=840.10 
+Epoch 2 / 200
+
+161603ms 9506us/step - loss=488.97 val_loss=823.56 
+Epoch 3 / 200
+
+162789ms 9576us/step - loss=375.19 val_loss=728.61 
+Epoch 4 / 200
+
+162458ms 9556us/step - loss=315.68 val_loss=701.88 
+Epoch 5 / 200
+
+161775ms 9516us/step - loss=277.58 val_loss=439.80 
+Epoch 6 / 200
+
+164112ms 9654us/step - loss=249.75 val_loss=269.45 
+Epoch 7 / 200
+
+166149ms 9773us/step - loss=232.56 val_loss=420.29 
+Epoch 8 / 200
+
+164369ms 9669us/step - loss=213.79 val_loss=491.16 
+Epoch 9 / 200
+
+161544ms 9503us/step - loss=202.21 val_loss=287.86 
+Epoch 10 / 200
+
+161796ms 9517us/step - loss=195.24 val_loss=265.83 
+Epoch 11 / 200
+
+162759ms 9574us/step - loss=184.09 val_loss=284.62 
+Epoch 12 / 200
+
+162014ms 9530us/step - loss=179.26 val_loss=224.66 
+Epoch 13 / 200
+
+162745ms 9573us/step - loss=176.57 val_loss=208.47 
+Epoch 14 / 200
+
+162558ms 9562us/step - loss=166.96 val_loss=189.48 
+Epoch 15 / 200
+
+160691ms 9452us/step - loss=144.51 val_loss=208.24 
+Epoch 16 / 200
+
+161983ms 9528us/step - loss=122.71 val_loss=187.83 
+Epoch 17 / 200
+
+162896ms 9582us/step - loss=111.48 val_loss=211.05 
+Epoch 18 / 200
+
+163862ms 9639us/step - loss=105.56 val_loss=138.32 
+Epoch 19 / 200
+
+160813ms 9460us/step - loss=102.48 val_loss=227.08 
+Epoch 20 / 200
+
+162501ms 9559us/step - loss=98.08 val_loss=161.74 
+Epoch 21 / 200
+
+162124ms 9537us/step - loss=95.57 val_loss=168.16 
+Epoch 22 / 200
+
+162499ms 9559us/step - loss=93.84 val_loss=136.33 
+Epoch 23 / 200
+
+162483ms 9558us/step - loss=91.13 val_loss=169.92 
+Epoch 24 / 200
+
+162765ms 9574us/step - loss=89.72 val_loss=196.83 
+Epoch 25 / 200
+
+164364ms 9668us/step - loss=87.72 val_loss=120.13 
+Epoch 26 / 200
+
+161158ms 9480us/step - loss=86.55 val_loss=228.29 
+Epoch 27 / 200
+
+161306ms 9489us/step - loss=84.71 val_loss=157.91 
+Epoch 28 / 200
+
+163059ms 9592us/step - loss=82.98 val_loss=173.90 
+Epoch 29 / 200
+
+163462ms 9615us/step - loss=80.96 val_loss=180.01 
+Epoch 30 / 200
+
+162114ms 9536us/step - loss=80.56 val_loss=161.59 
+Epoch 31 / 200
+
+162022ms 9531us/step - loss=80.41 val_loss=130.30 
+Epoch 32 / 200
+
+164948ms 9703us/step - loss=78.47 val_loss=111.93 
+Epoch 33 / 200
+
+163285ms 9605us/step - loss=77.18 val_loss=170.55 
+Epoch 34 / 200
+
+161791ms 9517us/step - loss=76.50 val_loss=127.73 
+Epoch 35 / 200
+
+162304ms 9547us/step - loss=74.84 val_loss=101.35 
+Epoch 36 / 200
+
+161200ms 9482us/step - loss=74.45 val_loss=141.22 
+Epoch 37 / 200
+
+161375ms 9493us/step - loss=73.03 val_loss=110.32 
+Epoch 38 / 200
+
+160785ms 9458us/step - loss=72.21 val_loss=113.97 
+Epoch 39 / 200
+
+163420ms 9613us/step - loss=71.55 val_loss=191.06 
+Epoch 40 / 200
+
+162649ms 9568us/step - loss=70.55 val_loss=118.31 
+Epoch 41 / 200
+
+162663ms 9568us/step - loss=70.07 val_loss=212.47 
+Epoch 42 / 200
+
+161332ms 9490us/step - loss=68.79 val_loss=158.66 
+Epoch 43 / 200
+
+161253ms 9485us/step - loss=69.05 val_loss=220.97 
+Epoch 44 / 200
+
+160539ms 9443us/step - loss=68.04 val_loss=136.61 
+Epoch 45 / 200
+
+162008ms 9530us/step - loss=67.43 val_loss=132.02 
+Epoch 46 / 200
+
+161624ms 9507us/step - loss=66.54 val_loss=136.04 
+Epoch 47 / 200
+
+160951ms 9468us/step - loss=65.79 val_loss=233.73 
+Epoch 48 / 200
+
+161347ms 9491us/step - loss=65.39 val_loss=101.56 
+Epoch 49 / 200
+
+162589ms 9564us/step - loss=64.76 val_loss=137.50 
+Epoch 50 / 200
+
+162214ms 9542us/step - loss=64.08 val_loss=108.76 
+Epoch 51 / 200
+
+161196ms 9482us/step - loss=63.32 val_loss=114.55 
+Epoch 52 / 200
+
+160612ms 9448us/step - loss=63.10 val_loss=120.89 
+Epoch 53 / 200
+
+160688ms 9452us/step - loss=62.20 val_loss=119.78 
+Epoch 54 / 200
+
+162586ms 9564us/step - loss=62.41 val_loss=149.48 
+Epoch 55 / 200
+
+160997ms 9470us/step - loss=60.85 val_loss=131.34 
+Epoch 56 / 200
+
+161667ms 9510us/step - loss=60.48 val_loss=95.10 
+Epoch 57 / 200
+
+161324ms 9490us/step - loss=60.34 val_loss=198.99 
+Epoch 58 / 200
+
+161983ms 9528us/step - loss=60.11 val_loss=106.63 
+Epoch 59 / 200
+
+161490ms 9499us/step - loss=59.90 val_loss=116.65 
+Epoch 60 / 200
+
+163867ms 9639us/step - loss=58.18 val_loss=105.28 
+Epoch 61 / 200
+
+162021ms 9531us/step - loss=58.79 val_loss=126.75 
+Epoch 62 / 200
+
+161191ms 9482us/step - loss=57.67 val_loss=96.96 
+Epoch 63 / 200
+
+161887ms 9523us/step - loss=57.37 val_loss=102.80 
+Epoch 64 / 200
+
+162341ms 9549us/step - loss=57.32 val_loss=106.79 
+Epoch 65 / 200
+
+163182ms 9599us/step - loss=56.93 val_loss=111.04 
+Epoch 66 / 200
+
+165321ms 9725us/step - loss=56.15 val_loss=108.84 
+Epoch 67 / 200
+
+163234ms 9602us/step - loss=55.57 val_loss=106.61 
+Epoch 68 / 200
+
+163192ms 9600us/step - loss=55.06 val_loss=92.03 
+Epoch 69 / 200
+
+165506ms 9736us/step - loss=55.76 val_loss=113.27 
+Epoch 70 / 200
+
+165238ms 9720us/step - loss=55.08 val_loss=93.52 
+Epoch 71 / 200
+
+167023ms 9825us/step - loss=53.40 val_loss=180.98 
+Epoch 72 / 200
+
+165451ms 9732us/step - loss=54.74 val_loss=134.45 
+Epoch 73 / 200
+
+164186ms 9658us/step - loss=52.79 val_loss=96.65 
+Epoch 74 / 200
+
+166044ms 9767us/step - loss=53.60 val_loss=118.33 
+Epoch 75 / 200
+
+167218ms 9836us/step - loss=53.19 val_loss=147.79 
+Epoch 76 / 200
+
+167314ms 9842us/step - loss=52.50 val_loss=143.21 
+Epoch 77 / 200
+
+167506ms 9853us/step - loss=52.48 val_loss=147.71 
+Epoch 78 / 200
+
+169328ms 9960us/step - loss=51.87 val_loss=71.44 
+Epoch 79 / 200
+
+166646ms 9803us/step - loss=51.19 val_loss=131.37 
+Epoch 80 / 200
+
+166896ms 9817us/step - loss=50.44 val_loss=98.08 
+Epoch 81 / 200
+
+166317ms 9783us/step - loss=51.23 val_loss=119.97 
+Epoch 82 / 200
+
+168336ms 9902us/step - loss=49.95 val_loss=119.56 
+Epoch 83 / 200
+
+168170ms 9892us/step - loss=50.13 val_loss=78.29 
+Epoch 84 / 200
+
+165929ms 9761us/step - loss=50.06 val_loss=178.40 
+Epoch 85 / 200
+
+166669ms 9804us/step - loss=49.89 val_loss=84.84 
+Epoch 86 / 200
+
+165671ms 9745us/step - loss=49.32 val_loss=146.84 
+Epoch 87 / 200
+
+166864ms 9816us/step - loss=48.70 val_loss=133.50 
+Epoch 88 / 200
+
+166296ms 9782us/step - loss=48.36 val_loss=125.46 
+Epoch 89 / 200
+
+167523ms 9854us/step - loss=49.47 val_loss=78.06 
+Epoch 90 / 200
+
+167349ms 9844us/step - loss=48.48 val_loss=102.25 
+Epoch 91 / 200
+
+170407ms 10024us/step - loss=48.10 val_loss=142.13 
+Epoch 92 / 200
+
+166703ms 9806us/step - loss=48.11 val_loss=123.34 
+Epoch 93 / 200
+
+165913ms 9760us/step - loss=47.60 val_loss=85.08 
+Epoch 94 / 200
+
+166343ms 9785us/step - loss=47.03 val_loss=96.96 
+Epoch 95 / 200
+
+166685ms 9805us/step - loss=47.37 val_loss=111.23 
+Epoch 96 / 200
+
+165684ms 9746us/step - loss=46.62 val_loss=90.23 
+Epoch 97 / 200
+
+165692ms 9747us/step - loss=46.57 val_loss=115.36 
+Epoch 98 / 200
+
+168165ms 9892us/step - loss=45.72 val_loss=162.69 
+Epoch 99 / 200
+
+166245ms 9779us/step - loss=46.38 val_loss=122.25 
+Epoch 100 / 200
+
+171270ms 10075us/step - loss=45.87 val_loss=119.63 
+Epoch 101 / 200
+
+168021ms 9884us/step - loss=45.32 val_loss=104.51 
+Epoch 102 / 200
+
+167864ms 9874us/step - loss=45.29 val_loss=119.09 
+Epoch 103 / 200
+
+166999ms 9823us/step - loss=44.60 val_loss=89.51 
+Epoch 104 / 200
+
+165565ms 9739us/step - loss=44.61 val_loss=102.29 
+Epoch 105 / 200
+
+166964ms 9821us/step - loss=44.72 val_loss=109.22 
+Epoch 106 / 200
+
+165565ms 9739us/step - loss=44.69 val_loss=137.94 
+Epoch 107 / 200
+
+166177ms 9775us/step - loss=43.95 val_loss=142.04 
+Epoch 108 / 200
+
+165322ms 9725us/step - loss=43.88 val_loss=96.79 
+Epoch 109 / 200
+
+165368ms 9728us/step - loss=43.81 val_loss=77.62 
+Epoch 110 / 200
+
+166910ms 9818us/step - loss=43.72 val_loss=88.91 
+Epoch 111 / 200
+
+165877ms 9757us/step - loss=43.73 val_loss=120.62 
+Epoch 112 / 200
+
+167692ms 9864us/step - loss=43.15 val_loss=133.69 
+Epoch 113 / 200
+
+166203ms 9777us/step - loss=43.22 val_loss=73.47 
+Epoch 114 / 200
+
+164855ms 9697us/step - loss=42.61 val_loss=140.00 
+Epoch 115 / 200
+
+167336ms 9843us/step - loss=43.16 val_loss=142.40 
+Epoch 116 / 200
+
+165479ms 9734us/step - loss=42.20 val_loss=102.99 
+Epoch 117 / 200
+
+166454ms 9791us/step - loss=42.72 val_loss=81.16 
+Epoch 118 / 200
+
+165162ms 9715us/step - loss=41.85 val_loss=72.41 
+Epoch 119 / 200
+
+168193ms 9894us/step - loss=42.12 val_loss=89.98 
+Epoch 120 / 200
+
+167674ms 9863us/step - loss=41.42 val_loss=117.28 
+Epoch 121 / 200
+
+167171ms 9834us/step - loss=41.31 val_loss=104.66 
+Epoch 122 / 200
+
+165495ms 9735us/step - loss=41.28 val_loss=105.73 
+Epoch 123 / 200
+
+165630ms 9743us/step - loss=41.30 val_loss=84.98 
+Epoch 124 / 200
+
+165886ms 9758us/step - loss=40.92 val_loss=97.03 
+Epoch 125 / 200
+
+168934ms 9937us/step - loss=40.66 val_loss=99.15 
+Epoch 126 / 200
+
+169631ms 9978us/step - loss=41.06 val_loss=121.45 
+Epoch 127 / 200
+
+165894ms 9758us/step - loss=40.65 val_loss=112.72 
+Epoch 128 / 200
+
+167714ms 9866us/step - loss=40.38 val_loss=88.28 
+Epoch 129 / 200
+
+169816ms 9989us/step - loss=40.51 val_loss=98.74 
+Epoch 130 / 200
+
+168348ms 9903us/step - loss=39.66 val_loss=111.78 
+Epoch 131 / 200
+
+167334ms 9843us/step - loss=40.15 val_loss=100.37 
+Epoch 132 / 200
+
+167033ms 9825us/step - loss=39.90 val_loss=115.77 
+Epoch 133 / 200
+
+166694ms 9806us/step - loss=39.13 val_loss=92.88 
+Epoch 134 / 200
+
+168341ms 9902us/step - loss=38.93 val_loss=129.05 
+Epoch 135 / 200
+
+166170ms 9775us/step - loss=38.67 val_loss=88.13 
+Epoch 136 / 200
+
+166371ms 9787us/step - loss=39.19 val_loss=122.86 
+Epoch 137 / 200
+
+167983ms 9881us/step - loss=39.36 val_loss=154.97 
+Epoch 138 / 200
+
+171553ms 10091us/step - loss=38.84 val_loss=81.04 
+Epoch 139 / 200
+
+179539ms 10561us/step - loss=38.55 val_loss=108.22 
+Epoch 140 / 200
+
+170909ms 10053us/step - loss=38.52 val_loss=98.00 
+Epoch 141 / 200
+
+168956ms 9939us/step - loss=38.50 val_loss=97.56 
+Epoch 142 / 200
+
+168005ms 9883us/step - loss=38.18 val_loss=102.60 
+Epoch 143 / 200
+
+169825ms 9990us/step - loss=38.22 val_loss=89.39 
+Epoch 144 / 200
+
+168130ms 9890us/step - loss=37.74 val_loss=97.91 
+Epoch 145 / 200
+
+167538ms 9855us/step - loss=37.60 val_loss=117.72 
+Epoch 146 / 200
+
+167028ms 9825us/step - loss=37.71 val_loss=115.26 
+Epoch 147 / 200
+
+167640ms 9861us/step - loss=37.58 val_loss=86.28 
+Epoch 148 / 200
+
+166753ms 9809us/step - loss=37.15 val_loss=110.76 
+Epoch 149 / 200
+
+168311ms 9901us/step - loss=37.18 val_loss=87.12 
+Epoch 150 / 200
+
+166928ms 9819us/step - loss=37.11 val_loss=99.59 
+Epoch 151 / 200
+
+167079ms 9828us/step - loss=37.08 val_loss=104.54 
+Epoch 152 / 200
+
+167012ms 9824us/step - loss=36.85 val_loss=122.01 
+Epoch 153 / 200
+
+168062ms 9886us/step - loss=36.81 val_loss=100.18 
+Epoch 154 / 200
+
+168877ms 9934us/step - loss=36.46 val_loss=102.48 
+Epoch 155 / 200
+
+168040ms 9885us/step - loss=36.78 val_loss=114.71 
+Epoch 156 / 200
+
+167480ms 9852us/step - loss=36.34 val_loss=74.90 
+Epoch 157 / 200
+
+167214ms 9836us/step - loss=36.24 val_loss=94.41 
+Epoch 158 / 200
+
+166998ms 9823us/step - loss=36.35 val_loss=97.32 
+Epoch 159 / 200
+
+169807ms 9989us/step - loss=36.40 val_loss=115.15 
+Epoch 160 / 200
+
+169324ms 9960us/step - loss=35.87 val_loss=73.92 
+Epoch 161 / 200
+
+167579ms 9858us/step - loss=36.03 val_loss=83.45 
+Epoch 162 / 200
+
+167236ms 9837us/step - loss=35.35 val_loss=115.45 
+Epoch 163 / 200
+
+166705ms 9806us/step - loss=35.78 val_loss=86.37 
+Epoch 164 / 200
+
+167340ms 9844us/step - loss=35.51 val_loss=80.72 
+Epoch 165 / 200
+
+167434ms 9849us/step - loss=35.01 val_loss=104.90 
+Epoch 166 / 200
+
+167841ms 9873us/step - loss=35.01 val_loss=82.94 
+Epoch 167 / 200
+
+167375ms 9846us/step - loss=35.10 val_loss=114.83 
+Epoch 168 / 200
+
+167523ms 9854us/step - loss=35.05 val_loss=96.62 
+Epoch 169 / 200
+
+167417ms 9848us/step - loss=35.03 val_loss=94.99 
+Epoch 170 / 200
+
+167849ms 9873us/step - loss=34.52 val_loss=85.84 
+Epoch 171 / 200
+
+166784ms 9811us/step - loss=34.59 val_loss=123.78 
+Epoch 172 / 200
+
+167373ms 9845us/step - loss=34.71 val_loss=160.45 
+Epoch 173 / 200
+
+168333ms 9902us/step - loss=33.96 val_loss=103.45 
+Epoch 174 / 200
+
+167440ms 9849us/step - loss=34.37 val_loss=81.44 
+Epoch 175 / 200
+
+166689ms 9805us/step - loss=34.19 val_loss=84.02 
+Epoch 176 / 200
+
+167458ms 9850us/step - loss=34.05 val_loss=103.64 
+Epoch 177 / 200
+
+169086ms 9946us/step - loss=33.68 val_loss=116.73 
+Epoch 178 / 200
+
+168860ms 9933us/step - loss=34.08 val_loss=103.03 
+Epoch 179 / 200
+
+168003ms 9883us/step - loss=33.53 val_loss=90.66 
+Epoch 180 / 200
+
+167211ms 9836us/step - loss=33.65 val_loss=84.84 
+Epoch 181 / 200
+
+167958ms 9880us/step - loss=33.75 val_loss=109.07 
+Epoch 182 / 200
+
+168341ms 9902us/step - loss=33.12 val_loss=94.40 
+Epoch 183 / 200
+
+167521ms 9854us/step - loss=33.14 val_loss=134.27 
+Epoch 184 / 200
+
+167803ms 9871us/step - loss=32.69 val_loss=105.74 
+Epoch 185 / 200
+
+167764ms 9868us/step - loss=32.99 val_loss=104.57 
+Epoch 186 / 200
+
+168148ms 9891us/step - loss=33.18 val_loss=91.08 
+Epoch 187 / 200
+
+167917ms 9877us/step - loss=32.99 val_loss=110.55 
+Epoch 188 / 200
+
+167499ms 9853us/step - loss=32.87 val_loss=102.54 
+Epoch 189 / 200
+
+167822ms 9872us/step - loss=32.48 val_loss=83.51 
+Epoch 190 / 200
+
+167211ms 9836us/step - loss=32.77 val_loss=98.22 
+Epoch 191 / 200
+
+169009ms 9942us/step - loss=32.32 val_loss=101.05 
+Epoch 192 / 200
+
+170432ms 10025us/step - loss=32.64 val_loss=106.88 
+Epoch 193 / 200
+
+167709ms 9865us/step - loss=32.37 val_loss=110.53 
+Epoch 194 / 200
+
+168928ms 9937us/step - loss=32.28 val_loss=87.64 
+Epoch 195 / 200
+
+170004ms 10000us/step - loss=32.17 val_loss=80.45 
+Epoch 196 / 200
+
+169686ms 9982us/step - loss=32.14 val_loss=105.21 
+Epoch 197 / 200
+
+166547ms 9797us/step - loss=32.05 val_loss=93.95 
+Epoch 198 / 200
+
+163190ms 9599us/step - loss=31.84 val_loss=80.58 
+Epoch 199 / 200
+
+162229ms 9543us/step - loss=31.76 val_loss=108.64 
+Epoch 200 / 200
+
+161829ms 9519us/step - loss=32.00 val_loss=97.01 
+Model training took 41936.038612893 s
+Trained model is saved to file://./dist/object_detection_model
+
+Next, run the following command to test the model in the browser:
+
+  yarn watch
+Done in 41938.81s.

@@ -1,0 +1,165 @@
+<!--
+ @license
+ Copyright 2019 Google LLC. All Rights Reserved.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ =============================================================================
+-->
+
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TensorFlow.js 예제: tfjs-data에서 CSV 파일 다루기</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+  <script type="module" src="index.js"></script>
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <style>
+    .status {
+      border: none;
+      font-size: 20px;
+      text-align: center;
+      resize: none;
+    }
+
+    .query {
+      font-size: 20px;
+      text-align: left;
+      resize: none;
+
+    }
+
+    .textarea {
+      font-size: 20px;
+      text-align: center;
+      resize: none;
+    }
+
+    .container {
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .divTable {
+      display: table;
+      width: 100%;
+    }
+
+    .divTableRow {
+      display: table-row;
+    }
+
+    .divTableHeading {
+      background-color: #EEE;
+      display: table-header-group;
+    }
+
+    .divTableCell,
+    .divTableHead {
+      border: 1px solid #999999;
+      display: table-cell;
+      padding: 3px 10px;
+    }
+
+    .divTableCellKey {
+      border: 1px solid #999999;
+      display: table-cell;
+      padding: 3px 10px;
+      font-weight: bold;
+    }
+
+    .divTableHeading {
+      background-color: #EEE;
+      display: table-header-group;
+      font-weight: bold;
+    }
+
+    .divTableFoot {
+      background-color: #EEE;
+      display: table-footer-group;
+      font-weight: bold;
+    }
+
+    .divTableBody {
+      display: table-row-group;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <br>
+    <h3>TensorFlow.js 예제: tfjs-data에서 CSV 파일 다루기</h3>
+    <div id="Preset URL buttons">
+      <button id="boston-button">보스턴 주택 CSV</button>
+      <button id="dresses-button">드레스 판매 OpenML CSV</button>
+      <button id="jena-climate-button">예나 기후 CSV</button>
+      <button id="suny-button">뉴욕 주립대 캠퍼스 CSV</button>
+    </div>
+    <p></p>
+    아래 CSV URL을 입력하거나 상단의 버튼 중 하나를 클릭하여 원격에 준비된 CSV 파일을 사용합니다.
+    자신만의 데이터를 사용하려면 CORS 요청을 허락하도록 웹 호스트를 업데이트해야 할 수 있습니다.
+    <p></p>
+    <textarea class="query" rows="3" cols="64" id="query-url">http://path/to/your.csv</textarea>
+    <p></p>
+    <div id="button-div">
+    </div>
+    <p></p>
+    <textarea class="status" rows="6" cols="60" readonly="true" id="status">
+      CSV URL을 선택하고 CSV에 있는 행 개수를 카운트해 보세요.
+    </textarea>
+    <div class="divTable">
+      <!-- 행 카운트 -->
+      <div class="divTableBody">
+        <div class="divTableRow">
+          <div class="divTableCell">
+            <button id="count-rows">행 카운트</button>
+          </div>
+          <div class="divTableCell" id="row-count-output">
+          </div>
+        </div>
+      <!-- 열 이름 가져오기 -->
+      <div class="divTableRow">
+          <div class="divTableCell">
+            <button id="get-column-names">열 이름 가져오기</button>
+          </div>
+          <div class="divTableCell" id="column-names-output">
+            <div id="column-names-message">
+            </div>
+            <div id="column-names-output-container">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 샘플 행 가져오기 -->
+      <div class="divTableRow">
+        <div class="divTableCell">
+          <button id="get-sample-row">샘플 행 가져오기</button><p></p>
+          가져올 샘플 인덱스 (0부터 시작): <input type="number" id="which-sample-input" value="2">
+        </div>
+        <div class="divTableCell">
+          <div id="sample-row-message">
+          </div>
+          <div id="sample-row-output-container">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

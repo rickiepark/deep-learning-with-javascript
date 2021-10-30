@@ -1,0 +1,212 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<!doctype html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>TensorFlow.js 예제: 날씨 데이터 시각화와 예측</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+  <script type="module" src="index.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<style>
+  .setting {
+    padding: 6px;
+  }
+
+  #trainModel {
+    margin-top: 12px;
+  }
+
+  .setting-label {
+    display: inline-block;
+    width: 12em;
+  }
+
+  .answer-correct {
+    color: green;
+  }
+
+  .answer-wrong {
+    color: red;
+  }
+
+  .data-series {
+    display: inline-block;
+    width: 320px;
+    margin: 4px;
+  }
+
+  .data-options {
+    display: inline-block;
+    width: 320px;
+    margin: 4px;
+  }
+
+  .data-time-options {
+    width: 240px;
+  }
+
+  .data-nav {
+    margin: 4px;
+  }
+
+  .model-training {
+    margin: 4px;
+  }
+</style>
+
+<body>
+  <title>TensorFlow js 에제: 날씨 데이터 시각화와 예측</title>
+  <div class='tfjs-example-container centered-container'>
+    <section class='title-area'>
+      <h1>TensorFlow js 에제: 날씨 데이터 시각화와 예측</h1>
+      <p class='subtitle'>
+      </p>
+    </section>
+
+    <section>
+      <p class='section-head'>설명</p>
+      <p>
+        이 데모는 다음을 수행합니다.
+        <ul>
+          <li>
+            <a href="https://www.npmjs.com/package/@tensorflow/tfjs-vis" target="_blank">tfjs-vis</a>를 사용한
+            시계열 데이터의 시각화
+          </li>
+          <li>
+            선형 회귀, 다층 퍼셉트론(MLP) 등의 여러 모델 종류를 사용해 시계열 입력 데이터를 기반으로 미래의 값 예측하기
+          </li>
+        </ul>
+        이 데모에 사용한 데이터는
+        <a href="https://www.kaggle.com/pankrzysiu/weather-archive-jena" target="_blank">예나 날씨 데이터셋</a>입니다.
+      </p>
+    </section>
+
+    <div>
+      <section>
+        <p class='section-head'>안내</p>
+        <p>
+          <ol>
+            <li>
+              모델에 사용할 데이터를 탐색하고 시각화하기 위해 "데이터 시리즈 1"과 "데이터 시리즈 2" 드롭다운 메뉴에서
+              데이터셋에 있는 여러 가지 열을 선택해 보세요.
+              정규화를 적용한 것과 적용하지 않는 경우를 실험해 보세요.
+              다른 기간을 선택해서 데이터를 살펴 보세요.
+              "전체"보다 적은 기간을 선택하면 왼쪽 화살표와 오른쪽 화살표 버튼을 눌러 시간 축을 따라 이동할 수 있습니다.
+              마지막으로 "데이터 시리즈를 축으로 사용하기" 체크박스를 선태하여 두 데이터 시리즈를 산점도로 출력해 보세요.
+            </li>
+            <li>
+              선형 회귀 모델과 다층 퍼셉트론(MLP)를 훈련하려면 훈련 에포크 횟수를 지정하고 "모델 훈련"을 클릭하세요.
+              훈련이 끝날 때까지 잠시 기다립니다. 훈련 에포크가 끝날 때마다 웹 페이지의 오른쪽 편에
+              tfjs-vis 바이저 탭(visor surface)에서 훈련 세트와 검증 세트의 손실 값이 갱신됩니다.
+              규제와 드롭아웃을 적용하여 실험하고 과대적합에 대한 효과를 관찰해 보세요.
+            </li>
+          </ol>
+        </p>
+      </section>
+
+      <section>
+        <p class='section-head'>상태</p>
+        <p id="status"></p>
+        <p id="message"></p>
+      </section>
+
+      <div class="controls with-rows">
+
+      <section>
+        <p class='section-head'>데이터 시각화</p>
+        <div class="data-options data-time-options">
+          <span>기간:</span>
+          <select id="time-span">
+            <option value="full">전체</option>
+            <option value="year">연</option>
+            <option value="month">월</option>
+            <option value="tenDays">10일</option>
+            <option value="week">주</option>
+            <option value="day">일</option>
+            <option value="hour">시간</option>
+          </select>
+        </div>
+
+        <div class="data-options">
+          <button id="data-prev" class="data-nav">←</button>
+          <button id="data-next" class="data-nav">→</button>
+          <span id="date-time-range"></span>
+        </div>
+
+        <div>
+          <div class="data-series">
+            <span>데이터 시리즈 1:</span>
+            <select id="data-series-1"></select>
+          </div>
+          <div class="data-series">
+            <span>데이터 시리즈 2:</span>
+            <select id="data-series-2"></select>
+          </div>
+        </div>
+
+        <div>
+          <div class="data-options">
+            <span>데이터 정규화</span>
+            <input type="checkbox" id="data-normalized">
+          </div>
+          <div class="data-options">
+            <span>데이터 시리즈를 축으로 사용하기</span>
+            <input type="checkbox" id="data-scatter">
+          </div>
+        </div>
+
+        <p id="trainStatus"></p>
+        <div class='with-cols'>
+          <div id="data-chart"></div>
+          <!-- <div id="examplesPerSecCanvas"></div> -->
+        </div>
+
+        <p class='section-head'>모델 훈련</p>
+        <div>
+          <span>모델 종류:</span>
+          <select id="model-type">
+            <option value="mlp">MLP</option>
+            <option value="mlp-l2">L2 규제를 적용한 MLP</option>
+            <option value="mlp-dropout">드롭아웃을 적용한 MLP</option>
+            <option value="linear-regression">선형 회귀</option>
+          </select>
+          <div class="model-training">
+            <span>날짜와 시간 특성 포함</span>
+            <input type="checkbox" id="include-date-time-features">
+          </div>
+          <div class="model-training">
+            <span>에포크:</span>
+            <input type="number" id="epochs" value="20">
+          </div>
+          <div class="model-training">
+            <button id="train-model">모델 훈련</button>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</body>

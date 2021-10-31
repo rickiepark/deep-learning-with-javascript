@@ -1,6 +1,6 @@
 # TensorFlow.js 예제: MNIST 숫자 분류하기
 
-이 에제는 (layers API를 사용하여) MNIST 모델을 훈련하는 방법을 보여줍니다.
+이 예제는 (layers API를 사용하여) MNIST 모델을 훈련하는 방법을 보여줍니다.
 
 이 예제와 관련된 [튜토리얼](https://www.tensorflow.org/js/tutorials/training/handwritten_digit_cnn)도 함께 확인하세요.
 

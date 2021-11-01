@@ -1,0 +1,78 @@
+<!--
+Copyright 2019 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<!doctype html>
+
+<head>
+  <title>TensorFlow.js 예제: 합성곱 신경망 시각화</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="tfjs-example-container">
+    <section class='title-area'>
+      <h1>TensorFlow.js 예제: 합성곱 신경망 시각화</h1>
+    </section>
+
+    <section>
+      <p class='section-head'>설명</p>
+      <p>
+        이 예제는 TensorFlow.js에서 합성곱 신경망의 내부 동작을 시각화하는 몇 가지 기법을 시연합니다.
+        <ul>
+          <li>
+            훈련한 합성곱 층의 필터가 민감한 입력 찾기: 입력 공간에 경사 상승법을 적용하여 합성곱 필터를
+            가장 크게 활성화하는 입력 이미지를 찾습니다.
+          </li>
+          <li>
+            TensorFlow.js의 함수형 API를 사용해 합성곱 신경망의 내부 활성화 출력을 구합니다.
+          </li>
+          <li>
+            그레이디언트 기반의 클래스 활성화 맵(class activation map, CAM) 방식을 사용해 입력 이미지의 어느 부분이
+            합성곱 신경망(여기에서는 <a href="https://keras.io/applications/#vgg16">VGG16</a>)의
+            분류 결정에 가장 크게 관련되어 있는지 찾습니다.
+          </li>
+        </ul>
+      </p>
+    </section>
+
+    <section>
+      <p class='section-head image-result-heading'>
+        입력 이미지와 분류 결과
+      </p>
+
+      <div id="image-result"></div>
+
+      <p class='section-head'>시각화</p>
+
+      <div>
+        <span>출력 대상:</span>
+        <select id="viz-type">
+          <option value="activation">필터 활성화</option>
+          <option value="filters">최대 활성화 입력 이미지</option>
+          <option value="cam">클래스 활성화 맵 (CAM)</option>
+        </select>
+      </div>
+
+      <div id="viz-section"></div>
+    </section>
+
+    <script src="index.js"></script>
+  </div>
+</body>

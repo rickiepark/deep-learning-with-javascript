@@ -167,7 +167,8 @@ trainModelButton.addEventListener('click', async () => {
       model, jenaWeatherData, normalize, includeDateTime,
       lookBack, step, delay, batchSize, epochs,
       tfvis.show.fitCallbacks(trainingSurface, ['loss', 'val_loss'], {
-        callbacks: ['onBatchEnd', 'onEpochEnd']
+        callbacks: ['onBatchEnd', 'onEpochEnd'],
+        yLabel: 'Loss'
       }));
 
   logStatus('모델 훈련을 완료합니다...');

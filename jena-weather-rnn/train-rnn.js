@@ -42,7 +42,7 @@ function parseArguments() {
     optionStrings: ['baseline', 'gru', 'simpleRNN'],
     // TODO(cais): Add more model types, e.g., gru with recurrent dropout.
     help: 'Type of the model to train. Use "baseline" to compute the ' +
-    'commonsense baseline prediction error.'
+    '상식 수준의 예측 오차'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
@@ -114,12 +114,12 @@ async function main() {
   await jenaWeatherData.load();
 
   if (args.modelType === 'baseline') {
-    console.log('Calculating commonsense baseline mean absolute error...');
+    console.log('상식 수준의 MAE를 계산 중입니다....');
     const baselineError = await getBaselineMeanAbsoluteError(
         jenaWeatherData, args.normalize, args.includeDateTime, args.lookBack,
         args.step, args.delay);
     console.log(
-        `Commonsense baseline mean absolute error: ` +
+        `상식 수준의 MAE: ` +
         `${baselineError.toFixed(6)}`);
   } else {
     let numFeatures = jenaWeatherData.getDataColumnNames().length;

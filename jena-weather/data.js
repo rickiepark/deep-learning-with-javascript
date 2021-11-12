@@ -181,12 +181,12 @@ export class JenaWeatherData {
   /** 데이터 열의 평균과 표준 편차를 반환합니다. */
   getMeanAndStddev(dataColumnName) {
     if (this.means == null || this.stddevs == null) {
-      throw new Error('means and stddevs have not been calculated yet.');
+      throw new Error('평균과 표준 편차를 아직 계산하지 않았습니다.');
     }
 
     const index = this.getDataColumnNames().indexOf(dataColumnName);
     if (index === -1) {
-      throw new Error(`Invalid data column name: ${dataColumnName}`);
+      throw new Error(`잘못된 열 이름: ${dataColumnName}`);
     }
     return {
       mean: this.means[index], stddev: this.stddevs[index]
@@ -196,7 +196,7 @@ export class JenaWeatherData {
   getColumnData(
       columnName, includeTime, normalize, beginIndex, length, stride) {
     const columnIndex = this.dataColumnNames.indexOf(columnName);
-    tf.util.assert(columnIndex >= 0, `Invalid column name: ${columnName}`);
+    tf.util.assert(columnIndex >= 0, `잘못된 열 이름: ${columnName}`);
 
     if (beginIndex == null) {
       beginIndex = 0;

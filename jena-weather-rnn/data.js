@@ -16,15 +16,10 @@
  */
 
 /**
- * Data object for Jena Weather data.
+ * 예나 날씨 데이터셋을 위한 데이터 객체
  *
- * The data used in this demo is the
- * [Jena weather archive
- * dataset](https://www.kaggle.com/pankrzysiu/weather-archive-jena).
- * 
- * This file is used to load the Jena weather data in both
- * - the browser: see [index.js](./index.js), and 
- * - the Node.js backend environment: see [train-rnn.js](./train-rnn.js).
+ * 이 데모에 사용한 데이터는
+ * [예나 날씨 데이터셋](https://www.kaggle.com/pankrzysiu/weather-archive-jena)입니다.
  */
 
 import * as tf from '@tensorflow/tfjs';
@@ -34,20 +29,18 @@ const REMOTE_JENA_WEATHER_CSV_PATH =
     'https://storage.googleapis.com/learnjs-data/jena_climate/jena_climate_2009_2016.csv';
 
 /**
- * A class that fetches and processes the Jena weather archive data.
+ * 예나 날씨 데이터를 가져와 처리하는 클래스
  *
- * It also provides a method to create a function that iterates over
- * batches of training or validation data.
+ * 훈련과 검증 데이터의 배치를 순회하는 함수를 만드는 메서드도 제공합니다.
  */
 export class JenaWeatherData {
   constructor() {}
 
   /**
-   * Load and preprocess data.
+   * 데이터 로딩과 전처리
    *
-   * This method first tries to load the data from `LOCAL_JENA_WEATHER_CSV_PATH`
-   * (a relative path) and, if that fails, will try to load it from a remote
-   * URL (`JENA_WEATHER_CSV_PATH`).
+   * 이 메서드는 먼저 (상대 경로인) `LOCAL_JENA_WEATHER_CSV_PATH`에서 데이터를 로드하고 실패하면
+   * 원격 URL(`JENA_WEATHER_CSV_PATH`)에서 데이터를 로드합니다.
    */
   async load() {
     let response;
@@ -65,13 +58,13 @@ export class JenaWeatherData {
     }
     const csvData = await response.text();
 
-    // Parse CSV file.
+    // CSV 파일 파싱
     const csvLines = csvData.split('\n');
 
-    // Parse header.
+    // 헤더 파싱
     const columnNames = csvLines[0].split(',');
     for (let i = 0; i < columnNames.length; ++i) {
-      // Discard the quotes around the column name.
+      // 열 이름 앞뒤의 따옴표를 제거합니다.
       columnNames[i] = columnNames[i].slice(1, columnNames[i].length - 1);
     }
 
@@ -83,10 +76,10 @@ export class JenaWeatherData {
     tf.util.assert(this.tempCol >= 1, `Unexpected T (degC) column index`);
 
     this.dateTime = [];
-    this.data = [];  // Unnormalized data.
-    // Day of the year data, normalized between 0 and 1.
+    this.data = [];  // 정규화되지 않은 데이터
+    // 0~1 사이로 정규화된 일자 데이터
     this.normalizedDayOfYear = [];
-    // Time of the day, normalized between 0 and 1.
+    // 0~1 사이로 정규화된 시간 데이터
     this.normalizedTimeOfDay = [];
     for (let i = 1; i < csvLines.length; ++i) {
       const line = csvLines[i].trim();
@@ -116,20 +109,19 @@ export class JenaWeatherData {
   }
 
   /**
-   * Parse the date-time string from the Jena weather CSV file.
+   * 예나 날씨 CSV 파일에서 날짜-시간 문자열을 파싱합니다.
    *
-   * @param {*} str The date time string with a format that looks like:
-   *   "17.01.2009 22:10:00"
-   * @returns date: A JavaScript Date object.
-   *          normalizedDayOfYear: Day of the year, normalized between 0 and 1.
-   *          normalizedTimeOfDay: Time of the day, normalized between 0 and 1.
+   * @param {*} str "17.01.2009 22:10:00"와 같은 포맷의 날짜 시간 문자열
+   * @returns date: 자바스크립트 Date 객체
+   *          normalizedDayOfYear: 0~1 사이로 정규화된 일자
+   *          normalizedTimeOfDay: 0~1 사이로 정규화된 시간
    */
   parseDateTime_(str) {
     const items = str.split(' ');
     const dateStr = items[0];
     const dateStrItems = dateStr.split('.');
     const day = +dateStrItems[0];
-    const month = +dateStrItems[1] - 1;  // month is 0-based in JS `Date` class.
+    const month = +dateStrItems[1] - 1;  // 자바스크립트 `Date` 클래스에서 월은 0부터 시작합니다.
     const year = +dateStrItems[2];
 
     const timeStrItems = items[1].split(':');
@@ -148,19 +140,17 @@ export class JenaWeatherData {
 
 
   /**
-   * Calculate the means and standard deviations of every column.
+   * 열의 평균과 표준편차를 계산합니다.
    *
-   * TensorFlow.js is used for acceleration.
+   * 가속을 위해 TensorFlow.js를 사용합니다.
    */
   async calculateMeansAndStddevs_() {
     tf.tidy(() => {
-      // Instead of doing it on all columns at once, we do it
-      // column by column, as doing it all at once causes WebGL OOM
-      // on some machines.
+      // 일부 컴퓨터에서 WebGL OOM를 피하기 위해 한 번에 전체 열을 계산하지 않고
+      // 한 열씩 처리합니다.
       this.means = [];
       this.stddevs = [];
       for (const columnName of this.dataColumnNames) {
-        // TODO(cais): See if we can relax this limit.
         const data =
             tf.tensor1d(this.getColumnData(columnName).slice(0, 6 * 24 * 365));
         const moments = tf.moments(data);
@@ -171,7 +161,7 @@ export class JenaWeatherData {
       console.log('stddevs:', this.stddevs);
     });
 
-    // Cache normalized values.
+    // 정규화된 값을 캐싱합니다.
     this.normalizedData = [];
     for (let i = 0; i < this.numRows; ++i) {
       const row = [];
@@ -190,15 +180,15 @@ export class JenaWeatherData {
     return this.dateTime[index];
   }
 
-  /** Get the mean and standard deviation of a data column. */
+  /** 데이터 열의 평균과 표준 편차를 반환합니다. */
   getMeanAndStddev(dataColumnName) {
     if (this.means == null || this.stddevs == null) {
-      throw new Error('means and stddevs have not been calculated yet.');
+      throw new Error('평균과 표준 편차를 아직 계산하지 않았습니다.');
     }
 
     const index = this.getDataColumnNames().indexOf(dataColumnName);
     if (index === -1) {
-      throw new Error(`Invalid data column name: ${dataColumnName}`);
+      throw new Error(`잘못된 열 이름: ${dataColumnName}`);
     }
     return {
       mean: this.means[index], stddev: this.stddevs[index]
@@ -208,7 +198,7 @@ export class JenaWeatherData {
   getColumnData(
       columnName, includeTime, normalize, beginIndex, length, stride) {
     const columnIndex = this.dataColumnNames.indexOf(columnName);
-    tf.util.assert(columnIndex >= 0, `Invalid column name: ${columnName}`);
+    tf.util.assert(columnIndex >= 0, `잘못된 열 이름: ${columnName}`);
 
     if (beginIndex == null) {
       beginIndex = 0;
@@ -233,41 +223,30 @@ export class JenaWeatherData {
   }
 
   /**
-   * Get a data iterator function.
+   * 데이터 반복 함수를 반환합니다.
    *
-   * @param {boolean} shuffle Whether the data is to be shuffled. If `false`,
-   *   the examples generated by repeated calling of the returned iterator
-   *   function will scan through range specified by `minIndex` and `maxIndex`
-   *   (or the entire range of the CSV file if those are not specified) in a
-   *   sequential fashion. If `true`, the examples generated by the returned
-   *   iterator function will start from random rows.
-   * @param {number} lookBack Number of look-back time steps. This is how many
-   *   steps to look back back when making a prediction. Typical value: 10 days
-   *   (i.e., 6 * 24 * 10 = 1440).
-   * @param {number} delay Number of time steps from the last time point in the
-   *   input features to the time of prediction. Typical value: 1 day (i.e.,
-   *   6 * 24 = 144).
-   * @param {number} batchSize Batch size.
-   * @param {number} step Number of steps between consecutive time points in the
-   *   input features. This is a downsampling factor for the input features.
-   *   Typical value: 1 hour (i.e., 6).
-   * @param {number} minIndex Optional minimum index to draw from the original
-   *   data set. Together with `maxIndex`, this can be used to reserve a chunk
-   *   of the original data for validation or evaluation.
-   * @param {number} maxIndex Optional maximum index to draw from the original
-   *   data set. Together with `minIndex`, this can be used to reserve a chunk
-   *   of the original data for validation or evaluation.
-   * @param {boolean} normalize Whether the iterator function will return
-   *   normalized data.
-   * @param {boolean} includeDateTime Include the date-time features, including
-   *   normalized day-of-the-year and normalized time-of-the-day.
-   * @return {Function} An iterator Function, which returns a batch of features
-   *   and targets when invoked. The features and targets are arranged in a
-   *   length-2 array, in the said order.
-   *   The features are represented as a float32-type `tf.Tensor` of shape
-   *     `[batchSize, Math.floor(lookBack / step), featureLength]`
-   *   The targets are represented as a float32-type `tf.Tensor` of shape
-   *     `[batchSize, 1]`.
+   * @param {boolean} shuffle 데이터를 섞을지 여부.
+   *   `false`로 지정하면 반환된 반복자 함수를 호출하여 생성된 샘플은 순서대로
+   *   `minIndex`와 `maxIndex`로 지정된 범위를 (지정하지 않으면 CSV 파일 전체 범위를) 스캔합니다.
+   *   `true`로 지정하면 반환된 반복자 함수가 생성된 샘플은 랜덤한 행에서 시작합니다.
+   * @param {number} lookBack 룩백(look-back) 스텝 횟수.
+   *   예측을 만들 때 사용할 이전 데이터 스텝. 일반적인 값: 10일(즉, 6 * 24 * 10 = 1440)
+   * @param {number} delay 입력 특성의 마지막 시간부터 예측 시간까지 타임 스텝 수.
+   *   일반적인 값: 1일 (즉, 6 * 24 = 144).
+   * @param {number} batchSize 배치 크기.
+   * @param {number} step 입력 특성에서 연속된 포인트 간의 스텝 수.
+   *   입력 특성의 다운샘플링 인자입니다. 일반적인 값: 1시간 (즉, 6).
+   * @param {number} minIndex (옵션 매개변수) 원본 데이터셋에서 추출하기 위한 최소 인덱스.
+   *   `maxIndex`와 함께 검증이나 평가를 위해 원본 데이터의 일부를 예약하는데 사용할 수 있습니다.
+   * @param {number} maxIndex (옵션 매개변수) 원본 데이터셋에서 추출하기 위한 최대 인덱스.
+   *   `minIndex`와 함께 검증이나 평가를 위해 원본 데이터의 일부를 예약하는데 사용할 수 있습니다.
+   * @param {boolean} normalize 반복 함수가 정규화된 데이터를 반환할지 여부.
+   * @param {boolean} includeDateTime 정규화된 일자와 시간과 함께 날짜-시간 특성을 포함할지 여부.
+   * @return {Function} 특성과 타깃의 배치를 반환하는 반복 함수.
+   *   특성과 타깃은 순서대로 길이 2인 배열로 구성됩니다.
+   *   특성은 `[batchSize, Math.floor(lookBack / step), featureLength]`
+   *     크기의 float32 타입의 `tf.Tensor`로 표현됩니다.
+   *   타깃은 `[batchSize, 1]` 크기의 float32 타입의 `tf.Tensor`로 표현됩니다.
    */
   getNextBatchFunction(
       shuffle, lookBack, delay, batchSize, step, minIndex, maxIndex, normalize,
@@ -278,16 +257,16 @@ export class JenaWeatherData {
     return {
       next: () => {
         const rowIndices = [];
-        let done = false;  // Indicates whether the dataset has ended.
+        let done = false;  // 데이터셋이 끝났는지 나타냅니다.
         if (shuffle) {
-          // If `shuffle` is `true`, start from randomly chosen rows.
+          // `shuffle`이 `true`이면 랜덤하게 선택한 행부터 시작합니다.
           const range = maxIndex - (minIndex + lookBack);
           for (let i = 0; i < batchSize; ++i) {
             const row = minIndex + lookBack + Math.floor(Math.random() * range);
             rowIndices.push(row);
           }
         } else {
-          // If `shuffle` is `false`, the starting row indices will be sequential.
+          // `shuffle`이 `false`이면 minIndex부터 순서대로 시작합니다.
           let r = startIndex;
           for (; r < startIndex + batchSize && r < maxIndex; ++r) {
             rowIndices.push(r);
@@ -304,23 +283,23 @@ export class JenaWeatherData {
             includeDateTime ? this.numColumns + 2 : this.numColumns;
         const samples = tf.buffer([numExamples, lookBackSlices, featureLength]);
         const targets = tf.buffer([numExamples, 1]);
-        // Iterate over examples. Each example contains a number of rows.
+        // 샘플을 순회합니다. 한 샘플은 여러 개의 행을 담고 있습니다.
         for (let j = 0; j < numExamples; ++j) {
           const rowIndex = rowIndices[j];
           let exampleRow = 0;
-          // Iterate over rows in the example.
+          // 샘플에 있는 행을 순회합니다.
           for (let r = rowIndex - lookBack; r < rowIndex; r += step) {
             let exampleCol = 0;
-            // Iterate over features in the row.
+            // 행에 있는 특성을 순회합니다.
             for (let n = 0; n < featureLength; ++n) {
               let value;
               if (n < this.numColumns) {
                 value = normalize ? this.normalizedData[r][n] : this.data[r][n];
               } else if (n === this.numColumns) {
-                // Normalized day-of-the-year feature.
+                // 정규화된 일자 특성
                 value = this.normalizedDayOfYear[r];
               } else {
-                // Normalized time-of-the-day feature.
+                // 정규화된 시간 특성
                 value = this.normalizedTimeOfDay[r];
               }
               samples.set(value, j, exampleRow, exampleCol++);

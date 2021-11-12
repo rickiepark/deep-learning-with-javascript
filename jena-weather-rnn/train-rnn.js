@@ -16,14 +16,13 @@
  */
 
 /**
- * Train recurrent neural networks (RNNs) for temperature prediction.
+ * 온도 예측 문제를 위해 순환 신경망(RNN)을 훈련합니다.
  *
- * This script drives the RNN training process in the Node.js environment
- * using tfjs-node or tfjs-node-gpu (see the `--gpu` flag).
+ * 이 스크립트 파일은 tfjs-node나 tfjs-node-gpu를 사용해 Node.js 환경에서 RNN을 훈련합니다.
+ * (`--gpu` 플래그 참조)
  *
- * - See [data.js](./data.js) for how the Jena weather dataset is loaded.
- * - See [models.js](./train.js) for the detailed model creation and training
- *   logic.
+ * - 예나 데이터셋 로딩 방법은 data.js를 참고하세요.
+ * - 자세한 모델 생성 방법과 훈련 로직은 models.js을 참고하세요.
  */
 
 import {ArgumentParser} from 'argparse';
@@ -35,65 +34,60 @@ global.fetch = require('node-fetch');
 
 function parseArguments() {
   const parser =
-      new ArgumentParser({description: 'Train RNNs for Jena weather problem'});
+      new ArgumentParser({description: '예나 날씨 문제를 위해 RNN을 훈련합니다.'});
   parser.addArgument('--modelType', {
     type: 'string',
     defaultValue: 'gru',
     optionStrings: ['baseline', 'gru', 'simpleRNN'],
-    // TODO(cais): Add more model types, e.g., gru with recurrent dropout.
-    help: 'Type of the model to train. Use "baseline" to compute the ' +
-    '상식 수준의 예측 오차'
+    help: '훈련할 모델 종류. 상식 수준의 예측 오차를 계산하려면 "baseline"을 사용하세요'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use GPU'
+    help: 'GPU 사용'
   });
   parser.addArgument('--lookBack', {
     type: 'int',
     defaultValue: 10 * 24 * 6,
-    help: 'Look-back period (# of rows) for generating features'
+    help: '특성 생성을 위해 사용할 과거 기간(행 개수)'
   });
   parser.addArgument('--step', {
     type: 'int',
     defaultValue: 6,
-    help: 'Step size (# of rows) used for generating features'
+    help: '특성 생성을 위한 스텝 크기(행 개수)'
   });
   parser.addArgument('--delay', {
     type: 'int',
     defaultValue: 24 * 6,
-    help: 'How many steps (# of rows) in the future to predict the ' +
-        'temperature for'
+    help: '얼마나 앞선 미래의 온도를 예측할 것인지(행 개수)'
   });
   parser.addArgument('--normalize', {
     defaultValue: true,
-    help: 'Used normalized feature values (default: true)'
+    help: '정규화된 특성 값을 사용합니다(기본값: true)'
   });
   parser.addArgument('--includeDateTime', {
     action: 'storeTrue',
-    help: 'Used date and time features (default: false)'
+    help: '날짜와 시간 특성을 사용합니다(기본값: false)'
   });
   parser.addArgument(
       '--batchSize',
-      {type: 'int', defaultValue: 128, help: 'Batch size for training'});
+      {type: 'int', defaultValue: 128, help: '훈련 배치 크기'});
   parser.addArgument(
       '--epochs',
-      {type: 'int', defaultValue: 20, help: 'Number of training epochs'});
+      {type: 'int', defaultValue: 20, help: '훈련 에포크 횟수'});
   parser.addArgument( '--earlyStoppingPatience', {
     type: 'int',
     defaultValue: 2,
-    help: 'Optional patience number for EarlyStoppingCallback'
+    help: 'earlyStopping 콜백에 사용할 patience 값'
    });
   parser.addArgument('--logDir', {
     type: 'string',
-    help: 'Optional tensorboard log directory, to which the loss and ' +
-    'accuracy will be logged during model training.'
+    help: '훈련하는 동안 손실과 정확도를 기록할 텐서보드 로그 디렉토리'
   });
   parser.addArgument('--logUpdateFreq', {
     type: 'string',
     defaultValue: 'batch',
     optionStrings: ['batch', 'epoch'],
-    help: 'Frequency at which the loss and accuracy will be logged to ' +
-    'tensorboard.'
+    help: '손실과 정확도를 텐서보드에 기록할 빈도'
   });
   return parser.parseArgs();
 }
@@ -102,15 +96,15 @@ async function main() {
   const args = parseArguments();
   let tfn;
   if (args.gpu) {
-    console.log('Using GPU for training.');
+    console.log('훈련에 GPU를 사용합니다.');
     tfn = require('@tensorflow/tfjs-node-gpu');
   } else {
-    console.log('Using CPU for training.');
+    console.log('훈련에 CPU를 사용합니다.');
     tfn = require('@tensorflow/tfjs-node');
   }
 
   const jenaWeatherData = new JenaWeatherData();
-  console.log(`Loading Jena weather data...`);
+  console.log(`예나 날씨 데이터를 로딩합니다...`);
   await jenaWeatherData.load();
 
   if (args.modelType === 'baseline') {
@@ -129,8 +123,8 @@ async function main() {
     let callback = [];
     if (args.logDir != null) {
       console.log(
-          `Logging to tensorboard. ` +
-          `Use the command below to bring up tensorboard server:\n` +
+          `텐서보드에 로깅합니다. ` +
+          `다음 명령으로 텐서보드 서버를 실행하세요:\n` +
           `  tensorboard --logdir ${args.logDir}`);
       callback.push(tfn.node.tensorBoard(args.logDir, {
         updateFreq: args.logUpdateFreq
@@ -138,7 +132,7 @@ async function main() {
     }
     if (args.earlyStoppingPatience != null) {
       console.log(
-          `Using earlyStoppingCallback with patience ` +
+          `earlyStopping 콜백의 patience: ` +
           `${args.earlyStoppingPatience}.`);
       callback.push(tfn.callbacks.earlyStopping({
         patience: args.earlyStoppingPatience

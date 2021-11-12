@@ -16,12 +16,7 @@
  */
 
 /**
- * Creating and training `tf.LayersModel`s for the temperature prediction
- * problem.
- *
- * This file is used to create models for both
- * - the browser: see [index.js](./index.js), and
- * - the Node.js backend environment: see [train-rnn.js](./train-rnn.js).
+ * 온도 예측 문제를 위해 `tf.LayersModel`을 만들고 훈련합니다.
  */
 
 import * as tf from '@tensorflow/tfjs';
@@ -34,20 +29,16 @@ const VAL_MIN_ROW = 200001;
 const VAL_MAX_ROW = 300000;
 
 /**
- * Calculate the commonsense baseline temperture-prediction accuracy.
+ * 온도 예측 정확도의 일반적인 기준을 계산합니다.
  *
- * The latest value in the temperature feature column is used as the
- * prediction.
+ * 온도 특성의 마지막 값을 예측으로 사용합니다.
  *
- * @param {boolean} normalize Whether to used normalized data for training.
- * @param {boolean} includeDateTime Whether to include date and time features
- *   in training.
- * @param {number} lookBack Number of look-back time steps.
- * @param {number} step Step size used to generate the input features.
- * @param {number} delay How many steps in the future to make the prediction
- *   for.
- * @returns {number} The mean absolute error of the commonsense baseline
- *   prediction.
+ * @param {boolean} normalize 훈련에 정규화된 데이터를 사용할지 여부
+ * @param {boolean} includeDateTime 훈련데 날짜와 시간 특성을 포함할지 여부
+ * @param {number} lookBack 룩백 타임 스텝 횟수
+ * @param {number} step 입력 특성을 생성하기 위해 사용할 스텝 크기
+ * @param {number} delay 예측할 미래 타임 스텝 수
+ * @returns {number} 기준 예측에 대한 평균 절댓값 오차
  */
 export async function getBaselineMeanAbsoluteError(
     jenaWeatherData, normalize, includeDateTime, lookBack, step, delay) {
@@ -82,10 +73,10 @@ export async function getBaselineMeanAbsoluteError(
 }
 
 /**
- * Build a linear-regression model for the temperature-prediction problem.
+ * 온도 예측 문제를 위한 선형 회귀 모델을 만듭니다.
  *
- * @param {tf.Shape} inputShape Input shape (without the batch dimenson).
- * @returns {tf.LayersModel} A TensorFlow.js tf.LayersModel instance.
+ * @param {tf.Shape} inputShape (배치 차원이 없는) 입력 크기
+ * @returns {tf.LayersModel} TensorFlow.js의 tf.LayersModel 객체
  */
 function buildLinearRegressionModel(inputShape) {
   const model = tf.sequential();
@@ -95,16 +86,15 @@ function buildLinearRegressionModel(inputShape) {
 }
 
 /**
- * Build a GRU model for the temperature-prediction problem.
+ * 온도 예측 문제를 위한 MLP 모델을 만듭니다.
  *
- * @param {tf.Shape} inputShape Input shape (without the batch dimenson).
- * @param {tf.regularizer.Regularizer} kernelRegularizer An optional
- *   regularizer for the kernel of the first (hdiden) dense layer of the MLP.
- *   If not specified, no weight regularization will be included in the MLP.
- * @param {number} dropoutRate Dropout rate of an optional dropout layer
- *   inserted between the two dense layers of the MLP. Optional. If not
- *   specified, no dropout layers will be included in the MLP.
- * @returns {tf.LayersModel} A TensorFlow.js tf.LayersModel instance.
+ * @param {tf.Shape} inputShape (배치 차원이 없는) 입력 크기
+ * @param {tf.regularizer.Regularizer} kernelRegularizer (옵션 매개변수)
+ *   MLP의 첫 번째 (은닉) 밀집층의 커널에 적용할 규제.
+ *   지정하지 않으면 MLP에 가중치 규제를 적용하지 않습니다.
+ * @param {number} dropoutRate MLP의 두 개의 은닉층 사이에 적용할 드롭아웃 층의 드롭아웃 비율.
+ *   지정하지 않으면 MLP에 드롭아웃 층이 추가되지 않습니다.
+ * @returns {tf.LayersModel} TensorFlow.js의 tf.LayersModel 객체.
  */
 export function buildMLPModel(inputShape, kernelRegularizer, dropoutRate) {
   const model = tf.sequential();
@@ -119,11 +109,10 @@ export function buildMLPModel(inputShape, kernelRegularizer, dropoutRate) {
 }
 
 /**
- * Build a simpleRNN-based model for the temperature-prediction problem.
+ * 온도 예측 문제를 위한 간단한 RNN 모델을 만듭니다.
  *
- * @param {tf.Shape} inputShape Input shape (without the batch dimenson).
- * @returns {tf.LayersModel} A TensorFlow.js model consisting of a simpleRNN
- *   layer.
+ * @param {tf.Shape} inputShape (배치 차원이 없는) 입력 크기
+ * @returns {tf.LayersModel} simpleRNN 층으로 구성된 TensorFlow.js 모델
  */
 export function buildSimpleRNNModel(inputShape) {
   const model = tf.sequential();
@@ -134,16 +123,14 @@ export function buildSimpleRNNModel(inputShape) {
 }
 
 /**
- * Build a GRU model for the temperature-prediction problem.
+ * 온도 예측 문제를 위한 GRU 모델을 만듭니다.
  *
- * @param {tf.Shape} inputShape Input shape (without the batch dimenson).
- * @param {number} dropout Optional input dropout rate
- * @param {number} recurrentDropout Optional recurrent dropout rate.
- * @returns {tf.LayersModel} A TensorFlow.js GRU model.
+ * @param {tf.Shape} inputShape (배치 차원이 없는) 입력 크기
+ * @param {number} dropout (옵션 매개변수) 입력 드롭아웃 비율
+ * @param {number} recurrentDropout (옵션 매개변수) 순환 드롭아웃 비율
+ * @returns {tf.LayersModel} TensorFlow.js GRU 모델
  */
 export function buildGRUModel(inputShape, dropout, recurrentDropout) {
-  // TODO(cais): Recurrent dropout is currently not fully working.
-  //   Make it work and add a flag to train-rnn.js.
   const model = tf.sequential();
   const rnnUnits = 32;
   model.add(tf.layers.gru({
@@ -157,13 +144,12 @@ export function buildGRUModel(inputShape, dropout, recurrentDropout) {
 }
 
 /**
- * Build a model for the temperature-prediction problem.
+ * 온도 예측 문제를 위한 모델을 만듭니다.
  *
- * @param {string} modelType Model type.
- * @param {number} numTimeSteps Number of time steps in each input.
- *   exapmle
- * @param {number} numFeatures Number of features (for each time step).
- * @returns A compiled instance of `tf.LayersModel`.
+ * @param {string} modelType 모델 종류
+ * @param {number} numTimeSteps 각 입력 샘플의 타임 스텝 횟수
+ * @param {number} numFeatures 타임 스텝마다 특성 개수
+ * @returns 컴파일된 `tf.LayersModel` 객체
  */
 export function buildModel(modelType, numTimeSteps, numFeatures) {
   const inputShape = [numTimeSteps, numFeatures];
@@ -184,9 +170,8 @@ export function buildModel(modelType, numTimeSteps, numFeatures) {
     model = buildSimpleRNNModel(inputShape);
   } else if (modelType === 'gru') {
     model = buildGRUModel(inputShape);
-    // TODO(cais): Add gru-dropout with recurrentDropout.
   } else {
-    throw new Error(`Unsupported model type: ${modelType}`);
+    throw new Error(`지원하지 않는 모델 타입입니다: ${modelType}`);
   }
 
   model.compile({loss: 'meanAbsoluteError', optimizer: 'rmsprop'});
@@ -195,25 +180,21 @@ export function buildModel(modelType, numTimeSteps, numFeatures) {
 }
 
 /**
- * Train a model on the Jena weather data.
+ * 예나 날씨 데이터에서 모델을 훈련합니다.
  *
- * @param {tf.LayersModel} model A compiled tf.LayersModel object. It is
- *   expected to have a 3D input shape `[numExamples, timeSteps, numFeatures].`
- *   and an output shape `[numExamples, 1]` for predicting the temperature
- * value.
- * @param {JenaWeatherData} jenaWeatherData A JenaWeatherData object.
- * @param {boolean} normalize Whether to used normalized data for training.
- * @param {boolean} includeDateTime Whether to include date and time features
- *   in training.
- * @param {number} lookBack Number of look-back time steps.
- * @param {number} step Step size used to generate the input features.
- * @param {number} delay How many steps in the future to make the prediction
- *   for.
- * @param {number} batchSize batchSize for training.
- * @param {number} epochs Number of training epochs.
- * @param {tf.Callback | tf.CustomCallbackArgs} customCallback Optional callback
- *   to invoke at the end of every epoch. Can optionally have `onBatchEnd` and
- *   `onEpochEnd` fields.
+ * @param {tf.LayersModel} model 컴파일된 tf.LayersModel 객체.
+ *   `[numExamples, timeSteps, numFeatures]` 크기의 3차원 입력과
+ *   온도 예측을 위해 `[numExamples, 1]` 크기의 출력을 기대합니다.
+ * @param {JenaWeatherData} jenaWeatherData JenaWeatherData 객체.
+ * @param {boolean} normalize 훈련에 정규화된 데이터를 사용할지 여부
+ * @param {boolean} includeDateTime 훈련에 날짜와 시간 특성을 포함할지 여부
+ * @param {number} lookBack 룩백 타임 스텝 횟수
+ * @param {number} step 입력 특성을 생성하는데 사용할 스텝 크기
+ * @param {number} delay 예측할 미래 타임 스텝 수
+ * @param {number} batchSize 훈련 배치 크기
+ * @param {number} epochs 훈련 에포크 수
+ * @param {tf.Callback | tf.CustomCallbackArgs} customCallback 에포크 종료마다 호출할 콜백.
+ *   `onBatchEnd`와 `onEpochEnd` 필드를 포함할 수 있습니다.
  */
 export async function trainModel(
     model, jenaWeatherData, normalize, includeDateTime, lookBack, step, delay,

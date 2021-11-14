@@ -15,10 +15,9 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-import * as loader from './loader';
-import * as ui from './ui';
-import {OOV_INDEX, padSequences} from './sequence_utils';
+import * as loader from './loader.js';
+import * as ui from './ui.js';
+import {OOV_INDEX, padSequences} from './sequence_utils.js';
 
 const HOSTED_URLS = {
   model:

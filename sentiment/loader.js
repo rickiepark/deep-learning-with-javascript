@@ -15,8 +15,7 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-import * as ui from './ui';
+import * as ui from './ui.js';
 
 /**
  * Test whether a given URL is retrievable.

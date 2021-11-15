@@ -27,7 +27,9 @@
  * the dates into one-hot `tf.Tensor` representations.
  */
 
-//const tf = require('@tensorflow/tfjs');
+if (tf === undefined) {
+  const tf = require('@tensorflow/tfjs');
+}
 
 const MONTH_NAMES_FULL = [
   'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',

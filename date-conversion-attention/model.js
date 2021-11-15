@@ -15,8 +15,9 @@
  * =============================================================================
  */
 
-//const tf = require('@tensorflow/tfjs');
-// import * as tf from '@tensorflow/tfjs';
+if (tf === undefined) {
+  const tf = require('@tensorflow/tfjs');
+}
 import * as dateFormat from './date_format.js';
 
 /**

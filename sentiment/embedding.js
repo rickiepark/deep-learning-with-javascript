@@ -16,20 +16,18 @@
  */
 
 /**
- * Utilites for extracting the embedding matrix and output them as files.
+ * 임베딩 행렬의 압축을 풀고 파일로 출력하기 위한 유틸리티
  */
 
 import {writeFileSync} from 'fs';
 import * as tf from '@tensorflow/tfjs';
 
 /**
- * Extract the first embedding matrix from a TensorFlow.js model.
+ * TensorFlow.js 모델에서 첫 번째 임베딩 행렬을 추출합니다.
  *
- * @param {tf.model} model An instance of tf.Model, assumed to contain an
- *   Embedding layer.
- * @retuns {tf.Tensor} The embedding matrix from the first Embedding
- *   layer encoutnered while iterating through all layers of the model.
- * @throws Error if no embedding layer can be found in the model.
+ * @param {tf.model} model tf.Model 객체. 임베딩 행렬을 포함하고 있다고 가정합니다.
+ * @retuns {tf.Tensor} 모델의 모든 층을 순회하면서 만난 첫 번째 임베딩 층의 임베딩 행렬
+ * @throws 모델에 임베딩 층이 없다면 에러가 발생합니다.
  */
 function extractEmbeddingMatrix(model) {
   for (const layer of model.layers) {
@@ -37,44 +35,41 @@ function extractEmbeddingMatrix(model) {
       const embed = layer.getWeights()[0];
       tf.util.assert(
         embed.rank === 2,
-        `Expected the rank of an embedding matrix to be 2, ` + 
-        `but got ${embed.rank}`);
+        `임베딩 행렬의 랭크는 2이여야 하지만, ` +
+        `${embed.rank}을 얻었습니다.`);
       return embed;
     }
   }
-  throw new Error('Cannot find any Embedding layer in model.');
+  throw new Error('모델에서 임베딩층을 찾을 수 없습니다.');
 }
 
 /**
- * Write the values of the first embedding matrix of a model to files.
- * 
- * The word labels are writen as well. The vectors and labels files are
- * directly loadable into the Embedding Projector
- * (https://projector.tensorflow.org/).
+ * 모델의 첫 번째 임베딩 행렬의 값을 파일로 저장합니다.
  *
- * @param {tf.model} model An instance of tf.Model, assumed to contain an
- *   Embedding layer.
- * @param {string} prefix Path prefix for writing the vectors and labels files.
- *   For exapmle if `prefix` is `/tmp/embed`, then 
- *   - the vectors will be written to `/tmp/embed_vectors.tsv`
- *   - the labels will be written to `/tmp/embed_labels.tsv`
- * @param {{[word: string]: number}} wordIndex A dictionary mapping words to
- *   their integer indices.
- * @param {number} indexFrom The basevalue of the integer indices.
+ * 단어 레이블도 저장합니다.
+ * 벡터와 레이블 파일은 임베딩 프로젝터(https://projector.tensorflow.org/)에 업로드할 수 있습니다.
+ *
+ * @param {tf.model} model tf.Model 객체, 임베딩 층을 가지고 있다고 가정합니다.
+ * @param {string} prefix 벡터와 레이블 파일 작성을 위한 프리픽스(prefix) 경로
+ *   예를 들어 `prefix`가 `/tmp/embed`이면,
+ *   - 벡터는 `/tmp/embed_vectors.tsv`에 저장됩니다.
+ *   - 레이블은 `/tmp/embed_labels.tsv`에 저장됩니다.
+ * @param {{[word: string]: number}} wordIndex 단어를 정수 인덱스에 매핑한 딕셔너리
+ * @param {number} indexFrom 정수 인덱스의 베이스 값
  */
 export async function writeEmbeddingMatrixAndLabels(
     model, prefix, wordIndex, indexFrom) {
   tf.util.assert(
       prefix != null && prefix.length > 0,
-      `Null, undefined or empty path prefix`);
+      `Null, undefined 또는 빈 경로입니다`);
 
   const embed = extractEmbeddingMatrix(model);
 
   const numWords = embed.shape[0];
   const embedDims = embed.shape[1];
   const embedData = await embed.data();
-  
-  // Write the ebmedding matrix to file.
+
+  // 임베딩 행렬을 파일에 저장합니다
   let vectorsStr = '';
   let index = 0;
   for (let i = 0; i < numWords; ++i) {
@@ -91,10 +86,10 @@ export async function writeEmbeddingMatrixAndLabels(
   const vectorsFilePath = `${prefix}_vectors.tsv`;
   writeFileSync(vectorsFilePath, vectorsStr, {encoding: 'utf-8'});
   console.log(
-      `Written embedding vectors (${numWords} * ${embedDims}) to: ` +
+      `임베딩 벡터 (${numWords} * ${embedDims}) 저장: ` +
       `${vectorsFilePath}`);
 
-  // Collect and write the word labels.
+  // 단어 레이블을 모아 저장합니다.
   const indexToWord = {};
   for (const word in wordIndex) {
     indexToWord[wordIndex[word]] = word;
@@ -113,6 +108,6 @@ export async function writeEmbeddingMatrixAndLabels(
   const labelsFilePath = `${prefix}_labels.tsv`;
   writeFileSync(labelsFilePath, labelsStr, {encoding: 'utf-8'});
   console.log(
-      `Written embedding labels (${numWords}) to: ` +
+      `임베딩 레이블 (${numWords}) 저장: ` +
       `${labelsFilePath}`);
 }

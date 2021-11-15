@@ -18,7 +18,7 @@
 import * as ui from './ui.js';
 
 /**
- * Test whether a given URL is retrievable.
+ * URL에 접속 가능한지 테스트합니다.
  */
 export async function urlExists(url) {
   ui.status('Testing url ' + url);
@@ -31,40 +31,40 @@ export async function urlExists(url) {
 }
 
 /**
- * Load pretrained model stored at a remote URL.
+ * 원격 URL에 저장된 사전 훈련된 모델을 로드합니다.
  *
- * @return An instance of `tf.Model` with model topology and weights loaded.
+ * @return 가중치와 모델 구조를 가진 `tf.Model` 객체
  */
 export async function loadHostedPretrainedModel(url) {
-  ui.status('Loading pretrained model from ' + url);
+  ui.status('사전 훈련된 모델 로딩: ' + url);
   try {
     const model = await tf.loadLayersModel(url);
-    ui.status('Done loading pretrained model.');
-    // We can't load a model twice due to
+    ui.status('사전 훈련된 모델 로딩 완료.');
+    // 다음 이슈 때문에 모델을 두 번 로드할 수 없습니다.
     // https://github.com/tensorflow/tfjs/issues/34
-    // Therefore we remove the load buttons to avoid user confusion.
+    // 사용자 혼돈을 막기 위해 로드 버튼을 삭제합니다.
     ui.disableLoadModelButtons();
     return model;
   } catch (err) {
     console.error(err);
-    ui.status('Loading pretrained model failed.');
+    ui.status('사전 훈련된 모델의 로딩을 실패했습니다.');
   }
 }
 
 /**
- * Load metadata file stored at a remote URL.
+ * 원격 ULR에 저장된 메타데이터 파일을 로드합니다.
  *
- * @return An object containing metadata as key-value pairs.
+ * @return 키-값 쌍으로 메타데이터를 담은 객체
  */
 export async function loadHostedMetadata(url) {
-  ui.status('Loading metadata from ' + url);
+  ui.status('메타 데이터 로딩: ' + url);
   try {
     const metadataJson = await fetch(url);
     const metadata = await metadataJson.json();
-    ui.status('Done loading metadata.');
+    ui.status('메타데이터 로딩 완료.');
     return metadata;
   } catch (err) {
     console.error(err);
-    ui.status('Loading metadata failed.');
+    ui.status('메타 데이터의 로딩을 실패했습니다.');
   }
 }

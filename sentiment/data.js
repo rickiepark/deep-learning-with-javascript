@@ -23,7 +23,7 @@ import * as path from 'path';
 
 import {OOV_INDEX, padSequences} from './sequence_utils';
 
-// `import` doesn't seem to work with extract-zip.
+// extract-zip은 `import` 명령이 안되는 것 같음.
 const extract = require('extract-zip');
 
 const DATA_ZIP_URL =
@@ -32,19 +32,15 @@ const METADATA_TEMPLATE_URL =
     'https://storage.googleapis.com/learnjs-data/imdb/metadata.json.zip';
 
 /**
- * Load IMDB data features from a local file.
+ * 로컬 파일에서 IMDB 데이터 로드하기
  *
- * @param {string} filePath Data file on local filesystem.
- * @param {string} numWords Number of words in the vocabulary. Word indices
- *   that exceed this limit will be marked as `OOV_INDEX`.
- * @param {string} maxLen Length of each sequence. Longer sequences will be
- *   pre-truncated; shorter ones will be pre-padded.
- * @param {string} multihot Whether to use multi-hot encoding of the words.
- *   Default: `false`.
- * @return {tf.Tensor} If `multihot` is `false` (default), the dataset
- *   represented as a 2D `tf.Tensor` of shape `[numExamples, maxLen]` and
- *   dtype `int32`. Else, the dataset represented as a 2D `tf.Tensor` of
- *   shape `[numExamples, numWords]` and dtype `float32`.
+ * @param {string} filePath 로컬 파일 시스템에 있는 데이터 파일
+ * @param {string} numWords 어휘 사전의 단어 개수. 이를 넘는 단어 인덱스는 `OOV_INDEX`가 됩니다.
+ * @param {string} maxLen 각 시퀀스의 길이. 이보다 긴 시퀀스는 앞부분이 잘려지고 짧은 시퀀스는 앞부분에 패딩이 추가됩니다.
+ * @param {string} multihot 단어의 멀티-핫 인코딩을 사용할지 여부. 기본값: `false`
+ * @return {tf.Tensor} `multihot`이 `false`(기본값)이면,
+ *   데이터셋은 `[numExamples, maxLen]` 크기의 2D `int32` `tf.Tensor`로 표현됩니다.
+ *   `true`이면 데이터셋은 `[numExamples, numWords]` 크기의 2D `float32` `tf.Tensor`로 표현됩니다.
  */
 function loadFeatures(filePath, numWords, maxLen, multihot = false) {
   const buffer = fs.readFileSync(filePath);
@@ -57,13 +53,13 @@ function loadFeatures(filePath, numWords, maxLen, multihot = false) {
   while (index < numBytes) {
     const value = buffer.readInt32LE(index);
     if (value === 1) {
-      // A new sequence has started.
+      // 새로운 시퀀스 시작
       if (index > 0) {
         sequences.push(seq);
       }
       seq = [];
     } else {
-      // Sequence continues.
+      // 시퀀스는 계속됩니다.
       seq.push(value >= numWords ? OOV_INDEX : value);
     }
     index += 4;
@@ -72,7 +68,7 @@ function loadFeatures(filePath, numWords, maxLen, multihot = false) {
     sequences.push(seq);
   }
 
-  // Get some sequence length stats.
+  // 시퀀스 길이 통계 계산
   let minLength = Infinity;
   let maxLength = -Infinity;
   sequences.forEach(seq => {
@@ -84,11 +80,10 @@ function loadFeatures(filePath, numWords, maxLen, multihot = false) {
       maxLength = length;
     }
   });
-  console.log(`Sequence length: min = ${minLength}; max = ${maxLength}`);
+  console.log(`시퀀스 길이: min = ${minLength}; max = ${maxLength}`);
 
   if (multihot) {
-    // If requested by the arg, encode the sequences as multi-hot
-    // vectors.
+    // `true`이면 시퀀스를 멀티-핫 벡터로 인코딩합니다.
     const buffer = tf.buffer([sequences.length, numWords]);
     sequences.forEach((seq, i) => {
       seq.forEach(wordIndex => {
@@ -107,11 +102,10 @@ function loadFeatures(filePath, numWords, maxLen, multihot = false) {
 }
 
 /**
- * Load IMDB targets from a file.
+ * 파일에서 IMDb 타깃을 로드합니다.
  *
- * @param {string} filePath Path to the binary targets file.
- * @return {tf.Tensor} The targets as `tf.Tensor` of shape `[numExamples, 1]`
- *   and dtype `float32`. It has 0 or 1 values.
+ * @param {string} filePath 이진 타깃 파일의 경로
+ * @return {tf.Tensor} `[numExamples, 1]` 크기의 `float32` `tf.Tensor` 타깃. 0 또는 1의 값을 가집니다.
  */
 function loadTargets(filePath) {
   const buffer = fs.readFileSync(filePath);
@@ -132,22 +126,22 @@ function loadTargets(filePath) {
   }
 
   console.log(
-      `Loaded ${numPositive} positive examples and ` +
-      `${numNegative} negative examples.`);
+      `${numPositive}개의 긍정적인 샘플과 ` +
+      `${numNegative}개의 부정적인 샘플을 로드했습니다.`);
   return tf.tensor2d(ys, [ys.length, 1], 'float32');
 }
 
 /**
- * Get a file by downloading it if necessary.
+ * 필요하면 파일을 다운로드합니다.
  *
- * @param {string} sourceURL URL to download the file from.
- * @param {string} destPath Destination file path on local filesystem.
+ * @param {string} sourceURL 파일을 다운로드할 URL
+ * @param {string} destPath 파일을 저장할 로컬 파일 시스템의 경로
  */
 async function maybeDownload(sourceURL, destPath) {
   return new Promise(async (resolve, reject) => {
     if (!fs.existsSync(destPath) || fs.lstatSync(destPath).size === 0) {
       const localZipFile = fs.createWriteStream(destPath);
-      console.log(`Downloading file from ${sourceURL} ...`);
+      console.log(`파일 다운로드 중: ${sourceURL} ...`);
       https.get(sourceURL, response => {
         response.pipe(localZipFile);
         localZipFile.on('finish', () => {
@@ -162,19 +156,19 @@ async function maybeDownload(sourceURL, destPath) {
 }
 
 /**
- * Get extracted files.
+ * 압축을 해제합니다.
  *
- * If the files are already extracted, this will be a no-op.
+ * 만약 이미 파일이 압축해제 되었다면 이 함수는 아무런 일을 하지 않습니다.
  *
- * @param {string} sourcePath Source zip file path.
- * @param {string} destDir Extraction destination directory.
+ * @param {string} sourcePath zip 파일 경로
+ * @param {string} destDir 압축을 풀 디렉토리
  */
 async function maybeExtract(sourcePath, destDir) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(destDir)) {
       return resolve();
     }
-    console.log(`Extracting: ${sourcePath} --> ${destDir}`);
+    console.log(`압축 해제 중: ${sourcePath} --> ${destDir}`);
     extract(sourcePath, {dir: destDir}, err => {
       if (err == null) {
         return resolve();
@@ -188,10 +182,9 @@ async function maybeExtract(sourcePath, destDir) {
 const ZIP_SUFFIX = '.zip';
 
 /**
- * Get the IMDB data through file downloading and extraction.
+ * 파일을 다운로드하고 압축해제 하여 IMDb 데이터 얻기
  *
- * If the files already exist on the local file system, the download and/or
- * extraction steps will be skipped.
+ * 파일이 이미 로컬 파일 시스템에 있다면 다운로드와 압축 해제는 실행되지 않습니다.
  */
 async function maybeDownloadAndExtract() {
   const zipDownloadDest = path.join(os.tmpdir(), path.basename(DATA_ZIP_URL));
@@ -204,18 +197,15 @@ async function maybeDownloadAndExtract() {
 }
 
 /**
- * Load data by downloading and extracting files if necessary.
+ * 필요하면 파일을 다운로드하고 압축을 해제하여 데이터를 로드합니다.
  *
- * @param {number} numWords Number of words to in the vocabulary.
- * @param {number} len Length of each sequence. Longer sequences will
- *   be pre-truncated and shorter ones will be pre-padded.
+ * @param {number} numWords 어휘 사전에 있는 단어 개수
+ * @param {number} len 각 시퀀스의 길이. 긴 시퀀스는 앞부분이 잘리고, 짧은 시퀀스는 앞부분에 패딩이 추가됩니다.
  * @return
- *   xTrain: Training data as a `tf.Tensor` of shape
- *     `[numExamples, len]` and `int32` dtype.
- *   yTrain: Targets for the training data, as a `tf.Tensor` of
- *     `[numExamples, 1]` and `float32` dtype. The values are 0 or 1.
- *   xTest: The same as `xTrain`, but for the test dataset.
- *   yTest: The same as `yTrain`, but for the test dataset.
+ *   xTrain: 훈련 데이터. `[numExamples, len]` 크기의 `int32` `tf.Tensor`.
+ *   yTrain: 타깃 데이터. `[numExamples, 1]` 크기의 `float32` `tf.Tensor`. 0 또는 1입니다.
+ *   xTest: `xTrain`과 같지만 테스트 데이터셋입니다.
+ *   yTest: `yTrain`과 같지만 테스트 데이터셋입니다.
  */
 export async function loadData(numWords, len, multihot = false) {
   const dataDir = await maybeDownloadAndExtract();
@@ -231,17 +221,17 @@ export async function loadData(numWords, len, multihot = false) {
 
   tf.util.assert(
       xTrain.shape[0] === yTrain.shape[0],
-      `Mismatch in number of examples between xTrain and yTrain`);
+      `xTrain과 yTrain의 샘플 개수가 맞지 않습니다.`);
   tf.util.assert(
       xTest.shape[0] === yTest.shape[0],
-      `Mismatch in number of examples between xTest and yTest`);
+      `xTest과 yTest의 샘플 개수가 맞지 않습니다.`);
   return {xTrain, yTrain, xTest, yTest};
 }
 
 /**
- * Load a metadata template by downloading and extracting files if necessary.
+ * 메타데이터 템플릿을 로드합니다. 필요하면 다운로드하고 압축을 해제합니다.
  *
- * @return A JSON object that is the metadata template.
+ * @return 메타데이터 템플릿 JSON 객체
  */
 export async function loadMetadataTemplate() {
   const baseName = path.basename(METADATA_TEMPLATE_URL);

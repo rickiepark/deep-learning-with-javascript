@@ -16,28 +16,25 @@
  */
 
 /**
- * Utilities for sequential data.
+ * 순차 데이터를 위한 유틸리티
  */
 
-export const PAD_INDEX = 0;  // Index of the padding character.
-export const OOV_INDEX = 2;  // Index fo the OOV character.
+export const PAD_INDEX = 0;  // 패딩 문자 인덱스
+export const OOV_INDEX = 2;  // OOV 문자 인덱스
 
 /**
- * Pad and truncate all sequences to the same length
+ * 모든 시퀀스를 같은 길이로 패딩하거나 자릅니다.
  *
- * @param {number[][]} sequences The sequences represented as an array of array
- *   of numbers.
- * @param {number} maxLen Maximum length. Sequences longer than `maxLen` will be
- *   truncated. Sequences shorter than `maxLen` will be padded.
- * @param {'pre'|'post'} padding Padding type.
- * @param {'pre'|'post'} truncating Truncation type.
- * @param {number} value Padding value.
+ * @param {number[][]} sequences 숫자 배열의 배열로 표현된 시퀀스
+ * @param {number} maxLen 최대 길이. `maxLen`보다 긴 시퀀스는 잘리고 짧은 시퀀스는 패딩됩니다.
+ * @param {'pre'|'post'} padding 패딩 타입
+ * @param {'pre'|'post'} truncating 잘림 타입
+ * @param {number} value 패딩 값
  */
 export function padSequences(
     sequences, maxLen, padding = 'pre', truncating = 'pre', value = PAD_INDEX) {
-  // TODO(cais): This perhaps should be refined and moved into tfjs-preproc.
   return sequences.map(seq => {
-    // Perform truncation.
+    // 시퀀스를 자릅니다.
     if (seq.length > maxLen) {
       if (truncating === 'pre') {
         seq.splice(0, seq.length - maxLen);
@@ -46,7 +43,7 @@ export function padSequences(
       }
     }
 
-    // Perform padding.
+    // 패딩을 추가합니다.
     if (seq.length < maxLen) {
       const pad = [];
       for (let i = 0; i < maxLen - seq.length; ++i) {

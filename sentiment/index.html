@@ -18,7 +18,7 @@ limitations under the License.
 <!doctype html>
 
 <head>
-  <title>TensorFlow.js Layers: Sentiment Analysis Demo</title>
+  <title>TensorFlow.js 예제: 감성 분석</title>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,65 +43,63 @@ limitations under the License.
 <body>
   <div class="tfjs-example-container centered-container">
     <section class='title-area'>
-      <h1>TensorFlow.js Layers: Sentiment Analysis Demo</h1>
+      <h1>TensorFlow.js 예제: 감성 분석</h1>
     </section>
 
     <section>
-      <p class='section-head'>Description</p>
+      <p class='section-head'>설명</p>
 
       <p>
-        This example demonstrated loading a pre-trained model and using it in the browser. This model is trained to
-        predict the sentiment of a short movie review (as a score between 0 and 1). The training is done server side
-        using Python and then converted into a TensorFlow.js model.
+        이 예제는 브라우저에서 사전 훈련된 모델을 로딩하여 사용합니다. 이 모델은 짧은 영화 리뷰의 감성을 (0과 1 사이로) 예측하도록 훈련되었습니다.
+        파이썬을 사용하여 서버 사이드에서 훈련되었고 TensorFlow.js 모델로 변환되었습니다.
       </p>
       <p>
-        The model is trained using IMDB reviews that have been truncated to a maximum of 200 words, only the
-        20000 most used words in the reviews are used. You can experiment with the model on this page or experiment
-        with training your model by looking at the <a href="https://github.com/tensorflow/tfjs-examples/tree/master/sentiment/python">training
-          code</a> in the repository.
+        이 모델은 최대 500개의 단어가 되도록 잘리거나 패딩된 IMDb 리뷰와
+        리뷰에 가장 많이 등장하는 20,000개 단어만을 사용하여 훈련되었습니다.
+        이 페이지에서 이 모델을 실험하거나
+        <a href="https://github.com/tensorflow/tfjs-examples/tree/master/sentiment/">깃허브 저장소</a>의
+        코드를 사용해 자신만의 모델을 훈련하여 실험해 볼 수 있습니다.
       </p>
-      <p>This is not intended to be a production level sentiment analysis model.</p>
+      <p>제품 수준의 감성 분석 모델을 만드는 예제는 아닙니다.</p>
     </section>
 
-
-
     <section>
-      <p class='section-head'>Load Model</p>
+      <p class='section-head'>모델 로딩</p>
 
       <div class="create-model">
-        <button id="load-pretrained-remote" style="display:none">Load hosted pretrained model</button>
-        <button id="load-pretrained-local" style="display:none">Load local pretrained model</button>
+        <button id="load-pretrained-remote" style="display:none">사전 훈련된 원격 모델 로드하기</button>
+        <button id="load-pretrained-local" style="display:none">사전 훈련된 로컬 모델 로드하기</button>
       </div>
 
       <div>
         <div>
-          <span>Model type: </span>
+          <span>모델 종류: </span>
           <span id="modelType"></span>
         </div>
         <div>
-          <span>Vocabulary size: </span>
+          <span>어휘 사전 크기: </span>
           <span id="vocabularySize"></span>
         </div>
         <div>
-          <span>Max length: </span>
+          <span>최대 길이: </span>
           <span id="maxLen"></span>
         </div>
       </div>
     </section>
 
     <section>
-      <p class='section-head'>Input Sample</p>
+      <p class='section-head'>입력 샘플</p>
 
       <select id="test-example-select" class="form-control">
-        <option value="positive">Positive example</option>
-        <option value="negative">Negative example</option>
+        <option value="positive">긍정적인 샘플</option>
+        <option value="negative">부정적인 샘플</option>
       </select>
       <textarea id="review-text"></textarea>
     </section>
 
     <section>
-      <p class='section-head'>Status</p>
-      <span id="status">Standing by.</span>
+      <p class='section-head'>상태</p>
+      <span id="status">대기중</span>
     </section>
 
   </div>

@@ -33,7 +33,7 @@ const LOCAL_URLS = {
 
 class SentimentPredictor {
   /**
-   * Initializes the Sentiment demo.
+   * 감성 분석 예제 초기화
    */
   async init(urls) {
     this.urls = urls;
@@ -57,10 +57,10 @@ class SentimentPredictor {
   }
 
   predict(text) {
-    // Convert to lower case and remove all punctuations.
+    // 소문자로 바꾸고 구둣점을 삭제합니다.
     const inputText =
         text.trim().toLowerCase().replace(/(\.|\,|\!)/g, '').split(' ');
-    // Convert the words to a sequence of word indices.
+    // 단어를 단어 인덱스의 시퀀스로 바꿉니다.
     const sequence = inputText.map(word => {
       let wordIndex = this.wordIndex[word] + this.indexFrom;
       if (wordIndex > this.vocabularySize) {
@@ -68,7 +68,7 @@ class SentimentPredictor {
       }
       return wordIndex;
     });
-    // Perform truncation and padding.
+    // 자르거나 패딩을 추가합니다.
     const paddedSequence = padSequences([sequence], this.maxLen);
     const input = tf.tensor2d(paddedSequence, [1, this.maxLen]);
 
@@ -83,12 +83,11 @@ class SentimentPredictor {
 };
 
 /**
- * Loads the pretrained model and metadata, and registers the predict
- * function with the UI.
+ * 사전 훈련된 모델과 메타데이터를 로드하고 예측 함수에 등록합니다.
  */
 async function setupSentiment() {
   if (await loader.urlExists(HOSTED_URLS.model)) {
-    ui.status('Model available: ' + HOSTED_URLS.model);
+    ui.status('사용할 모델: ' + HOSTED_URLS.model);
     const button = document.getElementById('load-pretrained-remote');
     button.addEventListener('click', async () => {
       const predictor = await new SentimentPredictor().init(HOSTED_URLS);
@@ -98,7 +97,7 @@ async function setupSentiment() {
   }
 
   if (await loader.urlExists(LOCAL_URLS.model)) {
-    ui.status('Model available: ' + LOCAL_URLS.model);
+    ui.status('사용할 모델: ' + LOCAL_URLS.model);
     const button = document.getElementById('load-pretrained-local');
     button.addEventListener('click', async () => {
       const predictor = await new SentimentPredictor().init(LOCAL_URLS);
@@ -107,7 +106,7 @@ async function setupSentiment() {
     button.style.display = 'inline-block';
   }
 
-  ui.status('Standing by.');
+  ui.status('대기중');
 }
 
 setupSentiment();

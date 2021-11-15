@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-if (tf === undefined) {
-  const tf = require('@tensorflow/tfjs');
+if (typeof tf === 'undefined') {
+  global.tf = require('@tensorflow/tfjs');
 }
 import * as dateFormat from './date_format.js';
 

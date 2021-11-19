@@ -16,9 +16,9 @@
  */
 
 /**
- * The client-side inference part of the date-conversion example.
+ * 날짜 변환 예제의 추론 파트
  *
- * Based on Python Keras example:
+ * 파이썬 케라스 예제를 참고했습니다:
  *   https://github.com/keras-team/keras/blob/master/examples/addition_rnn.py
  */
 
@@ -54,7 +54,7 @@ inputDateString.addEventListener('change', async () => {
     const {outputStr, attention} =
         await runSeq2SeqInference(model, inputStr, getAttention);
     const tElapsed = tf.util.now() - t0;
-    status.textContent = `seq2seq conversion took ${tElapsed.toFixed(1)} ms`;
+    status.textContent = `seq2seq 변환 시간: ${tElapsed.toFixed(1)} ms`;
     outputDateString.value = outputStr;
 
     const xTickLabels = outputStr.split('').map(
@@ -75,8 +75,8 @@ inputDateString.addEventListener('change', async () => {
         }, {
           width: 600,
           height: 360,
-          xLabel: 'Output characters',
-          yLabel: 'Input characters',
+          xLabel: '출력 문자',
+          yLabel: '입력 문자',
           colorMap: 'blues'
         });
   } catch (err) {
@@ -98,15 +98,14 @@ function integerToTwoDigitString(x) {
 
 async function init() {
   try {
-    status.textContent = `Loading model from ${RELATIVE_MODEL_URL} ...`;
+    status.textContent = `모델 로딩: ${RELATIVE_MODEL_URL} ...`;
     model = await tf.loadLayersModel(RELATIVE_MODEL_URL);
   } catch (err) {
-    // If loading of the local model has failed, try loading from the hosted
-    // model.
-    status.textContent = `Loading hosted model from ${HOSTED_MODEL_URL} ...`;
+    // 로컬 모델을 로드하는데 실패하면 원격 모델을 로드합니다.
+    status.textContent = `원격 모델 로딩: ${HOSTED_MODEL_URL} ...`;
     model = await tf.loadLayersModel(HOSTED_MODEL_URL);
   }
-  status.textContent = 'Done loading model.';
+  status.textContent = '모델 로딩 완료.';
   model.summary();
 
   const exampleItems = document.getElementsByClassName('input-date-example');

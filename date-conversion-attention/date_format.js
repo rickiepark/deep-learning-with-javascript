@@ -16,15 +16,12 @@
  */
 
 /**
- * Date formats and conversion utility functions.
+ * 날짜 포맷과 변환 유틸리티 함수
  *
- * This file is used for the training of the date-conversion model and
- * date conversions based on the trained model.
+ * 이 파일은 날짜 변환 모델의 훈련과 훈련된 모델을 기반으로한 날짜 변환에 사용됩니다.
  *
- * It contains functions that generate random dates and represent them in
- * several different formats such as (2019-01-20 and 20JAN19).
- * It also contains functions that convert the text representation of
- * the dates into one-hot `tf.Tensor` representations.
+ * 랜덤한 날짜를 생성하고 2019-01-20나 20JAN19와 같이 여러 포맷으로 표현하는 함수를 포함합니다.
+ * 또한 날짜의 텍스트 표현을 원-핫 `tf.Tensor` 표현으로 바꾸는 함수를 포함합니다.
  */
 
 const MONTH_NAMES_FULL = [
@@ -37,11 +34,11 @@ const MONTH_NAMES_3LETTER =
 const MIN_DATE = new Date('1950-01-01').getTime();
 const MAX_DATE = new Date('2050-01-01').getTime();
 
-export const INPUT_LENGTH = 12   // Maximum length of all input formats.
-export const OUTPUT_LENGTH = 10  // Length of 'YYYY-MM-DD'.
+export const INPUT_LENGTH = 12   // 모든 입력 포맷의 최대 길이
+export const OUTPUT_LENGTH = 10  // 'YYYY-MM-DD'의 길이
 
-// Use "\n" for padding for both input and output. It has to be at the
-// beginning so that `mask_zero=True` can be used in the keras model.
+// 입력과 출력의 패딩을 위해 "\n"을 사용합니다.
+// 케라스 모델에서 `mask_zero=True`를 사용할 수 있도록 초기에 패딩되어야 합니다.
 export const INPUT_VOCAB = '\n0123456789/-., ' +
     MONTH_NAMES_3LETTER.join('')
         .split('')
@@ -50,18 +47,16 @@ export const INPUT_VOCAB = '\n0123456789/-., ' +
         })
         .join('');
 
-// OUTPUT_VOCAB includes an start-of-sequence (SOS) token, represented as
-// '\t'. Note that the date strings are represented in terms of their
-// constituent characters, not words or anything else.
+// OUTPUT_VOCAB는 '\n'으로 표현된 시퀀스 시작 토큰을 포함합니다.
+// 날짜 문자열은 단어나 다른 것이 아니라 날짜를 구성하는 문자로 표현됩니다.
 export const OUTPUT_VOCAB = '\n\t0123456789-';
 
 export const START_CODE = 1;
 
 /**
- * Generate a random date.
+ * 랜덤한 날짜를 생성합니다.
  *
- * @return {[number, number, number]} Year as an integer, month as an
- *   integer >= 1 and <= 12, day as an integer >= 1.
+ * @return {[number, number, number]} 정수 값의 연도, 1과 12 사이의 정수인 월, 1보다 큰 정수인 일
  */
 export function generateRandomDateTuple() {
   const date = new Date(Math.random() * (MAX_DATE - MIN_DATE) + MIN_DATE);
@@ -72,26 +67,26 @@ function toTwoDigitString(num) {
   return num < 10 ? `0${num}` : `${num}`;
 }
 
-/** Date format such as 01202019. */
+/** 01202019 포맷 */
 export function dateTupleToDDMMMYYYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${dayStr}${monthStr}${dateTuple[0]}`;
 }
 
-/** Date format such as 01/20/2019. */
+/** 01/20/2019 포맷 */
 export function dateTupleToMMSlashDDSlashYYYY(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${monthStr}/${dayStr}/${dateTuple[0]}`;
 }
 
-/** Date format such as 1/20/2019. */
+/** 1/20/2019 포맷 */
 export function dateTupleToMSlashDSlashYYYY(dateTuple) {
   return `${dateTuple[1]}/${dateTuple[2]}/${dateTuple[0]}`;
 }
 
-/** Date format such as 01/20/19. */
+/** 01/20/19 포맷 */
 export function dateTupleToMMSlashDDSlashYY(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
@@ -99,13 +94,13 @@ export function dateTupleToMMSlashDDSlashYY(dateTuple) {
   return `${monthStr}/${dayStr}/${yearStr}`;
 }
 
-/** Date format such as 1/20/19. */
+/** 1/20/19 포맷 */
 export function dateTupleToMSlashDSlashYY(dateTuple) {
   const yearStr = `${dateTuple[0]}`.slice(2);
   return `${dateTuple[1]}/${dateTuple[2]}/${yearStr}`;
 }
 
-/** Date format such as 012019. */
+/** 012019 포맷 */
 export function dateTupleToMMDDYY(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
@@ -113,7 +108,7 @@ export function dateTupleToMMDDYY(dateTuple) {
   return `${monthStr}${dayStr}${yearStr}`;
 }
 
-/** Date format such as JAN 20 19. */
+/** JAN 20 19 포맷 */
 export function dateTupleToMMMSpaceDDSpaceYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   const dayStr = toTwoDigitString(dateTuple[2]);
@@ -121,14 +116,14 @@ export function dateTupleToMMMSpaceDDSpaceYY(dateTuple) {
   return `${monthStr} ${dayStr} ${yearStr}`;
 }
 
-/** Date format such as JAN 20 2019. */
+/** JAN 20 2019 포맷 */
 export function dateTupleToMMMSpaceDDSpaceYYYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${monthStr} ${dayStr} ${dateTuple[0]}`;
 }
 
-/** Date format such as JAN 20, 19. */
+/** JAN 20, 19 포맷 */
 export function dateTupleToMMMSpaceDDCommaSpaceYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   const dayStr = toTwoDigitString(dateTuple[2]);
@@ -136,70 +131,70 @@ export function dateTupleToMMMSpaceDDCommaSpaceYY(dateTuple) {
   return `${monthStr} ${dayStr}, ${yearStr}`;
 }
 
-/** Date format such as JAN 20, 2019. */
+/** JAN 20, 2019 포맷 */
 export function dateTupleToMMMSpaceDDCommaSpaceYYYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${monthStr} ${dayStr}, ${dateTuple[0]}`;
 }
 
-/** Date format such as 20-01-2019. */
+/** 20-01-2019 포맷 */
 export function dateTupleToDDDashMMDashYYYY(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${dayStr}-${monthStr}-${dateTuple[0]}`;
 }
 
-/** Date format such as 20-1-2019. */
+/** 20-1-2019 포맷 */
 export function dateTupleToDDashMDashYYYY(dateTuple) {
   return `${dateTuple[2]}-${dateTuple[1]}-${dateTuple[0]}`;
 }
 
-/** Date format such as 20.01.2019. */
+/** 20.01.2019 포맷 */
 export function dateTupleToDDDotMMDotYYYY(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${dayStr}.${monthStr}.${dateTuple[0]}`;
 }
 
-/** Date format such as 20.1.2019. */
+/** 20.1.2019 포맷 */
 export function dateTupleToDDotMDotYYYY(dateTuple) {
   return `${dateTuple[2]}.${dateTuple[1]}.${dateTuple[0]}`;
 }
 
-/** Date format such as 2019.01.20. */
+/** 2019.01.20 포맷 */
 export function dateTupleToYYYYDotMMDotDD(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${dateTuple[0]}.${monthStr}.${dayStr}`;
 }
 
-/** Date format such as 2019.1.20. */
+/** 2019.1.20 포맷 */
 export function dateTupleToYYYYDotMDotD(dateTuple) {
   return `${dateTuple[0]}.${dateTuple[1]}.${dateTuple[2]}`;
 }
 
-/** Date format such as 20190120. */
+/** 20190120 포맷 */
 export function dateTupleToYYYYMMDD(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
   const dayStr = toTwoDigitString(dateTuple[2]);
   return `${dateTuple[0]}${monthStr}${dayStr}`;
 }
 
-/** Date format such as 2019-1-20. */
+/** 2019-1-20 포맷 */
 export function dateTupleToYYYYDashMDashD(dateTuple) {
   return `${dateTuple[0]}-${dateTuple[1]}-${dateTuple[2]}`;
 }
 
-/** Date format such as 20 JAN 2019. */
+/** 20 JAN 2019 포맷 */
 export function dateTupleToDSpaceMMMSpaceYYYY(dateTuple) {
   const monthStr = MONTH_NAMES_3LETTER[dateTuple[1] - 1];
   return `${dateTuple[2]} ${monthStr} ${dateTuple[0]}`;
 }
 
 /**
- * Date format such as 2019-01-20
- * (i.e.,  the ISO format and the conversion target).
+ * 2019-01-20 포맷
+ * (즉, ISO 포맷과 타깃).
  * */
 export function dateTupleToYYYYDashMMDashDD(dateTuple) {
   const monthStr = toTwoDigitString(dateTuple[1]);
@@ -228,21 +223,19 @@ export const INPUT_FNS = [
   dateTupleToYYYYDashMDashD,
   dateTupleToDSpaceMMMSpaceYYYY,
   dateTupleToYYYYDashMMDashDD
-];  // TODO(cais): Add more formats if necessary.
+];
 
 /**
- * Encode a number of input date strings as a `tf.Tensor`.
+ * 여러 개의 입력 날짜 문자열을 `tf.Tensor`로 인코딩합니다.
  *
- * The encoding is a sequence of one-hot vectors. The sequence is
- * padded at the end to the maximum possible length of any valid
- * input date strings. The padding value is zero.
+ * 인코딩은 원-핫 벡터의 시퀀스입니다.
+ * 이 시퀀스는 유효한 입력 날짜 문자열의 최대 길이가 되도록 끝에 패딩됩니다.
+ * 패딩 값은 0입니다.
  *
- * @param {string[]} dateStrings Input date strings. Each element of the array
- *   must be one of the formats listed above. It is okay to mix multiple formats
- *   in the array.
- * @returns {tf.Tensor} One-hot encoded characters as a `tf.Tensor`, of dtype
- *   `float32` and shape `[numExamples, maxInputLength]`, where `maxInputLength`
- *   is the maximum possible input length of all valid input date-string formats.
+ * @param {string[]} dateStrings 입력 날짜 문자열. 이 배열의 각 원소는 위에 나열된 포맷 중 하나여야 합니다.
+ *   배열에 여러 개의 포맷이 혼합되어 있어도 괜찮습니다.
+ * @returns {tf.Tensor} 원-핫 인코딩된 문자로 `[numExamples, maxInputLength]` 크기의 `float32` `tf.Tensor`입니다.
+ *   여기에서 `maxInputLength`는 유효한 입력 날짜 문자열 포맷의 최대 입력 길이입니다.
  */
 export function encodeInputDateStrings(dateStrings) {
   const n = dateStrings.length;
@@ -253,7 +246,7 @@ export function encodeInputDateStrings(dateStrings) {
         const char = dateStrings[i][j];
         const index = INPUT_VOCAB.indexOf(char);
         if (index === -1) {
-          throw new Error(`Unknown char: ${char}`);
+          throw new Error(`알 수 없는 문자: ${char}`);
         }
         x.set(index, i, j);
       }
@@ -263,15 +256,14 @@ export function encodeInputDateStrings(dateStrings) {
 }
 
 /**
- * Encode a number of output date strings as a `tf.Tensor`.
+ * `tf.Tensor`로 여러 개의 출력 날짜 문자열을 인코딩합니다.
  *
- * The encoding is a sequence of integer indices.
+ * 이 인코딩은 정수 인덱스의 시퀀스입니다.
  *
- * @param {string[]} dateStrings An array of output date strings, must be in the
- *   ISO date format (YYYY-MM-DD).
- * @returns {tf.Tensor} Integer indices of the characters as a `tf.Tensor`, of
- *   dtype `int32` and shape `[numExamples, outputLength]`, where `outputLength`
- *   is the length of the standard output format (i.e., `10`).
+ * @param {string[]} dateStrings 출력 날짜 문자열의 배열. ISO 날짜 포맷(YYYY-MM-DD).
+ * @returns {tf.Tensor} 문자의 정수 인덱스.
+ *   `[numExamples, outputLength]` 크기의 `int32` `tf.Tensor`.
+ *   여기에서 `outputLength`는 표준 출력 포맷의 길이(즉, 10)입니다.
  */
 export function encodeOutputDateStrings(dateStrings, oneHot = false) {
   const n = dateStrings.length;
@@ -279,12 +271,12 @@ export function encodeOutputDateStrings(dateStrings, oneHot = false) {
   for (let i = 0; i < n; ++i) {
     tf.util.assert(
         dateStrings[i].length === OUTPUT_LENGTH,
-        `Date string is not in ISO format: "${dateStrings[i]}"`);
+        `날짜 문자열이 ISO 포맷이 아닙니다: "${dateStrings[i]}"`);
     for (let j = 0; j < OUTPUT_LENGTH; ++j) {
       const char = dateStrings[i][j];
       const index = OUTPUT_VOCAB.indexOf(char);
       if (index === -1) {
-        throw new Error(`Unknown char: ${char}`);
+        throw new Error(`알 수 없는 문자: ${char}`);
       }
       x.set(index, i, j);
     }

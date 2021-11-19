@@ -16,10 +16,9 @@
  */
 
 /**
- * Training an attention LSTM sequence-to-sequence decoder to translate
- * various date formats into the ISO date format.
+ * 여러가지 날짜 포맷을 ISO 날짜 포맷으로 바꾸기 위해 어텐션 LSTM 시퀀스-투-시퀀스 디코더를 훈련합니다.
  *
- * Inspired by and loosely based on
+ * 다음 예를 참고했습니다.
  * https://github.com/wanasit/katakana/blob/master/notebooks/Attention-based%20Sequence-to-Sequence%20in%20Keras.ipynb
  */
 
@@ -31,28 +30,25 @@ import * as dateFormat from './date_format';
 import {createModel, runSeq2SeqInference} from './model';
 
 /**
- * Generate sets of data for training.
+ * 훈련용 날짜 데이터 생성
  *
- * @param {number} trainSplit Trainining split. Must be >0 and <1.
- * @param {number} valSplit Validatoin split. Must be >0 and <1.
- * @return An `Object` consisting of
- *   - trainEncoderInput, as a `tf.Tensor` of shape
- *     `[numTrainExapmles, inputLength]`
- *   - trainDecoderInput, as a `tf.Tensor` of shape
- *     `[numTrainExapmles, outputLength]`. The first element of every
- *     example has been set as START_CODE (the sequence-start symbol).
- *   - trainDecoderOuptut, as a one-hot encoded `tf.Tensor` of shape
- *     `[numTrainExamples, outputLength, outputVocabSize]`.
- *   - valEncoderInput, same as trainEncoderInput, but for the validation set.
- *   - valDecoderInput, same as trainDecoderInput, but for the validation set.
- *   - valDecoderOutput, same as trainDecoderOuptut, but for the validation
- *     set.
- *   - testDateTuples, date tuples ([year, month, day]) for the test set.
+ * @param {number} trainSplit 훈련 세트 비율. 0보다 크고 1보다 작아야 합니다.
+ * @param {number} valSplit 검증 세트 비율. 0보다 크고 1보다 작아야 합니다.
+ * @return 다음으로 구성된 `Object`
+ *   - trainEncoderInput, `[numTrainExapmles, inputLength]` 크기의  `tf.Tensor`
+ *   - trainDecoderInput, `[numTrainExapmles, outputLength]` 크기의 `tf.Tensor`.
+ *     모든 샘플의 첫 번째 원소는 START_CODE(시작 토큰)로 지정됩니다.
+ *   - trainDecoderOuptut, `[numTrainExamples, outputLength, outputVocabSize]` 크기의
+ *     원-핫 인코딩된 `tf.Tensor`
+ *   - valEncoderInput, trainEncoderInput와 동일하지만 검증 세트용
+ *   - valDecoderInput, trainDecoderInput와 동일하지만 검증 세트용
+ *   - valDecoderOutput, trainDecoderOuptut와 동일하지만 검증 세트용
+ *   - testDateTuples, 테스트 세트 날짜 튜플 ([year, month, day])
  */
 export function generateDataForTraining(trainSplit = 0.25, valSplit = 0.15) {
   tf.util.assert(
       trainSplit > 0 && valSplit > 0 && trainSplit + valSplit <= 1,
-      `Invalid trainSplit (${trainSplit}) and valSplit (${valSplit})`);
+      `잘못된 trainSplit (${trainSplit})와 valSplit (${valSplit})`);
 
   const dateTuples = [];
   const MIN_YEAR = 1950;
@@ -66,10 +62,10 @@ export function generateDataForTraining(trainSplit = 0.25, valSplit = 0.15) {
 
   const numTrain = Math.floor(dateTuples.length * trainSplit);
   const numVal = Math.floor(dateTuples.length * valSplit);
-  console.log(`Number of dates used for training: ${numTrain}`);
-  console.log(`Number of dates used for validation: ${numVal}`);
+  console.log(`훈련에 사용할 날짜 개수: ${numTrain}`);
+  console.log(`검증에 사용할 날짜 개수: ${numVal}`);
   console.log(
-      `Number of dates used for testing: ` +
+      `테스트에 사용할 날짜 개수: ` +
       `${dateTuples.length - numTrain - numVal}`);
 
   function dateTuplesToTensor(dateTuples) {
@@ -85,9 +81,8 @@ export function generateDataForTraining(trainSplit = 0.25, valSplit = 0.15) {
       let decoderInput =
           dateFormat.encodeOutputDateStrings(trainTargetStrings)
           .asType('float32');
-      // One-step time shift: The decoder input is shifted to the left by
-      // one time step with respect to the encoder input. This accounts for
-      // the step-by-step decoding that happens during inference time.
+      // 한 스텝 시간 이동: 디코더 입력은 인코더 입력에 대비하여 한 타임 스텝 왼쪽으로 이동합니다.
+      // 이는 추론시에 일어나는 스텝 단위 디코딩을 해결합니다.
       decoderInput = tf.concat([
         tf.ones([decoderInput.shape[0], 1]).mul(dateFormat.START_CODE),
         decoderInput.slice(
@@ -127,33 +122,33 @@ export function generateDataForTraining(trainSplit = 0.25, valSplit = 0.15) {
 function parseArguments() {
   const argParser = new argparse.ArgumentParser({
     description:
-        'Train an attention-based date-conversion model in TensorFlow.js'
+        'TensorFlow.js로 어텐션 기반 날짜 변환 모델을 훈련합니다.'
   });
   argParser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use tfjs-node-gpu to train the model. Requires CUDA/CuDNN.'
+    help: 'tfjs-node-gpu를 사용해 모델을 훈련합니다. CUDA/CuDNN 필요.'
   });
   argParser.addArgument('--epochs', {
     type: 'int',
     defaultValue: 2,
-    help: 'Number of epochs to train the model for'
+    help: '모델을 훈련할 에포크 횟수'
   });
   argParser.addArgument('--batchSize', {
     type: 'int',
     defaultValue: 128,
-    help: 'Batch size to be used during model training'
+    help: '모델 훈련에 사용할 배치 크기'
   });
   argParser.addArgument('--trainSplit ', {
     type: 'float',
     defaultValue: 0.25,
-    help: 'Fraction of all possible dates to use for training. Must be ' +
-    '> 0 and < 1. Its sum with valSplit must be <1.'
+    help: '훈련에 사용할 날짜 비율. ' +
+    '0보다 크고 1보다 작아야 합니다. valSplit와 더해서 1보다 작아야 합니다.'
   });
   argParser.addArgument('--valSplit', {
     type: 'float',
     defaultValue: 0.15,
-    help: 'Fraction of all possible dates to use for training. Must be ' +
-    '> 0 and < 1. Its sum with trainSplit must be <1.'
+    help: '검증에 사용할 날짜 비율. ' +
+    '0보다 크고 1보다 작아야 합니다. trainSplit와 더해서 1보다 작아야 합니다.'
   });
   argParser.addArgument('--savePath', {
     type: 'string',
@@ -161,15 +156,13 @@ function parseArguments() {
   });
   argParser.addArgument('--logDir', {
     type: 'string',
-    help: 'Optional tensorboard log directory, to which the loss and ' +
-    'accuracy will be logged during model training.'
+    help: '훈련하는 동안 손실과 정확도를 기록할 텐서보드 로그 디렉토리.'
   });
   argParser.addArgument('--logUpdateFreq', {
     type: 'string',
     defaultValue: 'batch',
     optionStrings: ['batch', 'epoch'],
-    help: 'Frequency at which the loss and accuracy will be logged to ' +
-    'tensorboard.'
+    help: '텐서보드에 손실과 정확도를 기록할 빈도'
   });
   return argParser.parseArgs();
 }
@@ -210,31 +203,31 @@ async function run() {
             tfn.node.tensorBoard(args.logDir, {updateFreq: args.logUpdateFreq})
       });
 
-  // Save the model.
+  // 모델 저장
   if (args.savePath != null && args.savePath.length) {
     if (!fs.existsSync(args.savePath)) {
       shelljs.mkdir('-p', args.savePath);
     }
     const saveURL = `file://${args.savePath}`
     await model.save(saveURL);
-    console.log(`Saved model to ${saveURL}`);
+    console.log(`모데 저장: ${saveURL}`);
   }
 
-  // Run seq2seq inference tests and print the results to console.
+  // seq2seq 추론을 실행하고 결과를 콘솔에 출력합니다.
   const numTests = 10;
   for (let n = 0; n < numTests; ++n) {
     for (const testInputFn of dateFormat.INPUT_FNS) {
       const inputStr = testInputFn(testDateTuples[n]);
       console.log('\n-----------------------');
-      console.log(`Input string: ${inputStr}`);
+      console.log(`입력 문자열: ${inputStr}`);
       const correctAnswer =
           dateFormat.dateTupleToYYYYDashMMDashDD(testDateTuples[n]);
-      console.log(`Correct answer: ${correctAnswer}`);
+      console.log(`정확한 답: ${correctAnswer}`);
 
       const {outputStr} = await runSeq2SeqInference(model, inputStr);
       const isCorrect = outputStr === correctAnswer;
       console.log(
-          `Model output: ${outputStr} (${isCorrect ? 'OK' : 'WRONG'})` );
+          `모델 출력: ${outputStr} (${isCorrect ? 'OK' : 'WRONG'})` );
     }
   }
 }

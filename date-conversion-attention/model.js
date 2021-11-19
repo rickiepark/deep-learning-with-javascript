@@ -21,8 +21,7 @@ if (typeof tf === 'undefined') {
 import * as dateFormat from './date_format.js';
 
 /**
- * A custom layer used to obtain the last time step of an RNN sequential
- * output.
+ * RNN 순차 출력의 마지막 타임 스텝을 얻기 위한 사용자 정의 층
  */
 class GetLastTimestepLayer extends tf.layers.Layer {
   constructor(config) {
@@ -41,7 +40,7 @@ class GetLastTimestepLayer extends tf.layers.Layer {
       input = input[0];
     }
     const inputRank = input.shape.length;
-    tf.util.assert(inputRank === 3, `Invalid input rank: ${inputRank}`);
+    tf.util.assert(inputRank === 3, `잘못된 입력 랭크: ${inputRank}`);
     return input.gather([input.shape[1] - 1], 1).squeeze([1]);
   }
 
@@ -52,20 +51,16 @@ class GetLastTimestepLayer extends tf.layers.Layer {
 tf.serialization.registerClass(GetLastTimestepLayer);
 
 /**
- * Create an LSTM-based attention model for date conversion.
+ * 날짜 변환을 위한 LSTM 기반의 어텐션 모델을 만듭니다.
  *
- * @param {number} inputVocabSize Input vocabulary size. This includes
- *   the padding symbol. In the context of this model, "vocabulary" means
- *   the set of all unique characters that might appear in the input date
- *   string.
- * @param {number} outputVocabSize Output vocabulary size. This includes
- *   the padding and starting symbols. In the context of this model,
- *   "vocabulary" means the set of all unique characters that might appear in
- *   the output date string.
- * @param {number} inputLength Maximum input length (# of characters). Input
- *   sequences shorter than the length must be padded at the end.
- * @param {number} outputLength Output length (# of characters).
- * @return {tf.Model} A compiled model instance.
+ * @param {number} inputVocabSize 입력 어휘 사전 크기. 패딩 기호를 포함합니다.
+ *   이 모델의 경우 어휘 사전은 입력 날짜 문자열에 등장하는 모든 고유한 문자의 집합입니다.
+ * @param {number} outputVocabSize 출력 어휘 사전 크기. 패딩과 시작 기호를 포함합니다.
+ *   이 모델의 경우 어휘 사전은 출력 날짜 문자열에 등장하는 모든 고유한 문자의 집합입니다.
+ * @param {number} inputLength 최대 입력 길이(문자 개수).
+ *   이 길이보다 짧은 입력 시퀀스는 끝에 패딩이 추가되어야 합니다.
+ * @param {number} outputLength 출력 길이(문자 개수).
+ * @return {tf.Model} 컴파일된 모델 객체
  */
 export function createModel(
     inputVocabSize, outputVocabSize, inputLength, outputLength) {
@@ -138,21 +133,18 @@ export function createModel(
 }
 
 /**
- * Perform sequence-to-sequence decoding for date conversion.
+ * 날짜 변환을 위해 시퀀스-투-시퀀스 디코딩을 수행합니다.
  *
- * @param {tf.Model} model The model to be used for the sequence-to-sequence
- *   decoding, with two inputs:
- *   1. Encoder input of shape `[numExamples, inputLength]`
- *   2. Decoder input of shape `[numExamples, outputLength]`
- *   and one output:
- *   1. Decoder softmax probability output of shape
- *      `[numExamples, outputLength, outputVocabularySize]`
- * @param {string} inputStr Input date string to be converted.
+ * @param {tf.Model} model 시퀀스-투-시퀀스 디코딩을 위해 사용할 모델.
+ *   두 개의 입력:
+ *   1. `[numExamples, inputLength]` 크기의 인코더 입력
+ *   2. `[numExamples, outputLength]` 크기의 디코더 입력
+ *   하나의 출력:
+ *   1. `[numExamples, outputLength, outputVocabularySize]` 크기의 디코더 소프트맥스 확률 출력
+ * @param {string} inputStr 변환할 입력 날짜 문자열
  * @return {{outputStr: string, attention?: tf.Tensor}}
- *   - The `outputStr` field is the output date string.
- *   - If and only if `getAttention` is `true`, the `attention` field will
- *     be populated by attention matrix as a `tf.Tensor` of
- *     dtype `float32` and shape `[]`.
+ *   - `outputStr` 필드는 출력 날짜 문자열입니다.
+ *   - `getAttention`가 `true`이면, `[]` 크기의 `float32` `tf.Tensor`로 `attention` 필드가 채워집니다.
  */
 export async function runSeq2SeqInference(
     model, inputStr, getAttention = false) {
@@ -171,13 +163,12 @@ export async function runSeq2SeqInference(
 
     const output = {outputStr: ''};
 
-    // The `tf.Model` instance used for the final time step varies depending on
-    // whether the attention matrix is requested or not.
+    // 어텐션 행렬을 반환하는지에 따라 마지막 타임 스텝에 사용할 `tf.Model` 객체가 달라집니다.
     let finalStepModel = model;
     if (getAttention) {
-      // If the attention matrix is requested, construct a two-output model.
-      // - The 1st output is the original decoder output.
-      // - The 2nd output is the attention matrix.
+      // 어텐션 행렬을 반환하려면 두 개의 출력을 가진 모델을 만듭니다.
+      // - 첫 번째 출력은 원본 디코더 출력입니다.
+      // - 두 번째 출력은 어텐션 행렬입니다.
       finalStepModel = tf.model({
         inputs: model.inputs,
         outputs: model.outputs.concat([model.getLayer('attention').output])
@@ -186,7 +177,7 @@ export async function runSeq2SeqInference(
 
     const finalPredictOut = finalStepModel.predict(
         [encoderInput, decoderInput.toTensor()]);
-    let decoderFinalOutput;  // The decoder's final output.
+    let decoderFinalOutput;  // 디코더의 최종 출력
     if (getAttention) {
       decoderFinalOutput = finalPredictOut[0];
       output.attention = finalPredictOut[1];

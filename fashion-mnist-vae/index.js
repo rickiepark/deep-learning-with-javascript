@@ -100,7 +100,7 @@ async function renderLatentSpace(latentSpace) {
   const xPlaceholder = Array(xAxis.shape[0]).fill(0);
   const yPlaceholder = Array(yAxis.shape[0]).fill(0);
 
-  const rows = d3Select('.plot-area').selectAll('div.row').data(xPlaceholder);
+  const rows = d3.select('.plot-area').selectAll('div.row').data(xPlaceholder);
   const rEnter = rows.enter().append('div').attr('class', 'row');
   rows.exit().remove();
 
@@ -122,9 +122,9 @@ async function renderLatentSpace(latentSpace) {
 
     tf.dispose([zX, zBatch, batchImageTensor]);
 
-    const cols = d3Select(this).selectAll('.col');
+    const cols = d3.select(this).selectAll('.col');
     cols.each(async function(colZ, colIndex) {
-      const canvas = d3Select(this).select('canvas').node();
+      const canvas = d3.select(this).select('canvas').node();
       const imageTensor = imageTensors[colIndex];
 
       // Render the results to the canvas

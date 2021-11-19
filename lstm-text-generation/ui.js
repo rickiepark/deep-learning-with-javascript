@@ -16,11 +16,8 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-import * as tfvis from '@tensorflow/tfjs-vis';
-
-import {TEXT_DATA_URLS, TextData} from './data';
-import {SaveableLSTMTextGenerator} from './index';
+import {TEXT_DATA_URLS, TextData} from './data.js';
+import {SaveableLSTMTextGenerator} from './index.js';
 
 // UI controls.
 const testText = document.getElementById('test-text');

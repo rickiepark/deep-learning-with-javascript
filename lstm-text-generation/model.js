@@ -15,8 +15,10 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
-import {TextData} from './data';
+if (typeof tf === 'undefined') {
+  global.tf = require('@tensorflow/tfjs');
+}
+import {TextData} from './data.js';
 
 /**
  * Create a model for next-character prediction.

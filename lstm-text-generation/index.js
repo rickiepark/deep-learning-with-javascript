@@ -26,11 +26,9 @@
  * Networks" http://karpathy.github.io/2015/05/21/rnn-effectiveness/
  */
 
-import * as tf from '@tensorflow/tfjs';
-
-import {TextData} from './data';
-import * as model from './model';
-import {onTextGenerationBegin, onTextGenerationChar, onTrainBatchEnd, onTrainBegin, onTrainEpochEnd, setUpUI} from './ui';
+import {TextData} from './data.js';
+import * as model from './model.js';
+import {onTextGenerationBegin, onTextGenerationChar, onTrainBatchEnd, onTrainBegin, onTrainEpochEnd, setUpUI} from './ui.js';
 
 /**
  * Class that manages LSTM-based text generation.

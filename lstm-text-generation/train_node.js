@@ -22,11 +22,37 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as https from 'https';
 
 import * as argparse from 'argparse';
 
-import {maybeDownload, TextData, TEXT_DATA_URLS} from './data';
+import {TextData, TEXT_DATA_URLS} from './data';
 import {createModel, compileModel, fitModel, generateText} from './model';
+
+/**
+ * Get a file by downloading it if necessary.
+ *
+ * @param {string} sourceURL URL to download the file from.
+ * @param {string} destPath Destination file path on local filesystem.
+ */
+export async function maybeDownload(sourceURL, destPath) {
+  const fs = require('fs');
+  return new Promise(async (resolve, reject) => {
+    if (!fs.existsSync(destPath) || fs.lstatSync(destPath).size === 0) {
+      const localZipFile = fs.createWriteStream(destPath);
+      console.log(`Downloading file from ${sourceURL} to ${destPath}...`);
+      https.get(sourceURL, response => {
+        response.pipe(localZipFile);
+        localZipFile.on('finish', () => {
+          localZipFile.close(() => resolve());
+        });
+        localZipFile.on('error', err => reject(err));
+      });
+    } else {
+      return resolve();
+    }
+  });
+}
 
 function parseArgs() {
   const parser = argparse.ArgumentParser({

@@ -1,0 +1,181 @@
+<!--
+Copyright 2018 Google LLC. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================
+-->
+
+<!doctype html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/tfjs-examples.css" />
+</head>
+
+<style>
+  .monospace {
+    font-family: monospace;
+  }
+
+  .input-title {
+    display: inline-block;
+    width: 12em;
+  }
+
+  select {
+    font-size: 14pt;
+  }
+
+  button {
+    margin: 3px;
+  }
+
+  input:disabled {
+    background: #eeeeee;
+  }
+
+  textarea {
+    width: 98%;
+  }
+</style>
+
+<body class='tfjs-example-container'>
+
+  <section class='title-area'>
+    <h1>TensorFlow.js Text Generation:</h1>
+    <p class='subtitle'>Train a LSTM (Long Short Term Memory) model to generate text</p>
+  </section>
+
+  <section>
+    <p class='section-head'>Description</p>
+    <p>
+      This example allows you to train a model to generate text in the style of some existing source text.
+      The model is designed to predict the <em>next character</em> in a text given some preceding string of characters.
+      Doing this repetedly builds up a text, charachter by character.
+    </p>
+  </section>
+
+  <section>
+    <p class='section-head'>Status</p>
+    <div id="app-status">
+      Please select a text data source or enter your custom text in the text box below and click <em>"Load source data"</em>.
+    </div>
+  </section>
+
+  <section>
+    <p class='section-head'>Source Data</p>
+    <select id="text-data-select"></select>
+    <button id="load-text-data">Load source data</button>
+    <div>
+      <textarea class="monospace" id="test-text" value="" rows="10"></textarea>
+    </div>
+  </section>
+
+  <section>
+    <p class='section-head'>Model Loading/Creation</p>
+    <div>
+      <p>
+        <em>
+          Model saved in IndexedDB:
+          <span id="model-available">Load text data first.</span>
+        </em>
+      </p>
+
+      <div>
+        <span class="input-title">LSTM layer size(s) (e.g., 128 or 100,50):</span>
+        <input id="lstm-layer-sizes" value="128"></input>
+
+        <button id="create-or-load-model" disabled="true">Create or load model</button>
+        <button id="delete-model" disabled="true">Delete existing model</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class='section-head'>Model Training</p>
+    <p>
+      It can take a while to generate an effective model. Try increasing the number of <em>epochs</em> to improve the
+      results, we have found that about <strong>50-100 epochs</strong> are needed to start generating reasonable
+      text.
+    </p>
+    <div class="with-cols">
+      <div>
+        <div>
+          <span class="input-title">Number of Epochs:</span>
+          <input id="epochs" value="5"></input>
+        </div>
+        <div>
+          <span class="input-title">Examples per epoch:</span>
+          <input id="examples-per-epoch" value="2048"></input>
+        </div>
+        <div>
+          <span class="input-title">Batch size:</span>
+          <input id="batch-size" value="128"></input>
+        </div>
+        <div>
+          <span class="input-title">Validation spilt:</span>
+          <input id="validation-split" value="0.0625"></input>
+        </div>
+        <div>
+          <span class="input-title">Learning rate:</span>
+          <input id="learning-rate" value="1e-2"></input>
+        </div>
+        <div>
+          <button id="train-model" disabled="true">Train model</button>
+        </div>
+      </div>
+      <div class="canvases" id="batch-loss-canvas"></div>
+      <div class="canvases" id="epoch-loss-canvas"></div>
+    </div>
+  </section>
+
+  <section>
+    <p class='section-head'>Text Generation Parameters</p>
+    <p>
+      To generate text the model needs to have some number of preceding characters from which it continues,
+      we call these characters the <em>seed text</em>. You can type one in, or we will extract a random substring from
+      the input text to be the seed text. Note that the seed text must be at least 40 charachters long.
+    </p>
+    <div>
+      <span class="input-title">Length of generated text:</span>
+      <input id="generate-length" value="200"></input>
+    </div>
+
+    <div>
+      <span class="input-title">Generation temperature:</span>
+      <input id="temperature" value="0.75"></input>
+    </div>
+
+    <div>
+      <button id="generate-text" disabled="true">Generate text</button>
+      <span id="text-generation-status"></span>
+    </div>
+
+    <div>
+      <span class="input-title">Seed text:</span>
+      <textarea class="monospace" id="seed-text" value="" rows="4"></textarea>
+    </div>
+
+    <p class='section-head'>Model Output</p>
+
+    <div>
+      <span class="input-title">Generated text:</span>
+      <textarea class="monospace" id="generated-text" readonly="true" value="" rows="10"></textarea>
+    </div>
+
+  </section>
+
+</body>
+
+<script src="index.js"></script>

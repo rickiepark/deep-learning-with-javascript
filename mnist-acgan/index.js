@@ -24,11 +24,10 @@
  *   2. A hosted model, via HTTPS requests.
  */
 
-import * as ta from 'time-ago';
-import * as tf from '@tensorflow/tfjs';
+import * as ta from './timeago.js';
 
 // Load dataset just for comparison with the fake (generated images).
-import {loadMnistData, sampleFromMnistData} from './web-data';
+import {loadMnistData, sampleFromMnistData} from './web-data.js';
 
 const status = document.getElementById('status');
 const loadHostedModel = document.getElementById('load-hosted-model');

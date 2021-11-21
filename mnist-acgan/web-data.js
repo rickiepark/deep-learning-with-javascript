@@ -18,8 +18,6 @@
 // TODO(cais): Once MNIST dataset is available from the tf.data.* API, use
 // that instead and remove this file.
 
-import * as tf from '@tensorflow/tfjs';
-
 export const IMAGE_H = 28;
 export const IMAGE_W = 28;
 const IMAGE_SIZE = IMAGE_H * IMAGE_W;

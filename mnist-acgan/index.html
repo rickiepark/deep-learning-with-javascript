@@ -17,8 +17,12 @@ limitations under the License.
 
 <!doctype html>
 <head>
+  <title>TensorFlow.js 예제: GAN</title>
   <link rel="stylesheet" href="../shared/tfjs-examples.css" />
   <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+  <script type="module" src="index.js"></script>
 </head>
 
 <body>
@@ -87,7 +91,7 @@ limitations under the License.
           <button id="toggle-sliders" disabled="true">Show z-vector sliders</button>
           <div id="sliders-container"></div>
         </div>
-        
+
         <canvas id="fake-canvas" width="280" height="28"></canvas>
       </div>
       <div>
@@ -101,5 +105,3 @@ limitations under the License.
     <div>
   </div>
 </body>
-
-<script src="index.js"></script>

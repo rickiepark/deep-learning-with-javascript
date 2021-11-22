@@ -65,7 +65,7 @@ function parseArgs() {
   });
   parser.addArgument('modelJSONPath', {
     type: 'string',
-    help: '훈련된 다음 문자 예측 모델을 디스크에 저장하기 위한 경로 ' +
+    help: '다음 문자 예측 모델이 저장된 디스크 경로 ' +
     '(e.g., ./my-model/model.json)'
   });
   parser.addArgument('--genLength', {
@@ -81,7 +81,7 @@ function parseArgs() {
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'CUDA GPU로 훈련합니다.'
+    help: 'CUDA GPU를 사용합니다.'
   });
   parser.addArgument('--sampleStep', {
     type: 'int',

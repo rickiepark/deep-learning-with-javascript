@@ -99,7 +99,7 @@ async function generateAndVisualizeImages(generator) {
     generatedImages.dataSync();  // For accurate timing benchmark.
     const elapsed = tf.util.now() - t0;
     fakeImagesSpan.textContent =
-        `Fake images (generation took ${elapsed.toFixed(2)} ms)`;
+        `가짜 이미지 (생성에 걸린 시간: ${elapsed.toFixed(2)} ms)`;
     // Concatenate the images horizontally into a single image.
     return tf.concat(tf.unstack(generatedImages), 1);
   });
@@ -142,7 +142,7 @@ function createSliders(generator) {
   }
   slidersContainer.style.display = 'none';
   zSpaceToggleButton.disabled = false;
-  zSpaceToggleButton.textContent = `Show z-vector sliders (${latentDims} dimensions)`;
+  zSpaceToggleButton.textContent = `z-벡터 슬라이더 보기 (${latentDims} 차원)`;
 }
 
 async function showGeneratorInitially(generator) {
@@ -199,7 +199,7 @@ async function init() {
     if (metadata.lastUpdated != null) {
       status.textContent +=
           ` (Saved model was last updated ` +
-          `${ta.ago(new Date(metadata.lastUpdated))}). `;
+          `${ta.timeago().ago(new Date(metadata.lastUpdated))}). `;
     }
     status.textContent +=
         'Loaded locally-saved model! Now click "Generate" or ' +

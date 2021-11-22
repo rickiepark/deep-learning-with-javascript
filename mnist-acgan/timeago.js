@@ -1,6 +1,6 @@
 "use strict";
 
-var timeago = function() {
+export var timeago = function() {
 
   var o = {
     second: 1000,

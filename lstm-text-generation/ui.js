@@ -19,7 +19,7 @@
 import {TEXT_DATA_URLS, TextData} from './data.js';
 import {SaveableLSTMTextGenerator} from './index.js';
 
-// UI controls.
+// UI 콘트롤
 const testText = document.getElementById('test-text');
 const createOrLoadModelButton = document.getElementById('create-or-load-model');
 const deleteModelButton = document.getElementById('delete-model');
@@ -49,10 +49,10 @@ const modelAvailableInfo = document.getElementById('model-available');
 const sampleLen = 40;
 const sampleStep = 3;
 
-// Module-global instance of TextData.
+// TextData 객체
 let textData;
 
-// Module-global instance of SaveableLSTMTextGenerator.
+// SaveableLSTMTextGenerator 객체
 let textGenerator;
 
 function logStatus(message) {
@@ -63,27 +63,25 @@ let batchLossValues;
 let epochLossValues;
 
 /**
- * A function to call when a training process starts.
+ * 훈련이 시작될 때 호출되는 함수
  */
 export function onTrainBegin() {
   batchLossValues = [];
   epochLossValues = [];
-  logStatus('Starting model training...');
+  logStatus('모델 훈련을 시작합니다...');
 }
 
 /**
- * A function to call when a batch is competed during training.
+ * 훈련에서 배치가 끝날 때 호출되는 함수
  *
- * @param {number} loss Loss value of the current batch.
- * @param {number} progress Total training progress, as a number between 0
- *   and 1.
- * @param {number} examplesPerSec The training speed in the batch, in examples
- *   per second.
+ * @param {number} loss 현재 배치의 손실 값
+ * @param {number} progress 0~1 사이의 숫자로 나타난 전체 훈련 진행 상황
+ * @param {number} examplesPerSec 초당 샘플 수로 나타난 배치에서 훈련 속도
  */
 export function onTrainBatchEnd(logs, progress, examplesPerSec) {
   logStatus(
-      `Model training: ${(progress * 1e2).toFixed(1)}% complete... ` +
-      `(${examplesPerSec.toFixed(0)} examples/s)`);
+      `모델 훈련: ${(progress * 1e2).toFixed(1)}% 완료... ` +
+      `(${examplesPerSec.toFixed(0)} 샘플/초)`);
   batchLossValues.push(logs);
   const container = document.getElementById('batch-loss-canvas');
   tfvis.show.history(container, batchLossValues, ['loss'], {
@@ -104,27 +102,26 @@ export function onTrainEpochEnd(logs) {
 }
 
 /**
- * A function to call when text generation begins.
+ * 텍스트 생성이 시작될 때 호출되는 함수
  *
- * @param {string} seedSentence: The seed sentence being used for text
- *   generation.
+ * @param {string} seedSentence: 텍스트 생성을 위해 사용할 시드 문장
  */
 export function onTextGenerationBegin() {
   generatedTextInput.value = '';
-  logStatus('Generating text...');
+  logStatus('텍스트를 생성합니다...');
 }
 
 /**
- * A function to call each time a character is obtained during text generation.
+ * 텍스트 생성에서 문자가 결정될 때마다 호출되는 함수
  *
- * @param {string} char The just-generated character.
+ * @param {string} char 방금 생성된 문자
  */
 export async function onTextGenerationChar(char) {
   generatedTextInput.value += char;
   generatedTextInput.scrollTop = generatedTextInput.scrollHeight;
   const charCount = generatedTextInput.value.length;
   const generateLength = parseInt(generateLengthInput.value);
-  const status = `Generating text: ${charCount}/${generateLength} complete...`;
+  const status = `텍스트 생성: ${charCount}/${generateLength} 완료...`;
   logStatus(status);
   textGenerationStatus.textContent = status;
   await tf.nextFrame();
@@ -132,20 +129,20 @@ export async function onTextGenerationChar(char) {
 
 export function setUpUI() {
   /**
-   * Refresh the status of locally saved model (in IndexedDB).
+   * 로컬(IndexedDB)에 저장된 모델의 상태 갱신
    */
   async function refreshLocalModelStatus() {
     const modelInfo = await textGenerator.checkStoredModelStatus();
     if (modelInfo == null) {
       modelAvailableInfo.innerText =
-          `No locally saved model for "${textGenerator.modelIdentifier()}".`;
-      createOrLoadModelButton.textContent = 'Create model';
+          `로컬에 저장된 모델(${textGenerator.modelIdentifier()})이 없습니다.`;
+      createOrLoadModelButton.textContent = '모델 생성';
       deleteModelButton.disabled = true;
       enableModelParameterControls();
     } else {
       modelAvailableInfo.innerText =
-          `Saved @ ${modelInfo.dateSaved.toISOString()}`;
-      createOrLoadModelButton.textContent = 'Load model';
+          `@ ${modelInfo.dateSaved.toISOString()}에 저장한 모델이 있습니다.`;
+      createOrLoadModelButton.textContent = '모델 로드';
       deleteModelButton.disabled = false;
       disableModelParameterControls();
     }
@@ -167,30 +164,29 @@ export function setUpUI() {
   }
 
   /**
-   * Use `textGenerator` to generate random text, show the characters on the
-   * screen as they are generated one by one.
+   * `textGenerator`를 사용해 랜덤한 텍스트를 생성하고 문자가 하나씩 생성될 때마다 화면에 출력합니다.
    */
   async function generateText() {
     try {
       disableModelButtons();
 
       if (textGenerator == null) {
-        logStatus('ERROR: Please load text data set first.');
+        logStatus('에러: 먼저 텍스트 데이터셋을 로드하세요.');
         return;
       }
       const generateLength = parseInt(generateLengthInput.value);
       const temperature = parseFloat(temperatureInput.value);
       if (!(generateLength > 0)) {
         logStatus(
-            `ERROR: Invalid generation length: ${generateLength}. ` +
-            `Generation length must be a positive number.`);
+            `에러: 잘못된 생성 길이: ${generateLength}. ` +
+            `생성 길이는 양수여야 합니다.`);
         enableModelButtons();
         return;
       }
       if (!(temperature > 0 && temperature <= 1)) {
         logStatus(
-            `ERROR: Invalid temperature: ${temperature}. ` +
-            `Temperature must be a positive number.`);
+            `에러: 잘못된 온도: ${temperature}. ` +
+            `온도는 양수여야 합니다.`);
         enableModelButtons();
         return;
       }
@@ -198,16 +194,16 @@ export function setUpUI() {
       let seedSentence;
       let seedSentenceIndices;
       if (seedTextInput.value.length === 0) {
-        // Seed sentence is not specified yet. Get it from the data.
+        // 시드 문장이 지정되지 않아서 데이터에서 만듭니다.
         [seedSentence, seedSentenceIndices] = textData.getRandomSlice();
         seedTextInput.value = seedSentence;
       } else {
         seedSentence = seedTextInput.value;
         if (seedSentence.length < textData.sampleLen()) {
           logStatus(
-              `ERROR: Seed text must have a length of at least ` +
-              `${textData.sampleLen()}, but has a length of ` +
-              `${seedSentence.length}.`);
+              `에러: 시드 텍스트의 길이는 최소한 ` +
+              `${textData.sampleLen()}이 되어야 합니다. 하지만 ` +
+              `${seedSentence.length}가 입력되었습니다.`);
           enableModelButtons();
           return;
         }
@@ -219,7 +215,7 @@ export function setUpUI() {
       const sentence = await textGenerator.generateText(
           seedSentenceIndices, generateLength, temperature);
       generatedTextInput.value = sentence;
-      const status = 'Done generating text.';
+      const status = '텍스트 생성 완료.';
       logStatus(status);
       textGenerationStatus.value = status;
 
@@ -227,7 +223,7 @@ export function setUpUI() {
 
       return sentence;
     } catch (err) {
-      logStatus(`ERROR: Failed to generate text: ${err.message}, ${err.stack}`);
+      logStatus(`에러: 텍스트 생성 실패: ${err.message}, ${err.stack}`);
     }
   }
 
@@ -261,20 +257,18 @@ export function setUpUI() {
   }
 
   /**
-   * Initialize UI state.
+   * UI 상태 초기화
    */
-
   disableModelParameterControls();
 
   /**
-   * Update Text Inputs
+   * 텍스트 입력창 업데이트
    */
   updateTextInputParameters();
 
   /**
-   * Wire up UI callbacks.
+   * UI 콜백 연결
    */
-
   loadTextDataButton.addEventListener('click', async () => {
     textDataSelect.disabled = true;
     loadTextDataButton.disabled = true;
@@ -282,19 +276,19 @@ export function setUpUI() {
     const url = TEXT_DATA_URLS[dataIdentifier].url;
     if (testText.value.length === 0) {
       try {
-        logStatus(`Loading text data from URL: ${url} ...`);
+        logStatus(`다음 URL에서 텍스트 데이터를 로딩합니다: ${url} ...`);
         const response = await fetch(url);
         const textString = await response.text();
         testText.value = textString;
         logStatus(
-            `Done loading text data ` +
-            `(length=${(textString.length / 1024).toFixed(1)}k). ` +
-            `Next, please load or create model.`);
+            `텍스트 데이터 로드 완료 ` +
+            `(길이=${(textString.length / 1024).toFixed(1)}k). ` +
+            `이제, 모델을 로드하거나 만드세요.`);
       } catch (err) {
-        logStatus('Failed to load text data: ' + err.message);
+        logStatus('텍스트 데이터 로드 실패: ' + err.message);
       }
       if (testText.value.length === 0) {
-        logStatus('ERROR: Empty text data.');
+        logStatus('에러: 빈 텍스트 데이터');
         return;
       }
     } else {
@@ -310,44 +304,43 @@ export function setUpUI() {
     createOrLoadModelButton.disabled = true;
     if (textGenerator == null) {
       createOrLoadModelButton.disabled = false;
-      logStatus('ERROR: Please load text data set first.');
+      logStatus('에러: 먼저 텍스트 데이터셋을 로드하세요.');
       return;
     }
 
     if (await textGenerator.checkStoredModelStatus()) {
-      // Load locally-saved model.
-      logStatus('Loading model from IndexedDB... Please wait.');
+      // 로컬에 저장된 모델 로드
+      logStatus('IndexedDB에서 모델을 로드합니다... 잠시 기다려 주세요.');
       await textGenerator.loadModel();
       updateModelParameterControls(textGenerator.lstmLayerSizes());
       logStatus(
-          'Done loading model from IndexedDB. ' +
-          'Now you can train the model further or use it to generate text.');
+          'IndexedDB 모델을 로드하였습니다. ' +
+          '이제 모델을 더 훈련하거나 텍스트를 생성할 수 있습니다.');
     } else {
-      // Create model from scratch.
-      logStatus('Creating model... Please wait.');
+      // 처음부터 모델을 만듭니다.
+      logStatus('모델 생성 중... 잠시 기다려 주세요.');
       const lstmLayerSizes = lstmLayersSizesInput.value.trim().split(',').map(
           s => parseInt(s));
 
-      // Sanity check on the LSTM layer sizes.
+      // LSTM 층 크기 확인
       if (lstmLayerSizes.length === 0) {
-        logStatus('ERROR: Invalid LSTM layer sizes.');
+        logStatus('에러: 잘못된 LSTM 층 크기');
         return;
       }
       for (let i = 0; i < lstmLayerSizes.length; ++i) {
         const lstmLayerSize = lstmLayerSizes[i];
         if (!(lstmLayerSize > 0)) {
           logStatus(
-              `ERROR: lstmLayerSizes must be a positive integer, ` +
-              `but got ${lstmLayerSize} for layer ${i + 1} ` +
-              `of ${lstmLayerSizes.length}.`);
+              `에러: lstmLayerSizes는 양의 정수여야 합니다. ` +
+              `하지만  ${i + 1}번째 층의 크기가 ${lstmLayerSize}입니다.`);
           return;
         }
       }
 
       await textGenerator.createModel(lstmLayerSizes);
       logStatus(
-          'Done creating model. ' +
-          'Now you can train the model or use it to generate text.');
+          '모델 생성 완료. ' +
+          '이제 모델을 훈련하거나 텍스트를 생성할 수 있습니다.');
     }
 
     trainModelButton.disabled = false;
@@ -356,12 +349,12 @@ export function setUpUI() {
 
   deleteModelButton.addEventListener('click', async () => {
     if (textGenerator == null) {
-      logStatus('ERROR: Please load text data set first.');
+      logStatus('에러: 먼저 텍스트 데이터셋을 로드하세요.');
       return;
     }
     if (confirm(
-            `Are you sure you want to delete the model ` +
-            `'${textGenerator.modelIdentifier()}'?`)) {
+            `정말 모델 ` +
+            `'${textGenerator.modelIdentifier()}'을 삭제하시겠어요?`)) {
       console.log(await textGenerator.removeModel());
       await refreshLocalModelStatus();
     }
@@ -369,33 +362,33 @@ export function setUpUI() {
 
   trainModelButton.addEventListener('click', async () => {
     if (textGenerator == null) {
-      logStatus('ERROR: Please load text data set first.');
+      logStatus('에러: 먼저 텍스트 데이터셋을 로드하세요.');
       return;
     }
 
     const numEpochs = parseInt(epochsInput.value);
     if (!(numEpochs > 0)) {
-      logStatus(`ERROR: Invalid number of epochs: ${numEpochs}`);
+      logStatus(`에러: 잘못된 에포크 횟수: ${numEpochs}`);
       return;
     }
     const examplesPerEpoch = parseInt(examplesPerEpochInput.value);
     if (!(examplesPerEpoch > 0)) {
-      logStatus(`ERROR: Invalid examples per epoch: ${examplesPerEpoch}`);
+      logStatus(`에러: 잘못된 에포크 당 샘플 개수: ${examplesPerEpoch}`);
       return;
     }
     const batchSize = parseInt(batchSizeInput.value);
     if (!(batchSize > 0)) {
-      logStatus(`ERROR: Invalid batch size: ${batchSize}`);
+      logStatus(`에러: 잘못된 배치 개수: ${batchSize}`);
       return;
     }
     const validationSplit = parseFloat(validationSplitInput.value);
     if (!(validationSplit >= 0 && validationSplit < 1)) {
-      logStatus(`ERROR: Invalid validation split: ${validationSplit}`);
+      logStatus(`에러: 잘못된 검증 세트 비율: ${validationSplit}`);
       return;
     }
     const learningRate = parseFloat(learningRateInput.value);
     if (!(learningRate > 0)) {
-      logStatus(`ERROR: Invalid learning rate: ${learningRate}`);
+      logStatus(`에러: 잘못된 학습률: ${learningRate}`);
       return;
     }
 
@@ -412,7 +405,7 @@ export function setUpUI() {
 
   generateTextButton.addEventListener('click', async () => {
     if (textGenerator == null) {
-      logStatus('ERROR: Load text data set first.');
+      logStatus('에러: 먼저 텍스트 데이터셋을 로드하세요.');
       return;
     }
     await generateText();

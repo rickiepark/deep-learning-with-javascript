@@ -16,7 +16,7 @@
  */
 
 /**
- * Training of a next-char prediction model.
+ * 다음 문자 예측 모델 훈련하기
  */
 
 import * as fs from 'fs';
@@ -30,17 +30,17 @@ import {TextData, TEXT_DATA_URLS} from './data';
 import {createModel, compileModel, fitModel, generateText} from './model';
 
 /**
- * Get a file by downloading it if necessary.
+ * 필요하면 파일 다운로드하기
  *
- * @param {string} sourceURL URL to download the file from.
- * @param {string} destPath Destination file path on local filesystem.
+ * @param {string} sourceURL 파일을 다운로드할 URL
+ * @param {string} destPath 로컬에 저장할 파일 시스템의 경로
  */
 export async function maybeDownload(sourceURL, destPath) {
   const fs = require('fs');
   return new Promise(async (resolve, reject) => {
     if (!fs.existsSync(destPath) || fs.lstatSync(destPath).size === 0) {
       const localZipFile = fs.createWriteStream(destPath);
-      console.log(`Downloading file from ${sourceURL} to ${destPath}...`);
+      console.log(`${sourceURL}에서 ${destPath}로 파일을 다운로드하는 중...`);
       https.get(sourceURL, response => {
         response.pipe(localZipFile);
         localZipFile.on('finish', () => {
@@ -56,83 +56,81 @@ export async function maybeDownload(sourceURL, destPath) {
 
 function parseArgs() {
   const parser = argparse.ArgumentParser({
-    description: 'Train an lstm-text-generation model.'
+    description: 'lstm-text-generation 모델을 훈련합니다.'
   });
   parser.addArgument('textDatasetName', {
     type: 'string',
     choices: Object.keys(TEXT_DATA_URLS),
-    help: 'Name of the text dataset'
+    help: '텍스트 데이터셋 이름'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use CUDA GPU for training.'
+    help: 'CUDA GPU를 사용해 훈련합니다.'
   });
   parser.addArgument('--sampleLen', {
     type: 'int',
     defaultValue: 60,
-    help: 'Sample length: Length of each input sequence to the model, in ' +
-    'number of characters.'
+    help: '샘플 길이: 모델에 들어갈 입력 시퀀스의 길이(문자 개수)'
   });
   parser.addArgument('--sampleStep', {
     type: 'int',
     defaultValue: 3,
-    help: 'Step length: how many characters to skip between one example ' +
-    'extracted from the text data to the next.'
+    help: '스텝 길이: 텍스트 데이터에서 추출한 한 샘플과 다음 샘플 사이에 건너 뛸 문자 개수'
   });
   parser.addArgument('--learningRate', {
     type: 'float',
     defaultValue: 1e-2,
-    help: 'Learning rate to be used during training'
+    help: '훈련에 사용할 학습률'
   });
   parser.addArgument('--epochs', {
     type: 'int',
     defaultValue: 150,
-    help: 'Number of training epochs'
+    help: '훈련 에포크 횟수'
   });
   parser.addArgument('--examplesPerEpoch', {
     type: 'int',
     defaultValue: 10000,
-    help: 'Number of examples to sample from the text in each training epoch.'
+    help: '훈련 에포크에서 사용할 텍스트 샘플 개수'
   });
   parser.addArgument('--batchSize', {
     type: 'int',
     defaultValue: 128,
-    help: 'Batch size for training.'
+    help: '훈련 배치 크기'
   });
   parser.addArgument('--validationSplit', {
     type: 'float',
     defaultValue: 0.0625,
-    help: 'Validation split for training.'
+    help: '검증 세트 비율'
   });
   parser.addArgument('--displayLength', {
     type: 'int',
     defaultValue: 120,
-    help: 'Length of the sampled text to display after each epoch of training.'
+    help: '훈련 에포크가 끝날 때마다 출력할 샘플 텍스트 길이'
   });
   parser.addArgument('--savePath', {
     type: 'string',
-    help: 'Path to which the model will be saved (optional)'
+    help: '모델을 저장할 경로 (옵션)'
   });
   parser.addArgument('--lstmLayerSize', {
     type: 'string',
     defaultValue: '128,128',
-    help: 'LSTM layer size. Can be a single number or an array of numbers ' +
-    'separated by commas (E.g., "256", "256,128")'
-  });  // TODO(cais): Support
+    help: 'LSTM 층 크기. 하나의 숫자 또는 콤마로 구분된 숫자 배열 ' +
+    '(예를 들어, "256", "256,128")'
+  });
   return parser.parseArgs();
 }
 
 async function main() {
   const args = parseArgs();
   if (args.gpu) {
-    console.log('Using GPU');
+    console.log('GPU 사용');
     require('@tensorflow/tfjs-node-gpu');
   } else {
-    console.log('Using CPU');
+    console.log('CPU 사용');
     require('@tensorflow/tfjs-node');
   }
 
-  // Create the text data object.
+  // 텍스트 데이터 객체 생성
   const textDataURL = TEXT_DATA_URLS[args.textDatasetName].url;
   const localTextDataPath = path.join(os.tmpdir(), path.basename(textDataURL));
   await maybeDownload(textDataURL, localTextDataPath);
@@ -140,8 +138,7 @@ async function main() {
   const textData =
       new TextData('text-data', text, args.sampleLen, args.sampleStep);
 
-  // Convert lstmLayerSize from string to number array before handing it
-  // to `createModel()`.
+  // `createModel()`에 전달하기 전에 lstmLayerSize를 문자열에서 숫자 배열로 바꿉니다.
   const lstmLayerSize = args.lstmLayerSize.indexOf(',') === -1 ?
       Number.parseInt(args.lstmLayerSize) :
       args.lstmLayerSize.split(',').map(x => Number.parseInt(x));
@@ -150,7 +147,7 @@ async function main() {
       textData.sampleLen(), textData.charSetSize(), lstmLayerSize);
   compileModel(model, args.learningRate);
 
-  // Get a seed text for display in the course of model training.
+  // 모델 훈련 도중 테스트 출력을 위한 시드 텍스트
   const [seed, seedIndices] = textData.getRandomSlice();
   console.log(`Seed text:\n"${seed}"\n`);
 
@@ -162,14 +159,14 @@ async function main() {
       args.validationSplit, {
         onTrainBegin: async () => {
           epochCount++;
-          console.log(`Epoch ${epochCount} of ${args.epochs}:`);
+          console.log(`에포크: ${epochCount} / ${args.epochs}:`);
         },
         onTrainEnd: async () => {
           DISPLAY_TEMPERATURES.forEach(async temperature => {
             const generated = await generateText(
                 model, textData, seedIndices, args.displayLength, temperature);
             console.log(
-                `Generated text (temperature=${temperature}):\n` +
+                `생성된 텍스트 (온도=${temperature}):\n` +
                 `"${generated}"\n`);
           });
         }
@@ -177,7 +174,7 @@ async function main() {
 
   if (args.savePath != null && args.savePath.length > 0) {
     await model.save(`file://${args.savePath}`);
-    console.log(`Saved model to ${args.savePath}`);
+    console.log(`모델 저장: ${args.savePath}`);
   }
 }
 

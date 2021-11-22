@@ -26,8 +26,33 @@ import * as argparse from 'argparse';
 
 import * as tf from '@tensorflow/tfjs';
 
-import {maybeDownload, TextData, TEXT_DATA_URLS} from './data';
+import {TextData, TEXT_DATA_URLS} from './data';
 import {generateText} from './model';
+
+/**
+ * 필요하면 파일 다운로드하기
+ *
+ * @param {string} sourceURL 파일을 다운로드할 URL
+ * @param {string} destPath 로컬에 저장할 파일 시스템의 경로
+ */
+export async function maybeDownload(sourceURL, destPath) {
+  const fs = require('fs');
+  return new Promise(async (resolve, reject) => {
+    if (!fs.existsSync(destPath) || fs.lstatSync(destPath).size === 0) {
+      const localZipFile = fs.createWriteStream(destPath);
+      console.log(`${sourceURL}에서 ${destPath}로 파일을 다운로드하는 중...`);
+      https.get(sourceURL, response => {
+        response.pipe(localZipFile);
+        localZipFile.on('finish', () => {
+          localZipFile.close(() => resolve());
+        });
+        localZipFile.on('error', err => reject(err));
+      });
+    } else {
+      return resolve();
+    }
+  });
+}
 
 function parseArgs() {
   const parser = argparse.ArgumentParser({

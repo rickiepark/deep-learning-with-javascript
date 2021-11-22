@@ -16,10 +16,9 @@
  */
 
 /**
- * TensorFlow.js Example: LSTM Text Generation.
+ * TensorFlow.js 예제: LSTM 텍스트 생성
  *
- * Inspiration comes from:
- *
+ * 다음을 참고했습니다.
  * -
  * https://github.com/keras-team/keras/blob/master/examples/lstm_text_generation.py
  * - Andrej Karpathy. "The Unreasonable Effectiveness of Recurrent Neural
@@ -31,19 +30,18 @@ import * as model from './model.js';
 import {onTextGenerationBegin, onTextGenerationChar, onTrainBatchEnd, onTrainBegin, onTrainEpochEnd, setUpUI} from './ui.js';
 
 /**
- * Class that manages LSTM-based text generation.
+ * LSTM 기반의 텍스트 생성을 관리하는 클래스
  *
- * This class manages the following:
+ * 다음과 같은 작업을 수행합니다:
  *
- * - Creating and training a LSTM model, written with the tf.layers API, to
- *   predict the next character given a sequence of input characters.
- * - Generating random text using the LSTM model.
+ * - tf.layers API로 LSTM 모델을 만들고 주어진 입력 문자 시퀀스에서 다음 문자를 예측하도록 훈련합니다.
+ * - LSTM 모델을 사용해 랜덤한 텍스트를 생성합니다.
  */
 export class LSTMTextGenerator {
   /**
-   * Constructor of NeuralNetworkTextGenerator.
+   * NeuralNetworkTextGenerator의 생성자
    *
-   * @param {TextData} textData An instance of `TextData`.
+   * @param {TextData} textData `TextData` 객체
    */
   constructor(textData) {
     this.textData_ = textData;
@@ -53,10 +51,9 @@ export class LSTMTextGenerator {
   }
 
   /**
-   * Create LSTM model from scratch.
+   * LSTM 모델을 만듭니다.
    *
-   * @param {number | number[]} lstmLayerSizes Sizes of the LSTM layers, as a
-   *   number or an non-empty array of numbers.
+   * @param {number | number[]} lstmLayerSizes LSTM 층의 크기. 하나의 숫자 또는 숫자 배열.
    */
   createModel(lstmLayerSizes) {
     this.model = model.createModel(
@@ -64,23 +61,21 @@ export class LSTMTextGenerator {
   }
 
   /**
-   * Compile model for training.
+   * 훈련을 위해 모델을 컴파일합니다.
    *
-   * @param {number} learningRate The learning rate to use during training.
+   * @param {number} learningRate 훈련에 사용할 학습률
    */
   compileModel(learningRate) {
     model.compileModel(this.model, learningRate);
   }
 
   /**
-   * Train the LSTM model.
+   * LSTM 모델을 훈련합니다.
    *
-   * @param {number} numEpochs Number of epochs to train the model for.
-   * @param {number} examplesPerEpoch Number of epochs to use in each training
-   *   epochs.
-   * @param {number} batchSize Batch size to use during training.
-   * @param {number} validationSplit Validation split to be used during the
-   *   training epochs.
+   * @param {number} numEpochs 모델을 훈련할 에포크 횟수
+   * @param {number} examplesPerEpoch 에포크에서 사용할 샘플 수
+   * @param {number} batchSize 훈련에 사용할 배치 크기
+   * @param {number} validationSplit 훈련에 사용할 검증 세트 비율
    */
   async fitModel(numEpochs, examplesPerEpoch, batchSize, validationSplit) {
     let batchCount = 0;
@@ -91,8 +86,7 @@ export class LSTMTextGenerator {
     onTrainBegin();
     const callbacks = {
       onBatchEnd: async (batch, logs) => {
-        // Calculate the training speed in the current batch, in # of
-        // examples per second.
+        // 초당 샘플 수로 현재 배치의 훈련 속도를 계산합니다.
         const t1 = new Date().getTime();
         const examplesPerSec = batchSize / ((t1 - t) / 1e3);
         t = t1;
@@ -109,14 +103,12 @@ export class LSTMTextGenerator {
   }
 
   /**
-   * Generate text using the LSTM model.
+   * LSTM 모델을 사용해 텍스트를 생성합니다.
    *
-   * @param {number[]} sentenceIndices Seed sentence, represented as the
-   *   indices of the constituent characters.
-   * @param {number} length Length of the text to generate, in number of
-   *   characters.
-   * @param {number} temperature Temperature parameter. Must be a number > 0.
-   * @returns {string} The generated text.
+   * @param {number[]} sentenceIndices 문자 인덱스로 표현된 시드 문장
+   * @param {number} length 생성할 텍스트 길이(문자 개수)
+   * @param {number} temperature 온도 파라미터. 0보다 커야 합니다.
+   * @returns {string} 생성된 텍스트
    */
   async generateText(sentenceIndices, length, temperature) {
     onTextGenerationBegin();
@@ -127,15 +119,15 @@ export class LSTMTextGenerator {
 };
 
 /**
- * A subclass of LSTMTextGenerator that supports model saving and loading.
+ * 모델 저장과 로딩을 위한 LSTMTextGenerator의 서브 클래스
  *
- * The model is saved to and loaded from browser's IndexedDB.
+ * 모델을 브라우저의 IndexedDB에 저장하고 로드합니다.
  */
 export class SaveableLSTMTextGenerator extends LSTMTextGenerator {
   /**
-   * Constructor of NeuralNetworkTextGenerator.
+   * NeuralNetworkTextGenerator의 생성자
    *
-   * @param {TextData} textData An instance of `TextData`.
+   * @param {TextData} textData `TextData` 객체
    */
   constructor(textData) {
     super(textData);
@@ -146,62 +138,60 @@ export class SaveableLSTMTextGenerator extends LSTMTextGenerator {
   }
 
   /**
-   * Get model identifier.
+   * 모델 식별자 가져오기
    *
-   * @returns {string} The model identifier.
+   * @returns {string} 모델 식별자
    */
   modelIdentifier() {
     return this.modelIdentifier_;
   }
 
   /**
-   * Create LSTM model if it is not saved locally; load it if it is.
+   * LSTM 모델이 로컬에 저장되어 있으면 로드하고 그렇지 않으면 만듭니다.
    *
-   * @param {number | number[]} lstmLayerSizes Sizes of the LSTM layers, as a
-   *   number or an non-empty array of numbers.
+   * @param {number | number[]} lstmLayerSizes LSTM 층의 크기. 하나의 숫자 또는 숫자 배열.
    */
   async loadModel(lstmLayerSizes) {
     const modelsInfo = await tf.io.listModels();
     if (this.modelSavePath_ in modelsInfo) {
-      console.log(`Loading existing model...`);
+      console.log(`기존 모델 로딩 중...`);
       this.model = await tf.loadLayersModel(this.modelSavePath_);
-      console.log(`Loaded model from ${this.modelSavePath_}`);
+      console.log(`${this.modelSavePath_}에서 모델을 로드했습니다.`);
     } else {
       throw new Error(
-          `Cannot find model at ${this.modelSavePath_}. ` +
-          `Creating model from scratch.`);
+          `${this.modelSavePath_}에서 모델을 찾을 수 없습니다. ` +
+          `새로 모델을 만듭니다.`);
     }
   }
 
   /**
-   * Save the model in IndexedDB.
+   * IndexedDB에 모델을 저장합니다.
    *
-   * @returns ModelInfo from the saving, if the saving succeeds.
+   * @returns 저장이 성공하면서 반환된 ModelInfo
    */
   async saveModel() {
     if (this.model == null) {
-      throw new Error('Cannot save model before creating model.');
+      throw new Error('모델을 만들기 전에 저장할 수 없습니다.');
     } else {
       return await this.model.save(this.modelSavePath_);
     }
   }
 
   /**
-   * Remove the locally saved model from IndexedDB.
+   * IndexedDB에 저장된 모델을 삭제합니다.
    */
   async removeModel() {
     if (await this.checkStoredModelStatus() == null) {
       throw new Error(
-          'Cannot remove locally saved model because it does not exist.');
+          '로컬에 저장된 모델이 없기 때문에 삭제할 수 없습니다.');
     }
     return await tf.io.removeModel(this.modelSavePath_);
   }
 
   /**
-   * Check the status of locally saved model.
+   * 로컬에 저장된 모델 상태를 체크합니다.
    *
-   * @returns If the locally saved model exists, the model info as a JSON
-   *   object. Else, `undefined`.
+   * @returns 로컬에 저장된 모델이 있다면 모델 정보를 JSON 객체로 반환하고 그렇지 않으면 `undefined`를 반환합니다.
    */
   async checkStoredModelStatus() {
     const modelsInfo = await tf.io.listModels();
@@ -209,20 +199,19 @@ export class SaveableLSTMTextGenerator extends LSTMTextGenerator {
   }
 
   /**
-   * Get a representation of the sizes of the LSTM layers in the model.
+   * 모델에 있는 LSTM 층의 크기를 가져옵니다.
    *
-   * @returns {number | number[]} The sizes (i.e., number of units) of the
-   *   LSTM layers that the model contains. If there is only one LSTM layer, a
-   *   single number is returned; else, an Array of numbers is returned.
+   * @returns {number | number[]} 모델의 LSTM 층의 크기 (즉, 유닛 개수)
+   *   하니의 LSTM 층만 있다면 하나의 숫자가 반환됩니다. 그렇지 않으면 숫자 배열이 반환됩니다. is returned.
    */
   lstmLayerSizes() {
     if (this.model == null) {
-      throw new Error('Create model first.');
+      throw new Error('먼저 모델을 만드세요.');
     }
     const numLSTMLayers = this.model.layers.length - 1;
     const layerSizes = [];
-    for (let i = 0; i < numLSTMLayers; ++i) {
-      layerSizes.push(this.model.layers[i].units);
+    for (let i = 0; i < numLSTMLayers; i++) {
+      layerSizes.push(this.model.layers[i].cell.units);
     }
     return layerSizes.length === 1 ? layerSizes[0] : layerSizes;
   }

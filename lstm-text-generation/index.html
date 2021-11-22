@@ -57,86 +57,85 @@ limitations under the License.
 <body class='tfjs-example-container'>
 
   <section class='title-area'>
-    <h1>TensorFlow.js Text Generation:</h1>
-    <p class='subtitle'>Train a LSTM (Long Short Term Memory) model to generate text</p>
+    <h1>TensorFlow.js 예제: 텍스트 생성</h1>
+    <p class='subtitle'>텍스트를 생성하기 위해 LSTM(Long Short Term Memory) 모델을 훈련합니다.</p>
   </section>
 
   <section>
-    <p class='section-head'>Description</p>
+    <p class='section-head'>설명</p>
     <p>
-      This example allows you to train a model to generate text in the style of some existing source text.
-      The model is designed to predict the <em>next character</em> in a text given some preceding string of characters.
-      Doing this repetedly builds up a text, charachter by character.
+      이 예제는 모델을 훈련하여 기존 소스 텍스트의 스타일로 텍스트를 생성합니다.
+      이 모델은 주어진 시드 문자열에서 <em>다음 문자</em>를 예측합니다.
+      문자 단위로 이를 반복 수행하여 텍스트를 구성합니다.
     </p>
   </section>
 
   <section>
-    <p class='section-head'>Status</p>
+    <p class='section-head'>상태</p>
     <div id="app-status">
-      Please select a text data source or enter your custom text in the text box below and click <em>"Load source data"</em>.
+      텍스트 데이터 소스를 선택하거나 아래 텍스트 상자에 직접 텍스를 입력한 후 <em>"소스 데이터 로드"</em> 버튼을 클릭하세요.
     </div>
   </section>
 
   <section>
-    <p class='section-head'>Source Data</p>
+    <p class='section-head'>소스 데이터</p>
     <select id="text-data-select"></select>
-    <button id="load-text-data">Load source data</button>
+    <button id="load-text-data">소스 데이터 로드</button>
     <div>
       <textarea class="monospace" id="test-text" value="" rows="10"></textarea>
     </div>
   </section>
 
   <section>
-    <p class='section-head'>Model Loading/Creation</p>
+    <p class='section-head'>모델 로딩/생성</p>
     <div>
       <p>
         <em>
-          Model saved in IndexedDB:
-          <span id="model-available">Load text data first.</span>
+          IndexedDB에 저장된 모델:
+          <span id="model-available">먼저 텍스트 데이터를 로드합니다.</span>
         </em>
       </p>
 
       <div>
-        <span class="input-title">LSTM layer size(s) (e.g., 128 or 100,50):</span>
+        <span class="input-title">LSTM 층 크기 (예를 들면, 128 또는 100,50):</span>
         <input id="lstm-layer-sizes" value="128"></input>
 
-        <button id="create-or-load-model" disabled="true">Create or load model</button>
-        <button id="delete-model" disabled="true">Delete existing model</button>
+        <button id="create-or-load-model" disabled="true">모델 생성 또는 로드</button>
+        <button id="delete-model" disabled="true">기존 모델 삭제</button>
       </div>
     </div>
   </section>
 
   <section>
-    <p class='section-head'>Model Training</p>
+    <p class='section-head'>모델 훈련</p>
     <p>
-      It can take a while to generate an effective model. Try increasing the number of <em>epochs</em> to improve the
-      results, we have found that about <strong>50-100 epochs</strong> are needed to start generating reasonable
-      text.
+      효과적인 모델을 만들려면 시간이 걸립니다. <em>에포크</em> 횟수를 늘려 결과를 향상시켜 보세요.
+      괜찮은 텍스를 생성하려면 대략 <em>50~100 에포크</em>가 필요합니다.
     </p>
     <div class="with-cols">
       <div>
         <div>
-          <span class="input-title">Number of Epochs:</span>
+          <span class="input-title">에포크 횟수:</span>
           <input id="epochs" value="5"></input>
         </div>
         <div>
-          <span class="input-title">Examples per epoch:</span>
+          <span class="input-title">에포크당 샘플:</span>
           <input id="examples-per-epoch" value="2048"></input>
         </div>
         <div>
-          <span class="input-title">Batch size:</span>
+          <span class="input-title">배치 크기:</span>
           <input id="batch-size" value="128"></input>
         </div>
         <div>
-          <span class="input-title">Validation spilt:</span>
+          <span class="input-title">검증 세트 비율:</span>
           <input id="validation-split" value="0.0625"></input>
         </div>
         <div>
-          <span class="input-title">Learning rate:</span>
+          <span class="input-title">학습률:</span>
           <input id="learning-rate" value="1e-2"></input>
         </div>
         <div>
-          <button id="train-model" disabled="true">Train model</button>
+          <button id="train-model" disabled="true">모델 훈련</button>
         </div>
       </div>
       <div class="canvases" id="batch-loss-canvas"></div>
@@ -145,36 +144,36 @@ limitations under the License.
   </section>
 
   <section>
-    <p class='section-head'>Text Generation Parameters</p>
+    <p class='section-head'>텍스트 생성 파라미터</p>
     <p>
-      To generate text the model needs to have some number of preceding characters from which it continues,
-      we call these characters the <em>seed text</em>. You can type one in, or we will extract a random substring from
-      the input text to be the seed text. Note that the seed text must be at least 40 charachters long.
+      텍스트를 생성하기 위해 모델은 몇 개의 시작 문자가 필요합니다. 이를 <em>시드 텍스트</em>라 부릅니다.
+      직접 입력하거나 입력 테스트에서 랜덤하게 추출하여 시드 텍스트를 만들 수 있습니다.
+      시드 텍스트는 최소한 40개 문자로 이루어져야 합니다.
     </p>
     <div>
-      <span class="input-title">Length of generated text:</span>
+      <span class="input-title">생성할 텍스트 길이:</span>
       <input id="generate-length" value="200"></input>
     </div>
 
     <div>
-      <span class="input-title">Generation temperature:</span>
+      <span class="input-title">생성 온도:</span>
       <input id="temperature" value="0.75"></input>
     </div>
 
     <div>
-      <button id="generate-text" disabled="true">Generate text</button>
+      <button id="generate-text" disabled="true">텍스트 생성</button>
       <span id="text-generation-status"></span>
     </div>
 
     <div>
-      <span class="input-title">Seed text:</span>
+      <span class="input-title">시드 텍스트:</span>
       <textarea class="monospace" id="seed-text" value="" rows="4"></textarea>
     </div>
 
-    <p class='section-head'>Model Output</p>
+    <p class='section-head'>모델 출력</p>
 
     <div>
-      <span class="input-title">Generated text:</span>
+      <span class="input-title">생성된 텍스트:</span>
       <textarea class="monospace" id="generated-text" readonly="true" value="" rows="10"></textarea>
     </div>
 

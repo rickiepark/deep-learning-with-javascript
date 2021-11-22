@@ -19,7 +19,6 @@ if (typeof tf === 'undefined') {
   global.tf = require('@tensorflow/tfjs');
 }
 
-// TODO(cais): Support user-supplied text data.
 export const TEXT_DATA_URLS = {
   'nietzsche': {
     url:
@@ -43,35 +42,34 @@ export const TEXT_DATA_URLS = {
 }
 
 /**
- * A class for text data.
+ * 텍스트 데이터를 위한 클래스
  *
- * This class manages the following:
+ * 이 클래스는 다음과 같은 작업을 수행합니다:
  *
- * - Converting training data (as a string) into one-hot encoded vectors.
- * - Drawing random slices from the training data. This is useful for training
- *   models and obtaining the seed text for model-based text generation.
+ * - (문자열) 훈련 데이터를 원-핫 인코딩 벡터로 변환합니다.
+ * - 훈련 데이터에서 랜덤한 슬라이스를 뽑습니다.
+ *   모델 훈련과 텍스트 생성시 시드 텍스트에 사용합니다.
  */
 export class TextData {
   /**
-   * Constructor of TextData.
+   * TextData 생성자
    *
-   * @param {string} dataIdentifier An identifier for this instance of TextData.
-   * @param {string} textString The training text data.
-   * @param {number} sampleLen Length of each training example, i.e., the input
-   *   sequence length expected by the LSTM model.
-   * @param {number} sampleStep How many characters to skip when going from one
-   *   example of the training data (in `textString`) to the next.
+   * @param {string} dataIdentifier TextData 객체를 위한 식별자
+   * @param {string} textString 훈련 텍스트 데이터
+   * @param {number} sampleLen 훈련 샘플의 길이, 즉 LSTM 모델이 기대하는 입력 시퀀스 길이
+   * @param {number} sampleStep 훈련 데이터(`textString`)에 있는 한 샘플에서 다음 샘플로 이동할 때
+   *   건너 뛸 문자 개수
    */
   constructor(dataIdentifier, textString, sampleLen, sampleStep) {
     tf.util.assert(
         sampleLen > 0,
-        `Expected sampleLen to be a positive integer, but got ${sampleLen}`);
+        `sampleLen은 양의 정수여야 합니다: ${sampleLen}`);
     tf.util.assert(
         sampleStep > 0,
-        `Expected sampleStep to be a positive integer, but got ${sampleStep}`);
+        `sampleStep은 양의 정수여야 합니다: ${sampleStep}`);
 
     if (!dataIdentifier) {
-      throw new Error('Model identifier is not provided.');
+      throw new Error('모델 식별자를 입력해 주세요.');
     }
 
     this.dataIdentifier_ = dataIdentifier;
@@ -86,47 +84,46 @@ export class TextData {
   }
 
   /**
-   * Get data identifier.
+   * 데이터 식별자 얻기
    *
-   * @returns {string} The data identifier.
+   * @returns {string} 데이터 식별자
    */
   dataIdentifier() {
     return this.dataIdentifier_;
   }
 
   /**
-   * Get length of the training text data.
+   * 훈련 텍스트 데이터 길이 얻기
    *
-   * @returns {number} Length of training text data.
+   * @returns {number} 훈련 텍스트 데이터의 길이
    */
   textLen() {
     return this.textLen_;
   }
 
   /**
-   * Get the length of each training example.
+   * 각 훈련 샘플의 길이 얻기
    */
   sampleLen() {
     return this.sampleLen_;
   }
 
   /**
-   * Get the size of the character set.
+   * 문자 집합의 크기 얻기
    *
-   * @returns {number} Size of the character set, i.e., how many unique
-   *   characters there are in the training text data.
+   * @returns {number} 문자 집합의 크기. 즉, 훈련 텍스트 데이터에 있는 고유한 문자 개수.
    */
   charSetSize() {
     return this.charSetSize_;
   }
 
   /**
-   * Generate the next epoch of data for training models.
+   * 모델 훈련을 위한 다음 에포크 데이터를 생성하기
    *
-   * @param {number} numExamples Number examples to generate.
-   * @returns {[tf.Tensor, tf.Tensor]} `xs` and `ys` Tensors.
-   *   `xs` has the shape of `[numExamples, this.sampleLen, this.charSetSize]`.
-   *   `ys` has the shape of `[numExamples, this.charSetSize]`.
+   * @param {number} numExamples 생성할 샘플 개수
+   * @returns {[tf.Tensor, tf.Tensor]} `xs`와 `ys` 텐서.
+   *   `xs`는 `[numExamples, this.sampleLen, this.charSetSize]` 크기 입니다..
+   *   `ys`는 `[numExamples, this.charSetSize]` 크기 입니다.
    */
   nextDataEpoch(numExamples) {
     this.generateExampleBeginIndices_();
@@ -151,20 +148,20 @@ export class TextData {
   }
 
   /**
-   * Get the unique character at given index from the character set.
+   * 문자 집합에서 주어진 인덱스의 문자 얻기
    *
    * @param {number} index
-   * @returns {string} The unique character at `index` of the character set.
+   * @returns {string} 문자 집합의 `index` 위치에 있는 문자
    */
   getFromCharSet(index) {
     return this.charSet_[index];
   }
 
   /**
-   * Convert text string to integer indices.
+   * 텍스트 문자열을 정수 인덱스로 변환합니다.
    *
-   * @param {string} text Input text.
-   * @returns {number[]} Indices of the characters of `text`.
+   * @param {string} text 입력 텍스트
+   * @returns {number[]} `text`에 있는 문자의 인덱스
    */
   textToIndices(text) {
     const indices = [];
@@ -175,10 +172,9 @@ export class TextData {
   }
 
   /**
-   * Get a random slice of text data.
+   * 텍스트 데이터에서 랜덤한 슬라이스를 가져옵니다.
    *
-   * @returns {[string, number[]} The string and index representation of the
-   *   same slice.
+   * @returns {[string, number[]} 슬라이스의 문자열과 인덱스
    */
   getRandomSlice() {
     const startIndex =
@@ -188,19 +184,19 @@ export class TextData {
   }
 
   /**
-   * Get a slice of the training text data.
+   * 훈련 텍스트 데이터에서 슬라이스를 얻습니다.
    *
    * @param {number} startIndex
    * @param {number} endIndex
-   * @param {bool} useIndices Whether to return the indices instead of string.
-   * @returns {string | Uint16Array} The result of the slicing.
+   * @param {bool} useIndices 문자열 대신 인덱스를 반환할지 여부
+   * @returns {string | Uint16Array} 슬라이싱 결과
    */
   slice_(startIndex, endIndex) {
     return this.textString_.slice(startIndex, endIndex);
   }
 
   /**
-   * Get the set of unique characters from text.
+   * 텍스트에서 고유한 문자 집합을 만듭니다.
    */
   getCharSet_() {
     this.charSet_ = [];
@@ -213,17 +209,17 @@ export class TextData {
   }
 
   /**
-   * Convert all training text to integer indices.
+   * 모든 훈련 텍스트를 정수 인덱스로 바꿉니다.
    */
   convertAllTextToIndices_() {
     this.indices_ = new Uint16Array(this.textToIndices(this.textString_));
   }
 
   /**
-   * Generate the example-begin indices; shuffle them randomly.
+   * 샘플의 시작 인덱스를 생성합니다. 그다음 랜덤하게 섞습니다.
    */
   generateExampleBeginIndices_() {
-    // Prepare beginning indices of examples.
+    // 샘플의 시작 인덱스를 준비합니다.
     this.exampleBeginIndices_ = [];
     for (let i = 0;
         i < this.textLen_ - this.sampleLen_ - 1;
@@ -231,7 +227,7 @@ export class TextData {
       this.exampleBeginIndices_.push(i);
     }
 
-    // Randomly shuffle the beginning indices.
+    // 시작 인덱스를 랜덤하게 섞습니다.
     tf.util.shuffle(this.exampleBeginIndices_);
     this.examplePosition_ = 0;
   }

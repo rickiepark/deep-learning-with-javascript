@@ -21,15 +21,12 @@ if (typeof tf === 'undefined') {
 import {TextData} from './data.js';
 
 /**
- * Create a model for next-character prediction.
- * @param {number} sampleLen Sampling length: how many characters form the
- *   input to the model.
- * @param {number} charSetSize Size of the character size: how many unique
- *   characters there are.
- * @param {number|numbre[]} lstmLayerSizes Size(s) of the LSTM layers.
- * @return {tf.Model} A next-character prediction model with an input shape
- *   of `[null, sampleLen, charSetSize]` and an output shape of
- *   `[null, charSetSize]`.
+ * 다음 문자 예측을 위한 모델을 만듭니다.
+ * @param {number} sampleLen 샘플 길이: 모델에 입력할 문자 개수
+ * @param {number} charSetSize 문자 집합 크기: 고유한 문자 개수
+ * @param {number|numbre[]} lstmLayerSizes LSTM 층 크기.
+ * @return {tf.Model} 다음 문자 예측 모델. 입력 크기는 `[null, sampleLen, charSetSize]`이고
+ *   출력 크기는 `[null, charSetSize]`입니다.
  */
 export function createModel(sampleLen, charSetSize, lstmLayerSizes) {
   if (!Array.isArray(lstmLayerSizes)) {
@@ -54,23 +51,21 @@ export function createModel(sampleLen, charSetSize, lstmLayerSizes) {
 export function compileModel(model, learningRate) {
   const optimizer = tf.train.rmsprop(learningRate);
   model.compile({optimizer: optimizer, loss: 'categoricalCrossentropy'});
-  console.log(`Compiled model with learning rate ${learningRate}`);
+  console.log(`학습률 ${learningRate}로 모델을 컴파일합니다.`);
   model.summary();
 }
 
 /**
- * Train model.
- * @param {tf.Model} model The next-char prediction model, assumed to have an
- *   input shape of `[null, sampleLen, charSetSize]` and an output shape of
- *   `[null, charSetSize]`.
- * @param {TextData} textData The TextData object to use during training.
- * @param {number} numEpochs Number of training epochs.
- * @param {number} examplesPerEpoch Number of examples to draw from the
- *   `textData` object per epoch.
- * @param {number} batchSize Batch size for training.
- * @param {number} validationSplit Validation split for training.
- * @param {tf.CustomCallbackArgs} callbacks Custom callbacks to use during
- *   `model.fit()` calls.
+ * 모델을 훈련합니다.
+ *
+ * @param {tf.Model} model 다음 문자 예측 모델. 입력 크기는
+ *   `[null, sampleLen, charSetSize]`이고 출력 크기는 `[null, charSetSize]`로 가정합니다.
+ * @param {TextData} textData 훈련에 사용할 TextData 객체
+ * @param {number} numEpochs 훈련 에포크 횟수
+ * @param {number} examplesPerEpoch 에포크 마다 `textData`에서 뽑을 샘플 개수
+ * @param {number} batchSize 훈련 배치 크기
+ * @param {number} validationSplit 훈련을 위한 검증 세트 비율
+ * @param {tf.CustomCallbackArgs} callbacks `model.fit()`에 사용할 사용자 정의 콜백
  */
 export async function fitModel(
     model, textData, numEpochs, examplesPerEpoch, batchSize, validationSplit,
@@ -89,18 +84,16 @@ export async function fitModel(
 }
 
 /**
- * Generate text using a next-char-prediction model.
+ * 다음 문자 예측 모델을 사용해 텍스트를 생성합니다.
  *
- * @param {tf.Model} model The model object to be used for the text generation,
- *   assumed to have input shape `[null, sampleLen, charSetSize]` and output
- *   shape `[null, charSetSize]`.
- * @param {number[]} sentenceIndices The character indices in the seed sentence.
- * @param {number} length Length of the sentence to generate.
- * @param {number} temperature Temperature value. Must be a number >= 0 and
- *   <= 1.
- * @param {(char: string) => Promise<void>} onTextGenerationChar An optinoal
- *   callback to be invoked each time a character is generated.
- * @returns {string} The generated sentence.
+ * @param {tf.Model} model 텍스트 생성을 위해 사용할 모델 객체.
+ *   입력의 크기는 `[null, sampleLen, charSetSize]`이고
+ *   출력의 크기는 `[null, charSetSize]`이라고 가정합니다.
+ * @param {number[]} sentenceIndices 시드 문장의 문자 인덱스
+ * @param {number} length 생성할 문장 길이
+ * @param {number} temperature 온도 값. 0보다 크거나 같고 1보다 작거나 같아야 합니다.
+ * @param {(char: string) => Promise<void>} onTextGenerationChar 문자를 생성할 때마다 호출될 콜백
+ * @returns {string} 생성한 문장
  */
 export async function generateText(
     model, textData, sentenceIndices, length, temperature,
@@ -108,26 +101,25 @@ export async function generateText(
   const sampleLen = model.inputs[0].shape[1];
   const charSetSize = model.inputs[0].shape[2];
 
-  // Avoid overwriting the original input.
+  // 원본 입력을 덮어 쓰지 않습니다.
   sentenceIndices = sentenceIndices.slice();
 
   let generated = '';
   while (generated.length < length) {
-    // Encode the current input sequence as a one-hot Tensor.
+    // 입력 시퀀스를 원-핫 텐서로 인코딩합니다.
     const inputBuffer =
         new tf.TensorBuffer([1, sampleLen, charSetSize]);
 
-    // Make the one-hot encoding of the seeding sentence.
+    // 시드 문장의 원-핫 인코딩을 만듭니다.
     for (let i = 0; i < sampleLen; ++i) {
       inputBuffer.set(1, 0, i, sentenceIndices[i]);
     }
     const input = inputBuffer.toTensor();
 
-    // Call model.predict() to get the probability values of the next
-    // character.
+    // Call model.predict()를 호출하여 다음 문자의 확률 값을 얻습니다.
     const output = model.predict(input);
 
-    // Sample randomly based on the probability values.
+    // 확률 값을 기반으로 랜덤하게 샘플링합니다.
     const winnerIndex = sample(tf.squeeze(output), temperature);
     const winnerChar = textData.getFromCharSet(winnerIndex);
     if (onTextGenerationChar != null) {
@@ -138,7 +130,7 @@ export async function generateText(
     sentenceIndices = sentenceIndices.slice(1);
     sentenceIndices.push(winnerIndex);
 
-    // Memory cleanups.
+    // 메모리 정리
     input.dispose();
     output.dispose();
   }
@@ -146,22 +138,20 @@ export async function generateText(
 }
 
 /**
- * Draw a sample based on probabilities.
+ * 확률을 기반으로 샘플을 뽑습니다.
  *
- * @param {tf.Tensor} probs Predicted probability scores, as a 1D `tf.Tensor` of
- *   shape `[charSetSize]`.
- * @param {tf.Tensor} temperature Temperature (i.e., a measure of randomness
- *   or diversity) to use during sampling. Number be a number > 0, as a Scalar
- *   `tf.Tensor`.
- * @returns {number} The 0-based index for the randomly-drawn sample, in the
- *   range of `[0, charSetSize - 1]`.
+ * @param {tf.Tensor} probs 예측한 확률 점수. `[charSetSize]` 크기의 1D `tf.Tensor`.
+ * @param {tf.Tensor} temperature 샘플링에 사용할 온도(즉, 무작위성 또는 다양성의 수준).
+ *   0보다 큰 스칼라 `tf.Tensor`.
+ * @returns {number} `[0, charSetSize - 1]` 범위에서 랜덤하게 뽑은 샘플의 인덱스.
+ * 인덱스는 0부터 시작합니다.
  */
 export function sample(probs, temperature) {
   return tf.tidy(() => {
     const logits = tf.div(tf.log(probs), Math.max(temperature, 1e-6));
     const isNormalized = false;
-    // `logits` is for a multinomial distribution, scaled by the temperature.
-    // We randomly draw a sample from the distribution.
+    // `logits`은 `temperature`로 스케일이 조정된 다항 분포입니다.
+    // 이 분포에서 랜덤하게 샘플을 뽑습니다.
     return tf.multinomial(logits, 1, null, isNormalized).dataSync()[0];
   });
 }

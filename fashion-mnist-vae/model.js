@@ -16,28 +16,24 @@
  */
 
 /**
- * This file implements the code for a multilayer perceptron based variational
- * autoencoder and is a per of this code
+ * 이 파일은 변이형 오토인코더 기반의 다층 퍼셉트론을 구현합니다.
+ * 다음 코드를 참고했습니다.
  * https://github.com/keras-team/keras/blob/master/examples/variational_autoencoder.py
  *
- * See this tutorial for a description of how autoencoders work.
+ * 오토인코더의 동작 방식에 대한 설명은 다음 튜토리얼을 참고하세요.
  * https://blog.keras.io/building-autoencoders-in-keras.html
  */
 
 const tf = require('@tensorflow/tfjs');
 
 /**
- * The encoder portion of the model.
+ * VAE 모델의 인코더
  *
- * @param {object} opts encoder configuration, includnig the following fields:
- *   - originaDim {number} Length of the input flattened image.
- *   - intermediateDim {number} Number of units of the intermediate (i.e.,
- *     hidden) dense layer.
- *   - latentDim {number} Dimensionality of the latent space (i.e,. z-space).
- * @param {number} opts.originalDim number of dimensions in the original data.
- * @param {number} opts.intermediateDim number of dimensions in the bottleneck.
- * @param {number} opts.latentDim number of dimensions in latent space.
- * @returns {tf.LayersModel} the encoder model.
+ * @param {object} opts 다음 필드를 포함한 인코더 설정
+ *   - originaDim {number} 펼친 입력 이미지의 길이
+ *   - intermediateDim {number} 중간 (은닉) 밀집 층의 유닛 개수
+ *   - latentDim {number} 잠재 공간의 차원 (즉, z-공간)
+ * @returns {tf.LayersModel} 인코더 모델
  */
 function encoder(opts) {
   const {originalDim, intermediateDim, latentDim} = opts;
@@ -64,11 +60,11 @@ function encoder(opts) {
 }
 
 /**
- * This layer implements the 'reparameterization trick' described in
+ * 이 층은 다음 페이지에서 언급된 재파라미터화 트릭을 구현합니다.
  * https://blog.keras.io/building-autoencoders-in-keras.html.
  *
- * The implementation is in the call method.
- * Instead of sampling from Q(z|X):
+ * call 메서드에 구현되어 있습니다.
+ * Q(z|X)에서 샘플링하는 대신:
  *    sample epsilon = N(0,I)
  *    z = z_mean + sqrt(var) * epsilon
  */
@@ -79,18 +75,17 @@ class ZLayer extends tf.layers.Layer {
 
   computeOutputShape(inputShape) {
     tf.util.assert(inputShape.length === 2 && Array.isArray(inputShape[0]),
-        () => `Expected exactly 2 input shapes. But got: ${inputShape}`);
+        () => `입력 크기는 정확히 2여야 합니다. 현재 입력 크기: ${inputShape}`);
     return inputShape[0];
   }
 
   /**
-   * The actual computation performed by an instance of ZLayer.
+   * ZLayer 객체가 수행하는 실제 연산.
    *
-   * @param {Tensor[]} inputs this layer takes two input tensors, z_mean and
-   *     z_log_var
-   * @return A tensor of the same shape as z_mean and z_log_var, equal to
-   *     z_mean + sqrt(exp(z_log_var)) * epsilon, where epsilon is a random
-   *     vector that follows the unit normal distribution (N(0, I)).
+   * @param {Tensor[]} inputs 이 층은 z_mean와 z_log_var 두 개 텐서를 받습니다.
+   * @return z_mean, z_log_var와 같은 크기의 텐서로
+   *     z_mean + sqrt(exp(z_log_var)) * epsilon를 계산한 값입니다.
+   *     여기서 epsilon은 표준 정규 분포(N(0, I))를 따르는 벡터입니다.
    */
   call(inputs, kwargs) {
     const [zMean, zLogVar] = inputs;
@@ -99,7 +94,7 @@ class ZLayer extends tf.layers.Layer {
 
     const mean = 0;
     const std = 1.0;
-    // sample epsilon = N(0, I)
+    // epsilon = N(0, I) 샘플링
     const epsilon = tf.randomNormal([batch, dim], mean, std);
 
     // z = z_mean + sqrt(var) * epsilon
@@ -113,21 +108,18 @@ class ZLayer extends tf.layers.Layer {
 tf.serialization.registerClass(ZLayer);
 
 /**
- * The decoder portion of the model.
+ * VAE 모델의 디코더
  *
- * @param {*} opts decoder configuration
- * @param {number} opts.originalDim number of dimensions in the original data
- * @param {number} opts.intermediateDim number of dimensions in the bottleneck
- *                                      of the encoder
- * @param {number} opts.latentDim number of dimensions in latent space
+ * @param {*} opts 디코더 설정
+ * @param {number} opts.originalDim 원본 데이터의 차원 수
+ * @param {number} opts.intermediateDim 중간 층의 유닛 개수
+ * @param {number} opts.latentDim 잠재 공간의 차원 수
  */
 function decoder(opts) {
   const {originalDim, intermediateDim, latentDim} = opts;
 
-  // The decoder model has a linear topology and hence could be constructed
-  // with `tf.sequential()`. But we use the functional-model API (i.e.,
-  // `tf.model()`) here nonetheless, for consistency with the encoder model
-  // (see `encoder()` above).
+  // 디코더 모델은 선형적인 구조라 `tf.sequential()`으로 만들 수 있습니다.
+  // 하지만 인코더 모델(`encoder()` 참고)과 통일성을 위해 함수형 API(즉, `tf.model()`)을 사용합니다.
   const input = tf.input({shape: [latentDim]});
   let y = tf.layers.dense({
     units: intermediateDim,
@@ -145,12 +137,12 @@ function decoder(opts) {
 }
 
 /**
- * The combined encoder-decoder pipeline.
+ * 인코더-디코더 파이프라인
  *
  * @param {tf.Model} encoder
  * @param {tf.Model} decoder
  *
- * @returns {tf.Model} the vae.
+ * @returns {tf.Model} VAE 모델
  */
 function vae(encoder, decoder) {
   const inputs = encoder.inputs;
@@ -169,12 +161,10 @@ function vae(encoder, decoder) {
 }
 
 /**
- * The custom loss function for VAE.
+ * VAE를 위한 사용자 손실 함수
  *
- * @param {tf.tensor} inputs the encoder inputs a batched image tensor
- * @param {[tf.tensor]} outputs the vae outputs, [decoderOutput,
- *     ...encoderOutputs]
- * @param {number} vaeOpts.originalDim number of dimensions in the original data
+ * @param {tf.tensor} inputs 인코더에 입력할 배치 이미지 텐서
+ * @param {[tf.tensor]} outputs VAE 출력, [decoderOutput, ...encoderOutputs]
  */
 function vaeLoss(inputs, outputs) {
   return tf.tidy(() => {
@@ -183,18 +173,17 @@ function vaeLoss(inputs, outputs) {
     const zMean = outputs[1];
     const zLogVar = outputs[2];
 
-    // First we compute a 'reconstruction loss' terms. The goal of minimizing
-    // tihs term is to make the model outputs match the input data.
+    // 먼저 재구성 손실 항을 계산합니다.
+    // 이 항을 최소화하는 목적은 모델이 입력 데이터와 같은 출력을 만들게 하는 것입니다.
     const reconstructionLoss =
         tf.losses.meanSquaredError(inputs, decoderOutput).mul(originalDim);
 
-    // binaryCrossEntropy can be used as an alternative loss function
+    // 이 대신 binaryCrossEntropy를 사용할 수 있습니다.
     // const reconstructionLoss =
     //  tf.metrics.binaryCrossentropy(inputs, decoderOutput).mul(originalDim);
 
-    // Next we compute the KL-divergence between zLogVar and zMean, minimizing
-    // this term aims to make the distribution of latent variable more normally
-    // distributed around the center of the latent space.
+    // 그다음 zLogVar와 zMean 사이의 KL-발산을 계산합니다.
+    // 이 항을 최소화하는 목적은 잠재 변수가 잠재 공간의 중심에서 더 정규 분포를 띠도록 만드는 것입니다.
     let klLoss = zLogVar.add(1).sub(zMean.square()).sub(zLogVar.exp());
     klLoss = klLoss.sum(-1).mul(-0.5);
 

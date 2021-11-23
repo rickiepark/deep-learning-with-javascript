@@ -35,35 +35,35 @@ const IMAGE_FLAT_SIZE = IMAGE_HEIGHT * IMAGE_WIDTH * IMAGE_CHANNELS;
 
 
 /**
- * Read the header of the dataset file
+ * 데이터셋 파일의 헤더를 읽습니다
  *
  * @param {Buffer} buffer
  * @param {number} headerLength
  *
- * @returns {number[]} MNIST data header values
+ * @returns {number[]} MNIST 데이터 헤더
  */
 function loadHeaderValues(buffer, headerLength) {
   const headerValues = [];
   for (let i = 0; i < headerLength / 4; i++) {
-    // Header data is stored in-order (aka big-endian)
+    // 헤더 데이터는 빅엔디안으로 저장되어 있습니다
     headerValues[i] = buffer.readUInt32BE(i * 4);
   }
   return headerValues;
 }
 
 /**
- * Load the images from the given file and normalize the data to 0-1 range.
+ * 파일에서 이미지를 로드하고 0-1 범위로 정규화합니다.
  *
- * Input file should be in the MNIST/FashionMNSIT file format
+ * 입력 파일은 MNIST/FashionMNIST 파일 포맷이어야 합니다.
  *
  * @param {string} filepath
  *
- * @returns {Float32Array[]} an array of images represented as typed arrays.
+ * @returns {Float32Array[]} 형식화 배열로 표현된 이미지 배열
  */
 async function loadImages(filepath) {
   if (!fs.existsSync(filepath)) {
-    console.log(`Data File: ${filepath} does not exist.
-      Please see the README for instructions on how to download it`);
+    console.log(`데이터 파일: ${filepath}이 없습니다.
+      README에 있는 다운로드 방법을 참고하세요.`);
     process.exit(1);
   }
 
@@ -82,8 +82,7 @@ async function loadImages(filepath) {
   while (index < buffer.byteLength) {
     const array = new Float32Array(recordBytes);
     for (let i = 0; i < recordBytes; i++) {
-      // Normalize the pixel values into the 0-1 interval, from
-      // the original 0-255 interval.
+      // 0-255 픽셀 값을 0-1 범위로 정규화합니다.
       array[i] = buffer.readUInt8(index++) / 255;
     }
     images.push(array);
@@ -95,12 +94,11 @@ async function loadImages(filepath) {
 }
 
 /**
- * Take an array of images (represented as typedarrays) and return
- * a tensor representing them.
+ * (형식화 배열로 표현된) 이미지 배열을 받아 텐서를 반환합니다.
  *
  * @param {Float32Array[]} imagesData
  *
- * @returns {Tensor3d} tensor of input images
+ * @returns {Tensor3d} 입력 이미지의 텐서
  */
 function batchImages(imagesData) {
   const numImages = imagesData.length;
@@ -119,11 +117,11 @@ function batchImages(imagesData) {
 }
 
 /**
- * Convert an image represented as a typed array to a JIMP object.
+ * 형식화 배열로 표현된 이미지를 JIMP 객체로 바꿉니다.
  *
  * @param {Float32Array} imageData
  *
- * @returns {Promise[Jimp]} Jimp object representing image.
+ * @returns {Promise[Jimp]} 이미지를 표현한 Jimp 객체
  */
 async function arrayToJimp(imageData) {
   const bufferLen = IMAGE_HEIGHT * IMAGE_WIDTH * 4;
@@ -155,7 +153,7 @@ async function arrayToJimp(imageData) {
 }
 
 /**
- * Preview an image on the console.
+ * 콘솔에 이미지를 출력합니다.
  *
  * @param {Float32Array} imageData
  */

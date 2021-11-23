@@ -23,10 +23,10 @@ const mkdirp = require('mkdirp');
 
 
 /**
- * Get a file by downloading it if necessary.
+ * 필요하면 파일을 다운로드합니다.
  *
- * @param {string} sourceURL URL to download the file from.
- * @param {string} destPath Destination file path on local filesystem.
+ * @param {string} sourceURL 파일을 다운로드할 URL
+ * @param {string} destPath 파일을 저장할 로컬 경로
  */
 async function maybeDownload(sourceURL, destPath) {
   return new Promise(async (resolve, reject) => {
@@ -51,10 +51,10 @@ async function maybeDownload(sourceURL, destPath) {
 }
 
 /**
- * Unzip file
+ * 파일 압축을 풉니다
  *
- * @param {string} sourcePath Source zip file path.
- * @param {string} destPath destination path.
+ * @param {string} sourcePath 압축 파일 경로
+ * @param {string} destPath 압축 해제할 경로
  */
 async function extract(sourcePath, destPath) {
   return new Promise((resolve, reject) => {
@@ -85,18 +85,18 @@ const UNZIP_PATH =
 (async function run() {
   try {
     console.log(
-        `Downloading data file from ${DATA_URL} and saving to ${ZIP_PATH}`);
+        `${DATA_URL}에서 데이터 파일을 다운로드하여 ${ZIP_PATH}에 저장합니다.`);
     await maybeDownload(DATA_URL, ZIP_PATH);
   } catch (e) {
-    console.log('Error downloading file');
+    console.log('파일 다운로드 에러');
     console.log(e);
   }
 
   try {
-    console.log('Unzipping data file');
+    console.log('데이터 파일 압축 해제');
     await extract(ZIP_PATH, UNZIP_PATH);
   } catch (e) {
-    console.log('Error unzipping file');
+    console.log('파일 압축 해제 에러');
     console.log(e);
   }
 }())

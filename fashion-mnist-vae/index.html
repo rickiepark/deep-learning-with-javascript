@@ -50,56 +50,55 @@ limitations under the License.
   <div class='tfjs-example-container centered-container'>
     <section class='title-area'>
       <h1>TensorFlow.js 예제: 변이형 오토인코더 (VAE)</h1>
-      <p class='subtitle'>Train a VAE model to generate images.</p>
+      <p class='subtitle'>VAE 모델을 훈련하여 이미지를 생성합니다.</p>
     </section>
     <section>
-      <p class='section-head'>Description</p>
+      <p class='section-head'>설명</p>
       <p>
-        This example trains a
+        이 예제는
         <a href="https://blog.keras.io/building-autoencoders-in-keras.html">
-          variational autoencoder</a>
-        to generate images that resemble those found in the <a href="https://github.com/zalandoresearch/fashion-mnist">
-          fashion MNIST</a> dataset.
+          변이형 오토인코더</a>를 훈련하여
+        <a href="https://github.com/zalandoresearch/fashion-mnist">fashion MNIST</a>
+        데이터셋에 있는 샘플과 닮은 이미지를 생성합니다.
       </p>
 
       <p>
-        This example trains the model in Node.js. See README.md for instructions. This page
-        contains a viewer for the trained model.
+        이 예제는 Node.js에서 모델을 훈련합니다. 자세한 내용은 README.md 파일을 참고하세요.
+        이 페이지는 훈련된 모델을 사용해 이미지를 생성합니다.
       </p>
 
       <p>
-        This examples assumes that the latest space of the autoencoder is 2d.
+        이 예제는 오토인코더의 잠재 공간이 2D라고 가정합니다.
       </p>
 
     </section>
 
     <div>
       <section>
-        <p class='section-head'>Instructions</p>
+        <p class='section-head'>설명</p>
         <p>
-          You can adjust the number of images in the grid as well as the start and end
-          values used to generate each image. Experiment with them see the range of what
-          the autoencoder can generate.
+          격자에 있는 이미지 개수와 이미지를 생성하기 위해 사용되는 시작값과 종료 값을 수정할 수 있습니다.
+          오토인코더가 생성할 수 있는 범위를 확인해 보세요.
         </p>
       </section>
 
       <section>
-        <p class='section-head'>Controls</p>
+        <p class='section-head'>조정</p>
 
         <div>
-          <label for="">Points per dimension</label>
+          <label for="">차원별 포인트 수</label>
           <input id="pointsPerDim" type="number" value=30>
-          <label for="">Start Val</label>
+          <label for="">시작값</label>
           <input id="start" type="number" value=-4>
-          <label for="">end Val</label>
+          <label for="">종료값</label>
           <input id="end" type="number" value=4>
 
-          <button id="update">Update</button>
+          <button id="update">업데이트</button>
         </div>
       </section>
 
       <section>
-        <p class='section-head'>Results</p>
+        <p class='section-head'>결과</p>
         <div id="plot-area" class="plot-area">
         </div>
       </section>

@@ -17,7 +17,7 @@ limitations under the License.
 
 <!doctype html>
 <head>
-  <title>TensorFlow.js 예제: GAN</title>
+  <title>TensorFlow.js 예제: 생성적 적대 신경망(GAN)</title>
   <link rel="stylesheet" href="../shared/tfjs-examples.css" />
   <link rel="stylesheet" href="./style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
@@ -28,67 +28,61 @@ limitations under the License.
 <body>
   <div class="tfjs-example-container centered-container">
     <section class='title-area'>
-      <h1>TensorFlow.js: Generative Adversarial Network</h1>
-      <p class='subtitle'>Demonstrates the generator part of the ACGAN in the browser.</p>
+      <h1>TensorFlow.js 예제: 생성적 적대 신경망(GAN)</h1>
+      <p class='subtitle'>브라우저에서 ACGAN의 생성자를 시연합니다.</p>
     </section>
 
-    <p class='section-head'>Description</p>
+    <p class='section-head'>설명</p>
       <p>
-        This is the web demo part of the dual-environment TensorFlow.js example
-        of
-        <a href="https://arxiv.org/abs/1610.09585" target="_blank">Auxiliary Classifier Generative Adversarial Network (ACGAN)</a>.
+        <a href="https://arxiv.org/abs/1610.09585" target="_blank">ACGAN</a>
+        TensorFlow.js 예제의 웹 데모입니다.
       </p>
       <p>
-        The training code is in
-        <a href="https://github.com/tensorflow/tfjs-examples/blob/master/mnist-acgan/gan.js">gan.js</a>,
-        which runs in Node.js using tfjs-node
-        or tfjs-node-gpu. In this web page, we load the generator part of a pre-trained
-        GAN to generate MNIST images. How real those generated MNIST images look depends
-        on how well the model has been trained. After 5 epochs of training, you should
-        start seeing reasonable images. After 15 epochs, the images should start to
-        look good.
-        Close-to-perfect images (ones that are hard to distinguish from the real ones)
-        should appear toward the end of the default 100 epochs of training.
+        훈련 코드는 <a href="https://github.com/rickiepark/deep-learning-with-javascript/blob/main/mnist-acgan/gan.js">gan.js</a>에
+        있으며 tfjs-node나 tfjs-node-gpu를 사용해 Node.js에서 실행됩니다.
+        이 웹 페이지에서는 사전 훈련된 ACGAN의 생성자를 로드하여 MNIST 이미지를 생성합니다.
+        생성된 MNIST 이미지가 얼마나 진짜 같을지는 얼마나 모델을 잘 훈련했는지에 달려 있습니다.
+        5 에포크 동안 훈련하면 꽤 괜찮은 이미지를 볼 수 있습니다.
+        15 에포크 이후에는 좋은 이미지가 출력되기 시작합니다.
+        (진짜 이미지와 구분하기 어려운) 완벽에 가까운 이미지는 100 에포크 동안 훈련한 후에 나타납니다.
       </p>
       <p>
-        The ACGAN is a type of
-        <a href="https://en.wikipedia.org/wiki/Generative_adversarial_network" target="_blank">GAN</a>.
-        It consists of
+        ACGAN은
+        <a href="https://en.wikipedia.org/wiki/Generative_adversarial_network" target="_blank">GAN</a>의
+        한 종류로 다음과 같이 구성됩니다.
           <ul>
             <li>
-              A <strong>disriminator</strong>, which is trained to distinguish a "counterfeit" MNIST image
-              from a real MNIST image. In addition, the disciminator part of ACGAN is also trained
-              to classify an MNIST image into the ten digit categories.
+              <strong>판별자</strong>: 진짜 MNIST 이미지와 가짜 MNIST 이미지를 구별하도록 훈련됩니다.
+              또한 ACGAN의 판별자는 MNIST 이미지를 10개의 숫자 카테고리로 분류하도록 훈련됩니다.
             </li>
             <li>
-              A <strong>generator</strong>, which is trained to generate realistic-looking MNIST images
-              and "fool" the discriminator. The generator takes two inputs:
+              <strong>생성자</strong>: 진짜 같은 MNIST 이미지르 생성하여 판별자를 속이도록 훈련됩니다.
+              판별자는 두 개의 입력을 받습니다:
               <ol>
                 <li>
-                  A fixed-length latent vector, which can be viewed as a "random primer" for the fake
-                  generation process.
+                  고정 길이의 잠재 벡터. 가짜 생성 과정을 위한 랜덤한 초깃값으로 볼 수 있습니다.
                 </li>
                 <li>
-                  An integer in the interval [0, 10), which indicates the desired digit category.
+                  [0, 10) 사이의 정수. 원하는 수자 카테고리를 나타냅니다.
                 </li>
               </ol>
-              Using these two inputs, it outputs a fake MNIST image.
+              이런 두 개의 입력을 사용해 가짜 MNIST 이미지를 만듭니다.
             </li>
           </ul>
       </p>
     </p>
 
-    <div id="status">Loading model...</div>
-    <button id="load-hosted-model">Load Hosted model</button>
-    <button id="test" disabled="true">Generate</button>
+    <div id="status">모델 로딩 중...</div>
+    <button id="load-hosted-model">원격 모델 로드하기</button>
+    <button id="test" disabled="true">이미지 생성</button>
 
     <div>
       <div>
         <div>
-          <span id="fake-images-span">Fake images (1 example per class)</span>
+          <span id="fake-images-span">가짜 이미지 (클래스마다 1개 샘플)</span>
         </div>
         <div>
-          <button id="toggle-sliders" disabled="true">Show z-vector sliders</button>
+          <button id="toggle-sliders" disabled="true">z-벡터 슬라이더 보기</button>
           <div id="sliders-container"></div>
         </div>
 
@@ -96,7 +90,7 @@ limitations under the License.
       </div>
       <div>
         <div>
-          <span>Real images for comparison (10 examples per class)</span>
+          <span>비교를 위한 진짜 이미지 (클래스마다 10개 샘플)</span>
         </div>
         <canvas id="real-canvas" width="280" height="280"></canvas>
       </div>

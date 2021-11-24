@@ -1,144 +1,113 @@
-# TensorFlow.js Example: ACGAN on the MNIST Dataset
+# TensorFlow.js 예제: 생성적 적대 신경망(GAN)
 
-## What this example is about
+## 예제 소개
 
-This example trains an Auxiliary Classifier Generative Adversarial Network
-(ACGAN) on the MNIST dataset.
+이 예제는 MNIST 데이터셋에서 ACGAN을 훈련합니다.
 
-For background of ACGAN, see:
+ACGAN에 대해서는 다음을 참고하세요:
  - Augustus Odena, Christopher Olah, Jonathon Shlens. (2017) "Conditional
    image synthesis with auxiliary classifier GANs"
    https://arxiv.org/abs/1610.09585
 
-The training script in this example ([gan.js](./gan.js)) is based on the Keras
-example at:
+이 예제의 훈련 스크립트([gan.js](./gan.js))는 케라스 예제를 기반으로 합니다:
   - https://github.com/keras-team/keras/blob/master/examples/mnist_acgan.py
 
-This example of TensorFlow.js runs simultaneously in two different environments:
- - Training in the Node.js environment. During the long-running training process,
-   a checkpoint of the generator will be saved to the disk at the end of every
-   epoch.
- - Demonstration of generation in the browser. The demo webpage will load
-   the checkpoints saved from the training process and use it to generate
-   fake MNIST images in the browser.
+이 TensorFlow.js 예제는 두 환경에서 실행할 수 있습니다:
+ - Node.js 환경에서 훈련. 장기간 실행되는 훈련 과정에서 에포크가 끝날 때마다 생성자를 디스크에 저장합니다.
+ - 브라우저에서 생성 과정 시연. 데모 웹페이지는 훈련 과정에서 저장된 생성자를 로드하고 이를 사용해 브라우저에서
+   가짜 MNIST 이미지를 생성합니다.
 
-## How to use this example
+## 예제 사용 방법
 
-This example can be used in two ways:
+두 가지 방법으로 사용할 수 있습니다:
 
-1. Performing both training and generation demo on your local machine,
-   or
-2. Run only the generation demo, by loading a hosted generator model from
-   the web.
+1. 로컬 컴퓨터에서 훈련과 생성 데모를 모두 수행하거나
+2. 웹에서 원격에 있는 생성 모델을 로딩하여 생성 데모만 수행합니다.
 
-For approach 1, you can start the training by:
+1번의 경우 다음과 같이 훈련을 실행할 수 있습니다:
 
 ```sh
 yarn
 yarn train
 ```
 
-If you have a CUDA-enabled GPU on your system, you can add the `--gpu` flag
-to train the model on the GPU, which should give you a significant boost in
-the speed of training:
+컴퓨터에 CUDA 지원 GPU가 있다면 `--gpu` 플래그를 추가하여 GPU에서 모델을 훈련할 수 있습니다.
+이렇게 하면 훈련 속도를 크게 높일 수 있습니다:
 
 ```sh
 yarn
 yarn train --gpu
 ```
 
-The training job is a long running one and takes a few hours to complete on
-a GPU (using @tensorflow/tfjs-node-gpu) and even longer on a CPU
-(using @tensorflow/tfjs-node). It saves the generator part of the ACGAN
-into the `./dist/generator` folder at the beginning of the training and
-at the end of every training epoch. Some additional metadata is
-saved with the model as well.
+훈련은 오랜 시간이 걸리며 (@tensorflow/tfjs-node-gpu를 사용해) GPU에서 완료하는데 몇 시간이 걸립니다.
+(@tensorflow/tfjs-node를 사용하는) CPU엣j는 더 오래 걸립니다.
+훈련을 시작할 때와 훈련 에포크가 끝날 때마다 ACGAN의 생성자를 `./dist/generator` 폴더에 저장합니다.
+모델과 함께 일부 메타데이터도 저장합니다.
 
-### Monitoring GAN training using TensorBoard
+### TensorBoard를 사용하여 GAN 훈련 모니터링하기
 
-The Node.js-based training script allows you to log the loss values from
-the generator and the discriminator to
-[TensorBoard](https://www.tensorflow.org/guide/summaries_and_tensorboard).
-Relative to printing loss values to the console, which the
-training script performs by default, logging to tensorboard has the following
-advantanges:
+Node.js 기반 훈련 스크립트를 사용하면 생성자와 판별자의 손실 값을
+[텐서보드](https://www.tensorflow.org/guide/summaries_and_tensorboard)에 기록할 수 있습니다.
+훈련 스크립트의 기본값인 콘솔에 손실 값을 출력하는 것에 비해
+텐서보드에 로그를 기록하면 다음과 같은 장점이 있습니다:
 
-1. Persistence of the loss values, so you can have a copy of the training
-   history available even if the system crashes in the middle of the training
-   for some reason, while logs in consoles a more ephemeral.
-2. Visualizing the loss values as curves makes the trends easier to see (e.g.,
-   see the screenshot below).
+1. 손실 값을 영구 기록하면 훈련 도중 어떤 이유로 시스템에 장애가 생기더라도 훈련 이력을 유지할 수 있습니다.
+   콘솔에 로그를 기록하면 시스템 장애시 모두 사라집니다.
+2. 손실 값을 그래프로 시각화하면 트렌드를 쉽게 파악할 수 있습니다(아래 스크린샷 참고).
 
 ![MNIST ACGAN Training: TensorBoard Example](./mnist-acgan-tensorboard-example.png)
 
-Detailed loss profiles are hosted and viewable at this
-[TensorBoard.dev link](https://tensorboard.dev/experiment/iBcGONlbQbmVyNd8H6unJg/#scalars).
+자세한 손실 그래프는
+[TensorBoard.dev](https://tensorboard.dev/experiment/iBcGONlbQbmVyNd8H6unJg/#scalars)에서
+볼 수 있습니다.
 
-To do this in this example, add the flag `--logDir` to the `yarn train`
-command, followed by the directory to which you want the logs to
-be written, e.g.,
+이렇게 예제를 실행하려면 `yarn train` 명령에 `--logDir` 플래그를 추가하고 로그를 기록하려는
+디렉토리를 지정합니다. 예를 들면 다음과 같습니다.
 
 ```sh
 yarn train --gpu --logDir /tmp/mnist-acgan-logs
 ```
 
-Then install tensorboard and start it by pointing it to the log directory:
+그다음 텐서보드를 설치하고 로그 디렉토리를 지정하여 실행합니다:
 
 ```sh
-# Skip this step if you have already installed tensorboard.
+# 텐서보드가 이미 설치되어 있다면 건너 뜁니다.
 pip install tensorboard
 
 tensorboard --logdir /tmp/mnist-acgan-logs
 ```
 
-tensorboard will print an HTTP URL in the terminal. Open your browser and
-navigate to the URL to view the loss curves in the Scalar dashboard of
-TensorBoard.
+텐서보드가 터미널에 URL을 출력할 것입니다.
+브라우저를 열고 이 URL에 접속하면 텐서보드의 Scalar 대시보드에서 손실 곡선을 볼 수 있습니다.
 
-### Running Generator demo in the Browser
+### 브라우저에서 생성 데모 실행하기
 
-To start the demo in the browser, do in a separate terminal:
+브라우저에서 데모를 실행하려면 별도의 터미널에서 다음 명령을 실행합니다:
 
 ```sh
 yarn
-yarn watch
+npx http-server
 ```
 
-When the browser demo starts up, it will try to load the generator model
-and metadata from `./generator`. If it succeeds, fake MNIST digits will
-be generated using the loaded generator model and displayed on the page
-right away. If it fails (e.g., because no local training job has ever
-been started), the user may still click the "Load Hosted Model" button
-to load a remotely-hosted generator.
+브라우저 데모가 시작되면 `./generator` 폴더에서 생성자 모델과 메타데이터를 로드합니다.
+로드에 성공하면 이 생성자를 사용하여 가짜 MNIST 숫자를 생성하고 바로 브라우저에 출력합니다.
+(가령 아직 모델을 훈련하지 않아) 모델 로드에 실패하면 "원격 모델 로드하기" 버튼을 클릭하여
+원격에 있는 모델을 로드할 수 있습니다.
 
-### Training the model on CUDA GPUs using tfjs-node-gpu
+### tfjs-node-gpu를 사용해 CUDA GPU에서 모델 훈련하기
 
-It is recommended to use tfjs-node-gpu to train the model on a CUDA-enabled GPU,
-as the convolution heavy operations run several times faster a GPU than on the
-CPU with tfjs-node.
+tfjs-node를 사용하여 CPU에서 훈련하는 것보다 GPU를 사용하면 합성곱 연산이 몇 배 빠르기 때문에
+tfjs-node-gpu를 사용해 CUDA 가능 GPU에서 모델을 훈련하는 것이 권장됩니다.
 
-By default, the [training script](./gan.js) runs on the CPU using tfjs-node. To
-run it on the GPU, repace the line
+기본적으로 [훈련 스크립트](./gan.js)는 tfjs-node를 사용해 CPU에서 실행됩니다.
+GPU에서 실행하려면 다음 코드를
 
 ```js
 require('@tensorflow/tfjs-node');
 ```
 
-with
+다음과 같이 바꾸세요.
 
 ```js
 require('@tensorflow/tfjs-node-gpu');
-```
-
-## Running unit tests
-
-This example comes with JavaScript unit tests. To run them, do:
-
-```sh
-pushd ../  # Go to the root directory of tfjs-exapmles
-yarn
-popd  # Go back to mnist-acgan/
-
-yarn
-yarn test
 ```

@@ -15,9 +15,6 @@
  * =============================================================================
  */
 
-// TODO(cais): Once MNIST dataset is available from the tf.data.* API, use
-// that instead and remove this file.
-
 export const IMAGE_H = 28;
 export const IMAGE_W = 28;
 const IMAGE_SIZE = IMAGE_H * IMAGE_W;
@@ -33,14 +30,13 @@ const MNIST_LABELS_PATH =
     'https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8';
 
 /**
- * A class that fetches the sprited MNIST dataset and provide data as
- * tf.Tensors.
+ * 스프라이트된 MNIST 데이터셋을 가져와 tf.Tensor로 변환하는 클래스
  */
 export class MnistData {
   constructor() {}
 
   async load() {
-    // Make a request for the MNIST sprited image.
+    // MNIST 스프라이트 이미지를 요청합니다.
     const img = new Image();
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -68,8 +64,7 @@ export class MnistData {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
           for (let j = 0; j < imageData.data.length / 4; j++) {
-            // All channels hold an equal value since the image is grayscale, so
-            // just read the red channel.
+            // 흑백 이미지이기 때문에 모든 채널이 동일한 값을 가집니다. 여기서는 빨강 채널을 사용합니다.
             datasetBytesView[j] = imageData.data[j * 4] / 255;
           }
         }
@@ -86,7 +81,7 @@ export class MnistData {
 
     this.datasetLabels = new Uint8Array(await labelsResponse.arrayBuffer());
 
-    // Slice the the images and labels into train and test sets.
+    // 이미지와 레이블을 잘라서 훈련 세트와 테스트 세트로 만듭니다.
     this.trainImages =
         this.datasetImages.slice(0, IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
     this.testImages = this.datasetImages.slice(IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
@@ -97,12 +92,11 @@ export class MnistData {
   }
 
   /**
-   * Get all training data as a data tensor and a labels tensor.
+   * 모든 훈련 데이터를 데이터 텐서와 레이블 텐서로 준비합니다.
    *
    * @returns
-   *   xs: The data tensor, of shape `[numTrainExamples, 28, 28, 1]`.
-   *   labels: The one-hot encoded labels tensor, of shape
-   *     `[numTrainExamples, 10]`.
+   *   xs: `[numTrainExamples, 28, 28, 1]` 크기의 데이터 텐서.
+   *   labels: `[numTrainExamples, 10]` 크기의 원-핫 인코딩된 레이블 텐서.
    */
   getTrainData() {
     const xs = tf.tensor4d(
@@ -114,15 +108,12 @@ export class MnistData {
   }
 
   /**
-   * Get all test data as a data tensor a a labels tensor.
+   * 모든 테스트 데이터를 데이터 텐서와 레이블 텐서로 준비합니다.
    *
-   * @param {number} numExamples Optional number of examples to get. If not
-   *     provided,
-   *   all test examples will be returned.
+   * @param {number} numExamples 가져올 샘플 개수. 지정하지 않으면 모든 테스트 샘플을 가져옵니다.
    * @returns
-   *   xs: The data tensor, of shape `[numTestExamples, 28, 28, 1]`.
-   *   labels: The one-hot encoded labels tensor, of shape
-   *     `[numTestExamples, 10]`.
+   *   xs: `[numTestExamples, 28, 28, 1]` 크기의 데이터 텐서.
+   *   labels: `[numTestExamples, 10]` 크기의 원-핫 인코딩된 레이블 텐서.
    */
   getTestData(numExamples) {
     let xs = tf.tensor4d(
@@ -144,7 +135,7 @@ let mnistLabels;
 let mnistNumExamples;
 let mnistIndices;
 
-/** Load MNIST data. */
+/** MNIST 데이터 로드하기 */
 export async function loadMnistData() {
   const mnistData = new MnistData();
   await mnistData.load();
@@ -160,16 +151,15 @@ export async function loadMnistData() {
 }
 
 /**
- * Sample a number of examples from each class of the MNIST dataset.
+ * MNIST 데이터셋의 클래스마다 여러 개의 샘플을 뽑습니다.
  *
- * @param {number} numExamplesPerClass Number of examples per class.
- * @returns {tf.Tensor} A 4D tensor of shape
- *   [numExamplesPerClass * 10, 28, 28, 1].
+ * @param {number} numExamplesPerClass 클래스별 샘플 개수
+ * @returns {tf.Tensor} [numExamplesPerClass * 10, 28, 28, 1] 크기의 4D 텐서
  */
 export function sampleFromMnistData(numExamplesPerClass) {
   tf.util.assert(
       numExamplesPerClass <= mnistNumExamples / 10,
-      `Requested too many examples per class ` +
+      `클래스 당 요청한 샘플이 너무 많습니다: ` +
           `(${numExamplesPerClass} > ${mnistNumExamples / 10})`);
 
   tf.util.shuffle(mnistIndices);

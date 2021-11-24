@@ -16,17 +16,16 @@
  */
 
 /**
- * This file loads a pre-trained generator part of an ACGAN and demonstrates
- * the generation of fake MNIST images.
+ * 이 파일은 사전 훈련된 ACGAN의 생성자를 로드하고 생성된 가짜 MNIST 이미지를 보여줍니다.
  *
- * The pre-trained generator model may come from either of the two sources:
- *   1. Running the traning script `gan.js` in the same folder.
- *   2. A hosted model, via HTTPS requests.
+ * 사전 훈련된 생성자 모델은 두 가지 방법으로 준비합니다:
+ *   1. 이 파일과 같은 폴더에 있는 `gan.js` 훈련 스크립트를 실행합니다.
+ *   2. HTTPS를 통해 호스팅된 모델을 가져옵니다.
  */
 
 import * as ta from './timeago.js';
 
-// Load dataset just for comparison with the fake (generated images).
+// 가짜(생성된 이미지)와 비교하기 위해 데이터셋을 로드합니다.
 import {loadMnistData, sampleFromMnistData} from './web-data.js';
 
 const status = document.getElementById('status');
@@ -39,15 +38,14 @@ const fakeCanvas = document.getElementById('fake-canvas');
 const realCanvas = document.getElementById('real-canvas');
 
 /**
- * Generate values for the latent vector and show them with the sliders.
+ * 잠재 벡터를 생성하고 슬라이더로 보여줍니다.
  *
- * @param {bool} fixedLatent Whether to use fixed value for the latent
- *   vector (0.5 for every dimension).
+ * @param {bool} fixedLatent 잠재 벡터에 고정된 값을 사용할지 여부 (모든 차원을 0.5로 설정)
  */
 function generateLatentVector(fixedLatent) {
   const latentDims = latentSliders.length;
 
-  // Generate random latent vector (a.k.a, z-space vector).
+  // 랜덤한 잠재 벡터(z-공간 벡터)를 생성합니다.
   const latentValues = [];
   for (let i = 0; i < latentDims; ++i) {
     const latentValue = fixedLatent === true ? 0.5 : Math.random();
@@ -57,11 +55,10 @@ function generateLatentVector(fixedLatent) {
 }
 
 /**
- * Read the value of the latent-space vector fromthe sliders.
+ * 슬라이더에서 잠재 공간 벡터 값을 읽습니다.
  *
- * @param {number} numRepeats Number of times to tile the single latent vector
- *   for. Used for generating a batch of fake MNIST images.
- * @returns The tiled latent-space vector, of shape [numRepeats, latentDim].
+ * @param {number} numRepeats 하나의 잠재 벡터를 반복할 횟수. 가짜 MNIST 이미지 배치를 생성하기 위해 사용합니다.
+ * @returns [numRepeats, latentDim] 크기의 잠재 공간 벡터
  */
 function getLatentVectors(numRepeats) {
   return tf.tidy(() => {
@@ -76,31 +73,30 @@ function getLatentVectors(numRepeats) {
 }
 
 /**
- * Generate a set of examples using the generator model of the ACGAN.
+ * ACGAN의 생성자를 사용해 이미지를 생성합니다.
  *
- * @param {tf.Model} generator The generator part of the ACGAN.
+ * @param {tf.Model} generator ACGAN의 생성자
  */
 async function generateAndVisualizeImages(generator) {
   tf.util.assert(
       generator.inputs.length === 2,
-      `Expected model to have exactly 2 symbolic inputs, ` +
-          `but there are ${generator.inputs.length}`);
+      `2개의 심볼릭 입력을 가진 모델이어야 합니다. ` +
+          `현재 모델의 입력 개수: ${generator.inputs.length}`);
 
   const combinedFakes = tf.tidy(() => {
     const latentVectors = getLatentVectors(10);
 
-    // Generate one fake image for each digit.
+    // 각 숫자마다 가짜 이미지를 생성합니다.
     const sampledLabels = tf.tensor2d([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [10, 1]);
-    // The output has pixel values in the [-1, 1] interval. Normalize it
-    // to the unit interval ([0, 1]).
+    // 출력 픽셀 값의 범위는 [-1, 1]입니다. 이를 [0, 1] 범위로 정규화합니다.
     const t0 = tf.util.now();
     const generatedImages =
         generator.predict([latentVectors, sampledLabels]).add(1).div(2);
-    generatedImages.dataSync();  // For accurate timing benchmark.
+    generatedImages.dataSync();  // 정확한 시간 측정을 위해
     const elapsed = tf.util.now() - t0;
     fakeImagesSpan.textContent =
         `가짜 이미지 (생성에 걸린 시간: ${elapsed.toFixed(2)} ms)`;
-    // Concatenate the images horizontally into a single image.
+    // 이미지를 수평으로 연결하여 하나의 이미지로 만듭니다.
     return tf.concat(tf.unstack(generatedImages), 1);
   });
 
@@ -108,20 +104,20 @@ async function generateAndVisualizeImages(generator) {
   tf.dispose(combinedFakes);
 }
 
-/** Refresh examples of real MNIST images. */
+/** 진짜 MNIST 이미지 샘플을 갱신합니다 */
 async function drawReals() {
   const combinedReals = sampleFromMnistData(10);
   await tf.browser.toPixels(combinedReals, realCanvas);
   tf.dispose(combinedReals);
 }
 
-/** An array that holds all sliders for the latent-space values. */
+/** 잠재 벡터 값을 위한 슬라이더를 담은 배열 */
 let latentSliders;
 
 /**
- * Create sliders for the latent space.
+ * 잠재 공간을 위한 슬라이더를 만듭니다.
  *
- * @param {tf.Model} generator The generator part of the trained ACGAN.
+ * @param {tf.Model} generator 훈련된 ACGAN의 생성자
  */
 function createSliders(generator) {
   const latentDims = generator.inputs[0].shape[1];
@@ -148,7 +144,7 @@ function createSliders(generator) {
 async function showGeneratorInitially(generator) {
   generator.summary();
 
-  // Create slider for the z-space (latent vectors).
+  // z-공간(잠재 공간)을 위한 슬라이더를 만듭니다.
   createSliders(generator);
 
   generateLatentVector(true);
@@ -159,72 +155,70 @@ async function showGeneratorInitially(generator) {
 }
 
 async function init() {
-  // Load MNIST data for display in webpage.
-  status.textContent = 'Loading MNIST data...';
+  // 웹페이지에 출력하기 위해 MNIST 데이터를 로드합니다.
+  status.textContent = 'MNIST 데이터 로딩 중...';
   await loadMnistData();
 
   const LOCAL_MEATADATA_PATH = 'generator/acgan-metadata.json';
   const LOCAL_MODEL_PATH = 'generator/model.json';
 
-  // Hosted, pre-trained generator model.
+  // 원격에 저장된 사전 훈련된 생성자
   const HOSTED_MODEL_URL =
       'https://storage.googleapis.com/tfjs-examples/mnist-acgan/dist/generator/model.json';
 
-  // Attempt to load locally-saved model. If it fails, activate the
-  // "Load hosted model" button.
+  // 로컬에 저장된 모델을 로드해 봅니다. 실패 하면 "원격 모델 로드하기" 버튼을 활성화합니다.
   let model;
   try {
-    status.textContent = 'Loading metadata';
+    status.textContent = '메타데이터 로딩';
     const metadata =
         await (await fetch(LOCAL_MEATADATA_PATH, {cache: 'no-cache'})).json();
 
-    status.textContent = `Loading model from ${LOCAL_MODEL_PATH}...`;
+    status.textContent = `${LOCAL_MODEL_PATH}에서 모델을 로딩합니다...`;
     model = await tf.loadLayersModel(
         tf.io.browserHTTPRequest(LOCAL_MODEL_PATH, {cache: 'no-cache'}));
     await showGeneratorInitially(model);
 
     if (metadata.completed) {
       status.textContent =
-          `Training of ACGAN in Node.js (${metadata.totalEpochs} epochs) ` +
-          `is completed. `;
+          `Node.js에서 ACGAN 훈련이 완료되었습니다(${metadata.totalEpochs} 에포크).`;
     } else {
-      status.textContent = `Training of ACGAN in Node.js is ongoing (epoch ` +
+      status.textContent = `Node.js에서 ACGAN 훈련이 진행중입니다(에포크 ` +
           `${metadata.currentEpoch + 1}/${metadata.totalEpochs})... `;
     }
     if (metadata.currentEpoch < 10) {
       status.textContent +=
-          '(Note: generator results may be bad during the first few epochs ' +
-          'of training, but should get better as training progresses.) '
+          '(노트: 처음 몇 에포크 동안은 생성자 결과가 나쁠 수 있습니다. ' +
+          '하지만 훈련이 진행됨에 따라 나아집니다.) '
     }
     if (metadata.lastUpdated != null) {
       status.textContent +=
-          ` (Saved model was last updated ` +
-          `${ta.timeago().ago(new Date(metadata.lastUpdated))}). `;
+          ` (저장된 모델이 ` +
+          `${ta.timeago().ago(new Date(metadata.lastUpdated))}에 마지막으로 업데이트되었습니다). `;
     }
     status.textContent +=
-        'Loaded locally-saved model! Now click "Generate" or ' +
-        'adjust the z-space sliders.';
+        '로컬에 저장된 모델을 로드했습니다! 이제 "이미지 생성" 버튼을 클릭하거나 ' +
+        'z-벡터 슬라이더를 조정할 수 있습니다.';
   } catch (err) {
     console.error(err);
     status.textContent =
-        'Failed to load locally-saved model and/or metadata. ' +
-        'Please click "Load Hosted Model"';
+        '로컬에 저장된 모델을 로드하는데 실패했습니다. ' +
+        '"원격 모델 로드하기" 버튼을 클릭하세요.';
   }
 
   loadHostedModel.addEventListener('click', async () => {
     try {
-      status.textContent = `Loading hosted model from ${HOSTED_MODEL_URL} ...`;
+      status.textContent = `${HOSTED_MODEL_URL}에서 모델을 로드합니다...`;
       model = await tf.loadLayersModel(HOSTED_MODEL_URL);
       loadHostedModel.disabled = true;
 
       await showGeneratorInitially(model);
       status.textContent =
-          `Succesfully loaded hosted model from ${HOSTED_MODEL_URL}. ` +
-          `Now click "Generate" or adjust the z-space sliders.`;
+          `${HOSTED_MODEL_URL}에서 모델을 로드하는데 성공했습니다. ` +
+          `이제 "이미지 생성" 버튼을 클릭하거나 z-벡터 슬라이더를 조정할 수 있습니다.`;
     } catch (err) {
       console.error(err);
       status.textContent =
-          `Failed to load hosted model from ${HOSTED_MODEL_URL}`;
+          `${HOSTED_MODEL_URL}에서 모델을 로드하는데 실패했습니다.`;
     }
   });
 

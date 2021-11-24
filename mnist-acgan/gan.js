@@ -16,40 +16,38 @@
  */
 
 /**
- * Train an Auxiliary Classifier Generative Adversarial Network (ACGAN) on the
- * MNIST dataset.
+ * MNIST 에서 ACGAN을 훈련합니다.
  *
- * To start the training:
+ * 훈련을 시작하려면:
  *
  * ```sh
  * yarn
  * yarn train
  * ```
- * 
- * If available, a CUDA GPU will give you a higher training speed:
- * 
+ *
+ * CUDA GPU가 있다면 훈련 속도를 높일 수 있습니다:
+ *
  * ```sh
  * yarn
  * yarn train --gpu
  * ```
  *
- * To start the demo in the browser, do in a separate terminal:
+ * 브라우저에서 데모를 보려면 별도 터미널에서 다음 명령을 사용합니다:
  *
  * ```sh
  * yarn
- * yarn watch
+ * npx http-server
  * ```
  *
- * It is recommended to use tfjs-node-gpu to train the model on a CUDA-enabled
- * GPU, as the convolution heavy operations run several times faster a GPU than
- * on the CPU with tfjs-node.
+ * 합성곱 연산은 tfjs-node를 사용하는 CPU보다 GPU에서 몇 배 빠르기 때문에
+ * tfjs-node-gpu를 사용해 CUDA 가능 GPU에서 모델을 훈련하는 것이 좋습니다.
  *
- * For background of ACGAN, see:
+ * ACGAN에 대한 자세한 내용은 다음을 참고하세요:
  * - Augustus Odena, Christopher Olah, Jonathon Shlens. (2017) "Conditional
  *   image synthesis with auxiliary classifier GANs"
  *   https://arxiv.org/abs/1610.09585
- * 
- * The implementation is based on:
+ *
+ * 다음 구현을 참고했습니다:
  *   https://github.com/keras-team/keras/blob/master/examples/mnist_acgan.py
  */
 
@@ -59,48 +57,45 @@ const path = require('path');
 const argparse = require('argparse');
 const data = require('./data');
 
-// Number of classes in the MNIST dataset.
+// MNIST 데이터셋에 있는 클래스 개수.
 const NUM_CLASSES = 10;
 
-// MNIST image size.
+// MNIST 이미지 크기
 const IMAGE_SIZE = 28;
 
-// The value of the tf object will be set dynamically, depending on whether
-// the CPU (tfjs-node) or GPU (tfjs-node-gpu) backend is used. This is why
-// `let` is used in lieu of the more conventional `const` here.
+// CPU(tfjs-node)나 GPU(tfjs-node-gpu) 백엔드를 사용하는지에 따라
+// tf 값은 동적으로 결정됩니다.
+// 이 때문에 `const` 대신에 `let`을 사용합니다.
 let tf = require('@tensorflow/tfjs');
 
 /**
- * Build the generator part of ACGAN.
+ * ACGAN의 생성자를 만듭니다.
  *
- * The generator of ACGAN takes two inputs:
+ * ACGAN의 생성자는 두 개의 입력을 받습니다:
  *
- *   1. A random latent-space vector (the latent space is often referred to
- *      as "z-space" in GAN literature).
- *   2. A label for the desired image category (0, 1, ..., 9).
+ *   1. 랜덤한 잠재 공간의 벡터 (GAN 논문에서는 종종 잠재 공간을 z-공간이라고 부릅니다)
+ *   2. 원하는 이미지 카테고리 레이블 (0, 1, ..., 9)
  *
- * It generates one output: the generated (i.e., fake) image.
+ * 하나의 출력을 만듭니다: 생성된 (즉 가짜) 이미지
  *
- * @param {number} latentSize Size of the latent space.
- * @returns {tf.LayersModel} The generator model.
+ * @param {number} latentSize 잠재 공간 크기
+ * @returns {tf.LayersModel} 생성자 모델
  */
 function buildGenerator(latentSize) {
   tf.util.assert(
       latentSize > 0 && Number.isInteger(latentSize),
-      `Expected latent-space size to be a positive integer, but ` +
-          `got ${latentSize}.`);
+      `잠재 공간 크기는 양수여야 합니다. 하지만 입력된 값은 ` +
+          `${latentSize}입니다.`);
 
   const cnn = tf.sequential();
 
-  // The number of units is chosen so that when the output is reshaped
-  // and fed through the subsequent conv2dTranspose layers, the tensor
-  // that comes out at the end has the exact shape that matches MNIST
-  // images ([28, 28, 1]).
+  // 출력의 크기르 바꾸어 이어지는 conv2dTranspose 층에 주입할 수 있도록 유닛 개수를 결정합니다.
+  // 결국 마지막 텐서는 MNIST 이미지 크기([28, 28, 1])와 같아야 합니다.
   cnn.add(tf.layers.dense(
       {units: 3 * 3 * 384, inputShape: [latentSize], activation: 'relu'}));
   cnn.add(tf.layers.reshape({targetShape: [3, 3, 384]}));
 
-  // Upsample from [3, 3, ...] to [7, 7, ...].
+  // [3, 3, ...]에서 [7, 7, ...]로 업샘플링합니다.
   cnn.add(tf.layers.conv2dTranspose({
     filters: 192,
     kernelSize: 5,
@@ -111,7 +106,7 @@ function buildGenerator(latentSize) {
   }));
   cnn.add(tf.layers.batchNormalization());
 
-  // Upsample to [14, 14, ...].
+  // [14, 14, ...]로 업샘플링
   cnn.add(tf.layers.conv2dTranspose({
     filters: 96,
     kernelSize: 5,
@@ -122,7 +117,7 @@ function buildGenerator(latentSize) {
   }));
   cnn.add(tf.layers.batchNormalization());
 
-  // Upsample to [28, 28, ...].
+  // [28, 28, ...]로 업샘플링
   cnn.add(tf.layers.conv2dTranspose({
     filters: 1,
     kernelSize: 5,
@@ -132,29 +127,24 @@ function buildGenerator(latentSize) {
     kernelInitializer: 'glorotNormal'
   }));
 
-  // Unlike most TensorFlow.js models, the generator part of an ACGAN has
-  // two inputs:
-  //   1. The latent vector that is used as the "seed" of the fake image
-  //      generation.
-  //   2. A class label that controls which of the ten MNIST digit classes
-  //      the generated fake image is meant to belong to.
+  // 대부분의 TensorFlow.js 모델과 달리 ACGAN의 생성자는 두 개의 입력을 받습니다:
+  //  1. 가짜 이미지 생성의 시드로 사용할 잠재 벡터
+  //  2. 생성될 가짜 이미지의 숫자 클래스를 제어하기 위한 클래스 레이블
 
-  // This is the z space commonly referred to in GAN papers.
+  // GAN 논문에서 종종 z-공간이라고 부릅니다.
   const latent = tf.input({shape: [latentSize]});
 
-  // The desired label of the generated image, an integer in the interval
-  // [0, NUM_CLASSES).
+  // 생성할 이미지의 레이블. [0, NUM_CLASSES] 사이의 정수
   const imageClass = tf.input({shape: [1]});
 
-  // The desired label is converted to a vector of length `latentSize`
-  // through embedding lookup.
+  // 레이블은 임베딩 룩업을 통해 `latentSize` 길이의 벡터로 변환됩니다.
   const classEmbedding = tf.layers.embedding({
     inputDim: NUM_CLASSES,
     outputDim: latentSize,
     embeddingsInitializer: 'glorotNormal'
   }).apply(imageClass);
 
-  // Hadamard product between z-space and a class conditional embedding.
+  // z-공간과 클래스 조건 임베딩 사이의 아다마르 곱(Hadamard product)
   const h = tf.layers.multiply().apply([latent, classEmbedding]);
 
   const fakeImage = cnn.apply(h);
@@ -162,21 +152,17 @@ function buildGenerator(latentSize) {
 }
 
 /**
- * Build the discriminator part of ACGAN.
+ * ACGAN의 판별자를 만듭니다.
  *
- * The discriminator model of ACGAN takes the input: an image of
- * MNIST format, of shape [batchSize, 28, 28, 1].
+ * ACGAN의 판별자는 [batchSize, 28, 28, 1] 크기의 이미지를 받습니다.
  *
- * It gives two outputs:
+ * 두 개의 출력을 만듭니다:
+ *   1. 판별자가 입력 이미지를 진짜(1에 가까움) 혹은 가짜(0에 가까움)로
+ *      판단하는지를 나타내는 0~1 사이의 시그모이드 확률 점수.
+ *   2. 10개 MNIST 숫자 카테고리에 대한 소프트맥스 확률 점수.
+ *      판별자가 입력 이미지를 10개 클래스에 대해 분류한 결과입니다.
  *
- *   1. A sigmoid probability score between 0 and 1, for whether the
- *      discriminator judges the input image to be real (close to 1)
- *      or fake (closer to 0).
- *   2. Softmax probability scores for the 10 MNIST digit categories,
- *      which is the discriminator's 10-class classification result
- *      for the input image.
- *
- * @returns {tf.LayersModel} The discriminator model.
+ * @returns {tf.LayersModel} 판별자 모델
  */
 function buildDiscriminator() {
   const cnn = tf.sequential();
@@ -184,8 +170,7 @@ function buildDiscriminator() {
   cnn.add(tf.layers.conv2d({
     filters: 32,
     kernelSize: 3,
-    padding: 'same',
-    strides: 2,
+    padding: 'same',    strides: 2,
     inputShape: [IMAGE_SIZE, IMAGE_SIZE, 1]
   }));
   cnn.add(tf.layers.leakyReLU({alpha: 0.2}));
@@ -211,18 +196,15 @@ function buildDiscriminator() {
   const image = tf.input({shape: [IMAGE_SIZE, IMAGE_SIZE, 1]});
   const features = cnn.apply(image);
 
-  // Unlike most TensorFlow.js models, the discriminator has two outputs.
-
-  // The 1st output is the probability score assigned by the discriminator to
-  // how likely the input example is a real MNIST image (as versus
-  // a "fake" one generated by the generator).
+  // 대부분의 TensorFlow.js 모델과 달리 판별자는 두 개의 출력을 만듭니다.
+  // 첫 번째 출력은 입력 샘플이 (생성자가 만든 가짜가 아니라) 진짜 MNIST 이미지와 얼마나 비슷한지
+  // 판별자가 할당한 확률 점수입니다.
   const realnessScore =
       tf.layers.dense({units: 1, activation: 'sigmoid'}).apply(features);
-  // The 2nd output is the softmax probabilities assign by the discriminator
-  // for the 10 MNIST digit classes (0 through 9). "aux" stands for "auxiliary"
-  // (the namesake of ACGAN) and refers to the fact that unlike a standard GAN
-  // (which performs just binary real/fake classification), the discriminator
-  // part of ACGAN also performs multi-class classification.
+  // 두 번째 출력은 10개 MNIST 숫자 클래스(0~9)에 대해 판별자가 할당한 소프트맥스 확률입니다.
+  // (ACGAN의 이름에 있는) "auxiliary"를 의미하는 "aux"는
+  // (단순히 진짜/가짜 이진 분류만 수행하는) 표준 GAN과 달리
+  // ACGAN의 판별자는 다중 분류도 수행한다는 사실을 나타냅니다.
   const aux = tf.layers.dense({units: NUM_CLASSES, activation: 'softmax'})
                   .apply(features);
 
@@ -230,27 +212,26 @@ function buildDiscriminator() {
 }
 
 /**
- * Build a combined ACGAN model.
+ * 연결된 ACGAN 모델 만들기.
  *
- * @param {number} latentSize Size of the latent vector.
- * @param {tf.SymbolicTensor} imageClass Symbolic tensor for the desired image
- *   class. This is the other input to the generator.
- * @param {tf.LayersModel} generator The generator.
- * @param {tf.LayersModel} discriminator The discriminator.
- * @param {tf.Optimizer} optimizer The optimizer to be used for training the
- *   combined model.
- * @returns {tf.LayersModel} The combined ACGAN model, compiled.
+ * @param {number} latentSize 잠재 벡터 크기
+ * @param {tf.SymbolicTensor} imageClass 원하는 이미지 클래스를 위한 심볼릭 텐서
+ *   생성자의 입력 중 하나입니다.
+ * @param {tf.LayersModel} generator 생성자
+ * @param {tf.LayersModel} discriminator 판별자
+ * @param {tf.Optimizer} optimizer 연결된 모델을 훈련하기 위해 사용하는 옵티마이저
+ * @returns {tf.LayersModel} 컴파일된 ACGAN 모델
  */
 function buildCombinedModel(latentSize, generator, discriminator, optimizer) {
-  // Latent vector. This is one of the two inputs to the generator.
+  // 잠재 벡터. 생성자의 첫 번째 입력입니다.
   const latent = tf.input({shape: [latentSize]});
-  // Desired image class. This is the second input to the generator.
+  // 원하는 이미지 클래스. 생성자의 두 번째 입력입니다.
   const imageClass = tf.input({shape: [1]});
-  // Get the symbolic tensor for fake images generated by the generator.
+  // 생성자가 만든 가짜 이미지의 심볼릭 텐서를 얻습니다.
   let fake = generator.apply([latent, imageClass]);
   let aux;
 
-  // We only want to be able to train generation for the combined model.
+  // 연결된 모델에서는 생성자만 훈련합니다.
   discriminator.trainable = false;
   [fake, aux] = discriminator.apply(fake);
   const combined =
@@ -263,48 +244,39 @@ function buildCombinedModel(latentSize, generator, discriminator, optimizer) {
   return combined;
 }
 
-// "Soft" one used for training the combined ACGAN model.
-// This is an important trick in training GANs.
+// 연결한 ACGAN 모델을 훈련하는데 사용할 "소프트" 1.
+// GAN 훈련 트릭 중 하나입니다.
 const SOFT_ONE = 0.95;
 
 /**
- * Train the discriminator for one step.
+ * 판별자를 한 스텝 훈련합니다.
  *
- * In this step, only the weights of the discriminator are updated. The
- * generator is not involved.
+ * 이 단계에서는 판별자의 가중치만 업데이트됩니다. 생성자는 훈련되지 않습니다.
  *
- * The following steps are involved:
+ * 다음 단계로 진행합니다:
+ *   - 진짜 데이터의 배치를 준비합니다.
+ *   - 랜덤한 잠재 벡터와 레이블 벡터를 생성합니다.
+ *   - 랜덤한 잠재 벡터와 레이블 벡터를 생성자에게 주입하고 생성된 (즉 가짜) 이미지 배치를 만듭니다.
+ *   - 진짜 데이터와 가짜 데이터를 연결합니다; 연결된 데이터에서 판별자를 한 스텝 훈련합니다.
+ *   - 손실을 계산하여 반환합니다.
  *
- *   - Slice the training features and to get batch of real data.
- *   - Generate a random latent-space vector and a random label vector.
- *   - Feed the random latent-space vector and label vector to the
- *     generator and let it generate a batch of generated (i.e., fake) images.
- *   - Concatenate the real data and fake data; train the discriminator on
- *     the concatenated data for one step.
- *   - Obtain and return the loss values.
- *
- * @param {tf.Tensor} xTrain A tensor that contains the features of all the
- *   training examples.
- * @param {tf.Tensor} yTrain A tensor that contains the labels of all the
- *   training examples.
- * @param {number} batchStart Starting index of the batch.
- * @param {number} batchSize Size of the batch to draw from `xTrain` and
- *   `yTrain`.
- * @param {number} latentSize Size of the latent space (z-space).
- * @param {tf.LayersModel} generator The generator of the ACGAN.
- * @param {tf.LayersModel} discriminator The discriminator of the ACGAN.
- * @returns {number[]} The loss values from the one-step training as numbers.
+ * @param {tf.Tensor} xTrain 모든 훈련 샘플의 특성을 담은 텐서
+ * @param {tf.Tensor} yTrain 모든 훈련 샘플의 레이블을 담은 텐서
+ * @param {number} batchStart 배치 시작 인덱스
+ * @param {number} batchSize `xTrain`과 `yTrain`에서 뽑을 배치 크기
+ * @param {number} latentSize 잠재 공간(z-공간) 크기
+ * @param {tf.LayersModel} generator ACGAN의 생성자
+ * @param {tf.LayersModel} discriminator ACGAN의 판별자
+ * @returns {number[]} 한 스텝 훈련으로 계산한 손실 값
  */
 async function trainDiscriminatorOneStep(
     xTrain, yTrain, batchStart, batchSize, latentSize, generator,
     discriminator) {
-  // TODO(cais): Remove tidy() once the current memory leak issue in tfjs-node
-  //   and tfjs-node-gpu is fixed.
   const [x, y, auxY] = tf.tidy(() => {
     const imageBatch = xTrain.slice(batchStart, batchSize);
     const labelBatch = yTrain.slice(batchStart, batchSize).asType('float32');
 
-    // Latent vectors.
+    // 잠재 벡터
     let zVectors = tf.randomUniform([batchSize, latentSize], -1, 1);
     let sampledLabels =
         tf.randomUniform([batchSize, 1], 0, NUM_CLASSES, 'int32')
@@ -329,29 +301,25 @@ async function trainDiscriminatorOneStep(
 }
 
 /**
- * Train the combined ACGAN for one step.
+ * 연결한 ACGAN을 한 스텝 훈련합니다.
  *
- * In this step, only the weights of the generator are updated.
+ * 이 단계에서는 생성자의 가중치만 업데이트됩니다.
  *
- * @param {number} batchSize Size of the fake-image batch to generate.
- * @param {number} latentSize Size of the latent space (z-space).
- * @param {tf.LayersModel} combined The instance of tf.LayersModel that combines
- *   the generator and the discriminator.
- * @returns {number[]} The loss values from the combined model as numbers.
+ * @param {number} batchSize 생성할 가짜 이미지 배치 크기
+ * @param {number} latentSize 잠재 공간 (z-공간) 크기
+ * @param {tf.LayersModel} combined 생성자와 판별자를 연결한 tf.LayersModel 객체
+ * @returns {number[]} 연결된 모델의 손실 값
  */
 async function trainCombinedModelOneStep(batchSize, latentSize, combined) {
-  // TODO(cais): Remove tidy() once the current memory leak issue in tfjs-node
-  //   and tfjs-node-gpu is fixed.
   const [noise, sampledLabels, trick] = tf.tidy(() => {
-    // Make new latent vectors.
+    // 새로운 잠재 벡터 만들기
     const zVectors = tf.randomUniform([batchSize, latentSize], -1, 1);
     const sampledLabels =
         tf.randomUniform([batchSize, 1], 0, NUM_CLASSES, 'int32')
             .asType('float32');
 
-    // We want to train the generator to trick the discriminator.
-    // For the generator, we want all the {fake, not-fake} labels to say
-    // not-fake.
+    // 판별자를 속이기 위해 생성자를 훈련합니다.
+    // 가짜와 진짜 레이블을 모두 진짜로 나타냅니다.
     const trick = tf.tidy(() => tf.ones([batchSize, 1]).mul(SOFT_ONE));
     return [zVectors, sampledLabels, trick];
   });
@@ -364,42 +332,42 @@ async function trainCombinedModelOneStep(batchSize, latentSize, combined) {
 
 function parseArguments() {
   const parser = new argparse.ArgumentParser({
-    description: 'TensorFlowj.js: MNIST ACGAN trainer example.',
+    description: 'TensorFlowj.js: MNIST ACGAN 훈련 예제',
     addHelp: true
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use tfjs-node-gpu for training (required CUDA GPU)'
+    help: 'tfjs-node-gpu를 사용해 훈련합니다(CUDA GPU 필요)'
   });
   parser.addArgument(
       '--epochs',
-      {type: 'int', defaultValue: 100, help: 'Number of training epochs.'});
+      {type: 'int', defaultValue: 100, help: '훈련 에포크 횟수'});
   parser.addArgument('--batchSize', {
     type: 'int',
     defaultValue: 100,
-    help: 'Batch size to be used during training.'
+    help: '훈련에 사요할 배치 크기'
   });
   parser.addArgument('--latentSize', {
     type: 'int',
     defaultValue: 100,
-    help: 'Size of the latent space (z-space).'
+    help: '잠재 공간 (z-공간) 크기'
   });
   parser.addArgument(
       '--learningRate',
-      {type: 'float', defaultValue: 0.0002, help: 'Learning rate.'});
+      {type: 'float', defaultValue: 0.0002, help: '학습률'});
   parser.addArgument('--adamBeta1', {
     type: 'float',
     defaultValue: 0.5,
-    help: 'Beta1 parameter of the ADAM optimizer.'
+    help: 'ADAM 옵티마이저의 Beta1 파라미터'
   });
   parser.addArgument('--generatorSavePath', {
     type: 'string',
     defaultValue: './dist/generator',
-    help: 'Path to which the generator model will be saved after every epoch.'
+    help: '에포크가 끝날 때마다 생성자 모델을 저장할 경로'
   });
   parser.addArgument('--logDir', {
     type: 'string',
-    help: 'Optional log directory to which the loss values will be written.'
+    help: '손실 값을 저장할 로그 디렉토리'
   });
   return parser.parseArgs();
 }
@@ -415,13 +383,11 @@ function makeMetadata(totalEpochs, currentEpoch, completed) {
 
 async function run() {
   const args = parseArguments();
-  // Set the value of tf depending on whether the CPU or GPU version of
-  // libtensorflow is used.
   if (args.gpu) {
-    console.log('Using GPU');
+    console.log('GPU 사용');
     tf = require('@tensorflow/tfjs-node-gpu');
   } else {
-    console.log('Using CPU');
+    console.log('CPU 사용');
     tf = require('@tensorflow/tfjs-node');
   }
 
@@ -431,7 +397,7 @@ async function run() {
   const saveURL = `file://${args.generatorSavePath}`;
   const metadataPath = path.join(args.generatorSavePath, 'acgan-metadata.json');
 
-  // Build the discriminator.
+  // 판별자를 만듭니다.
   const discriminator = buildDiscriminator();
   discriminator.compile({
     optimizer: tf.train.adam(args.learningRate, args.adamBeta1),
@@ -439,7 +405,7 @@ async function run() {
   });
   discriminator.summary();
 
-  // Build the generator.
+  // 생성자를 만듭니다.
   const generator = buildGenerator(args.latentSize);
   generator.summary();
 
@@ -451,19 +417,19 @@ async function run() {
   let {images: xTrain, labels: yTrain} = data.getTrainData();
   yTrain = tf.expandDims(yTrain.argMax(-1), -1);
 
-  // Save the generator model once before starting the training.
+  // 훈련을 시작하기 전에 생성자 모델을 저장합니다.
   await generator.save(saveURL);
 
   let numTensors;
   let logWriter;
   if (args.logDir) {
-    console.log(`Logging to tensorboard at logdir: ${args.logDir}`);
+    console.log(`텐서보드에 로그를 기록합니다: ${args.logDir}`);
     logWriter = tf.node.summaryFileWriter(args.logDir);
   }
 
   let step = 0;
   for (let epoch = 0; epoch < args.epochs; ++epoch) {
-    // Write some metadata to disk at the beginning of every epoch.
+    // 에포크를 시작할 때마다 메타데이터를 디스크에 저장합니다.
     fs.writeFileSync(
         metadataPath,
         JSON.stringify(makeMetadata(args.epochs, epoch, false)));
@@ -481,9 +447,8 @@ async function run() {
           xTrain, yTrain, batch * args.batchSize, actualBatchSize,
           args.latentSize, generator, discriminator);
 
-      // Here we use 2 * actualBatchSize here, so that we have
-      // the generator optimizer over an identical number of images
-      // as the discriminator.
+      // 생성자 옵티마이저가 판별자와 동일한 이미지 개수를 처리하도록
+      // 2 * actualBatchSize 크기를 사용합니다.
       const gLoss = await trainCombinedModelOneStep(
           2 * actualBatchSize, args.latentSize, combined);
 
@@ -497,9 +462,7 @@ async function run() {
         step++;
       }
 
-      // Assert on no memory leak.
-      // TODO(cais): Remove this check once the current memory leak in
-      //   tfjs-node and tfjs-node-gpu is fixed.
+      // 메모리 누수 확인
       if (numTensors == null) {
         numTensors = tf.memory().numTensors;
       } else {
@@ -511,12 +474,12 @@ async function run() {
 
     await generator.save(saveURL);
     console.log(
-        `epoch ${epoch + 1} elapsed time: ` +
+        `에포크 ${epoch + 1}의 소요 시간: ` +
         `${((tf.util.now() - tBatchBegin) / 1e3).toFixed(1)} s`);
-    console.log(`Saved generator model to: ${saveURL}\n`);
+    console.log(`생성자 저장: ${saveURL}\n`);
   }
 
-  // Write metadata to disk to indicate the end of the training.
+  // 훈련이 끝났음을 표시하기 위해 메타데이터를 디스크에 기록합니다.
   fs.writeFileSync(
       metadataPath,
       JSON.stringify(makeMetadata(args.epochs, args.epochs, true)));

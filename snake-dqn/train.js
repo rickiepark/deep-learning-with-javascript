@@ -20,8 +20,7 @@ import * as fs from 'fs';
 import * as argparse from 'argparse';
 import {mkdir} from 'shelljs';
 
-// The value of tf (TensorFlow.js-Node module) will be set dynamically
-// depending on the value of the --gpu flag below.
+// (TensorFlow.js Node 모듈인) tf 값은 --gpu 플래그에 따라 동적으로 설정됩니다.
 let tf;
 
 import {SnakeGameAgent} from './agent';
@@ -47,22 +46,18 @@ class MovingAverager {
 }
 
 /**
- * Train an agent to play the snake game.
+ * 스네이크 게임을 플레이하기 위한 에이전트를 훈련합니다.
  *
- * @param {SnakeGameAgent} agent The agent to train.
- * @param {number} batchSize Batch size for training.
- * @param {number} gamma Reward discount rate. Must be a number >= 0 and <= 1.
- * @param {number} learnigRate
- * @param {number} cumulativeRewardThreshold The threshold of moving-averaged
- *   cumulative reward from a single game. The training stops as soon as this
- *   threshold is achieved.
- * @param {number} maxNumFrames Maximum number of frames to train for.
- * @param {number} syncEveryFrames The frequency at which the weights are copied
- *   from the online DQN of the agent to the target DQN, in number of frames.
- * @param {string} savePath Path to which the online DQN of the agent will be
- *   saved upon the completion of the training.
- * @param {string} logDir Directory to which TensorBoard logs will be written
- *   during the training. Optional.
+ * @param {SnakeGameAgent} agent 훈련할 에이전트.
+ * @param {number} batchSize 훈련을 위한 배치 크기.
+ * @param {number} gamma 보상 할인 계수. 0보다 크거나 같고 1보다 작거나 같아야 합니다.
+ * @param {number} learnigRate 학습률
+ * @param {number} cumulativeRewardThreshold 한 게임에서 얻는 누적 보상의 이동 평균 임곗값.
+ *   임곗값에 도달하면 바로 훈련이 중지됩니다.
+ * @param {number} maxNumFrames 훈련할 최대 프레임 수
+ * @param {number} syncEveryFrames 에이전트의 온라인 DQN에서 타깃 DQN으로 가중치를 복사하는 빈도(프레임 수)
+ * @param {string} savePath 훈련이 끝난 후 에이전트의 온라인 DQN을 저장할 경로
+ * @param {string} logDir 훈련하는 동안 텐서보드 로그를 기록할 디렉토리
  */
 export async function train(
     agent, batchSize, gamma, learningRate, cumulativeRewardThreshold,
@@ -76,9 +71,9 @@ export async function train(
     agent.playStep();
   }
 
-  // Moving averager: cumulative reward across 100 most recent 100 episodes.
+  // 이동 평균: 가장 최근의 100개 에피소드에 걸쳐 보상을 누적합니다.
   const rewardAverager100 = new MovingAverager(100);
-  // Moving averager: fruits eaten across 100 most recent 100 episodes.
+  // 이동 평균: 가장 최근의 100개 에피소드에 걸쳐 먹은 과일을 누적합니다.
   const eatenAverager100 = new MovingAverager(100);
 
   const optimizer = tf.train.adam(learningRate);
@@ -116,7 +111,6 @@ export async function train(
       }
       if (averageReward100 >= cumulativeRewardThreshold ||
           agent.frameCount >= maxNumFrames) {
-        // TODO(cais): Save online network.
         break;
       }
       if (averageReward100 > averageReward100Best) {
@@ -126,110 +120,107 @@ export async function train(
             mkdir('-p', savePath);
           }
           await agent.onlineNetwork.save(`file://${savePath}`);
-          console.log(`Saved DQN to ${savePath}`);
+          console.log(`${savePath}에 DQN을 저장했습니다.`);
         }
       }
     }
     if (agent.frameCount % syncEveryFrames === 0) {
       copyWeights(agent.targetNetwork, agent.onlineNetwork);
-      console.log('Sync\'ed weights from online network to target network');
+      console.log('온라인 네트워크에서 타깃 네트워크로 가중치를 동기화했습니다');
     }
   }
 }
 
 export function parseArguments() {
   const parser = new argparse.ArgumentParser({
-    description: 'Training script for a DQN that plays the snake game'
+    description: '스네이크 게임을 플레이할 DQN을 훈련하는 스크립트'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Whether to use tfjs-node-gpu for training ' +
-    '(requires CUDA GPU, drivers, and libraries).'
+    help: '훈련에 tfjs-node-gpu을 사용합니다' +
+    '(CUDA GPU, 드라이버, 라이브러리가 필요합니다).'
   });
   parser.addArgument('--height', {
     type: 'int',
     defaultValue: 9,
-    help: 'Height of the game board.'
+    help: '게임 보드의 높이'
   });
   parser.addArgument('--width', {
     type: 'int',
     defaultValue: 9,
-    help: 'Width of the game board.'
+    help: '게임 보드의 너비'
   });
   parser.addArgument('--numFruits', {
     type: 'int',
     defaultValue: 1,
-    help: 'Number of fruits present on the board at any given time.'
+    help: '어떤 순간에 보드에 나타날 과일 개수'
   });
   parser.addArgument('--initLen', {
     type: 'int',
     defaultValue: 2,
-    help: 'Initial length of the snake, in number of squares.'
+    help: '초기 스네이크 길이(사각형 개수)'
   });
   parser.addArgument('--cumulativeRewardThreshold', {
     type: 'float',
     defaultValue: 100,
-    help: 'Threshold for cumulative reward (its moving ' +
-    'average) over the 100 latest games. Training stops as soon as this ' +
-    'threshold is reached (or when --maxNumFrames is reached).'
+    help: '최근 100개 게임에 대한 누적 보상의 임곗값(이동 평균). ' +
+    '임곗값에 도달하면 (또는 --maxNumFrames에 도달하면) 바로 훈련이 중지됩니다.'
   });
   parser.addArgument('--maxNumFrames', {
     type: 'float',
     defaultValue: 1e6,
-    help: 'Maximum number of frames to run durnig the training. ' +
-    'Training ends immediately when this frame count is reached.'
+    help: '훈련하는 동안 실행할 수 있는 최대 프레임 수. ' +
+    '이 프레임 수에 도달하면 바로 훈련이 중지됩니다.'
   });
   parser.addArgument('--replayBufferSize', {
     type: 'int',
     defaultValue: 1e4,
-    help: 'Length of the replay memory buffer.'
+    help: '재생 메모리 버퍼의 길이.'
   });
   parser.addArgument('--epsilonInit', {
     type: 'float',
     defaultValue: 0.5,
-    help: 'Initial value of epsilon, used for the epsilon-greedy algorithm.'
+    help: '입실론 그리디 알고리즘에서 사용할 초기 입실론 값.'
   });
   parser.addArgument('--epsilonFinal', {
     type: 'float',
     defaultValue: 0.01,
-    help: 'Final value of epsilon, used for the epsilon-greedy algorithm.'
+    help: '입실론 그리디 알고리즘에서 사용할 마지막 입실론 값.'
   });
   parser.addArgument('--epsilonDecayFrames', {
     type: 'int',
     defaultValue: 1e5,
-    help: 'Number of frames of game over which the value of epsilon ' +
-    'decays from epsilonInit to epsilonFinal'
+    help: 'epsilonInit에서 epsilonFinal까지 입실론 값을 감소시키기 위한 프레임 수'
   });
   parser.addArgument('--batchSize', {
     type: 'int',
     defaultValue: 64,
-    help: 'Batch size for DQN training.'
+    help: 'DQN 훈련의 배치 크기'
   });
   parser.addArgument('--gamma', {
     type: 'float',
     defaultValue: 0.99,
-    help: 'Reward discount rate.'
+    help: '보상 할인 계수'
   });
   parser.addArgument('--learningRate', {
     type: 'float',
     defaultValue: 1e-3,
-    help: 'Learning rate for DQN training.'
+    help: 'DQN 훈련의 학습률'
   });
   parser.addArgument('--syncEveryFrames', {
     type: 'int',
     defaultValue: 1e3,
-    help: 'Frequency at which weights are sync\'ed from the online network ' +
-    'to the target network.'
+    help: '온라인 네트워크에서 타깃 네트워크로 가중치를 복사할 주기'
   });
   parser.addArgument('--savePath', {
     type: 'string',
     defaultValue: './models/dqn',
-    help: 'File path to which the online DQN will be saved after training.'
+    help: '훈련이 끝난 후 온라인 DQN을 저장할 파일 경로.'
   });
   parser.addArgument('--logDir', {
     type: 'string',
     defaultValue: null,
-    help: 'Path to the directory for writing TensorBoard logs in.'
+    help: '텐서보드 로그를 기록할 디렉토리 경로'
   });
   return parser.parseArgs();
 }

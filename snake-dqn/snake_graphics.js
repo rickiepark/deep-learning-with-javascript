@@ -18,13 +18,12 @@
 import {SnakeGame} from './snake_game.js';
 
 /**
- * Render the state of the snake game on an HTML canvas element.
+ * HTML 캔바스 요소에 스네이크 게임의 상태를 렌더링합니다.
  *
- * @param {HTMLCanvasElement} canvas The canvas to render the game in.
- * @param {SnakeGame} game The game to render.
- * @param {Float32Array} qValues Q-values of the current step, optional.
- *   If provided, will overlay Q-values for possible actions on the rendered
- *   graph.
+ * @param {HTMLCanvasElement} canvas 게임을 렌더링할 캔바스
+ * @param {SnakeGame} game 렌더링할 게임
+ * @param {Float32Array} qValues 현재 스텝의 Q-가치
+ *   이 값이 제공되면 가능한 행동 위에 Q-가치를 나타냅니다.
  */
 export function renderSnakeGame(canvas, game, qValues) {
   const width = canvas.width;
@@ -40,7 +39,7 @@ export function renderSnakeGame(canvas, game, qValues) {
   const gridWidth = width / gameWidth;
   const gridHeight = height / gameHeight;
 
-  // Draw the grid.
+  // 격자를 그립니다.
   ctx.strokeStyle = '#aaa';
   ctx.lineWidth = '0';
   for (let i = 0; i <= gameHeight; ++i) {
@@ -54,7 +53,7 @@ export function renderSnakeGame(canvas, game, qValues) {
     ctx.stroke();
   }
 
-  // Draw the snake.
+  // 스네이크를 그립니다.
   state.s.forEach((yx, i) => {
     const [y, x] = yx;
     ctx.fillStyle = i === 0 ? 'orange' : 'blue';
@@ -77,7 +76,7 @@ export function renderSnakeGame(canvas, game, qValues) {
     }
   });
 
-  // Draw the fruit.
+  // 과일을 그립니다.
   state.f.forEach(yx => {
     const [y, x] = yx;
     ctx.fillStyle = 'green';
@@ -94,11 +93,11 @@ export function renderSnakeGame(canvas, game, qValues) {
     ctx.stroke();
   });
 
-  if (qValues != null) {   // If qNet is provided, render the q-values.
+  if (qValues != null) {   // qValues가 있으면 q-가치를 렌더링합니다.
     if (qValues.length !== 3) {
       throw new Error(
-          `Expected qValues to be of length 3, ` +
-          `but got length ${qValues.length}`);
+          `qValues 길이는 3이어야 합니다. ` +
+          `현재 qValues 길이: ${qValues.length}`);
     }
     const [headY, headX] = state.s[0];
 

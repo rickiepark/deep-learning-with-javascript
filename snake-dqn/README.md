@@ -1,77 +1,71 @@
-# Using Deep Q-Learning to Solve the Snake Game
+# 심층 Q-러닝을 사용해 스네이크 게임 플레이하기
 
 ![DQN Snake Game](./images/dqn-screenshot.png)
 
-[See this example live!](https://storage.googleapis.com/tfjs-examples/snake-dqn/index.html)
+[온라인 데모](https://ml-ko.kr/tfjs/snake-dqn)
 
-Deep Q-Learning is a reinforcement-learning (RL) algorithm. It is used
-frequently to solve arcade-style games like the Snake game used in this
-example.
+심층 Q-러닝은 강화 학습 알고리즘의 하나입니다.
+이 예제를 위해 사용한 스네이크 게임 같은 아케이드 스타일의 게임에 종종 사용됩니다.
 
-## The Snake game
+## 스네이크 게임
 
-The Snake game is a grid-world action game in which the player controls
-a virtual snake that keeps moving on the game board (9x9 by default).
-At each step, there are four possible actions: left, right, up, and down.
-To achieve higher scores (rewards), the player should guide the snake
-to the fruits on the screen and "eat" them, while avoiding
-- its head going off the board, and
-- its head bumping into its own body.
+스네이크 게임은 격자 보드 액션 게임입니다.
+플레이어가 게임 보드(기본값 9x9) 위를 움직이는 가상의 스네이크를 조정합니다.
+각 스텝에서 네 개의 행동이 가능합니다: 좌회전, 우회전, 위, 아래.
+높은 점수(보상)을 얻기 위해 플레이어는 스네이크가 과일을 먹도록 조정하면서 다음은 피해야 합니다.
+- 머리가 보드 밖으로 나갑니다.
+- 헤드가 자신의 몸통에 부딪힙니다.
 
-This example consists of two parts:
-1. Training the Deep Q-Network (DQN) in Node.js
-2. Live demo in the browser
+이 예제는 두 부분으로 구성되어 있습니다:
+1. Node.js에서 심층 Q-네트워크 훈련하기
+2. 브라우저에서 데모 실행하기
 
-## Training the Deep Q-Network in Node.js
+## Node.js에서 심층 Q-네트워크 훈련하기
 
-To train the DQN, use command:
+다음 명령을 사용해 DQN을 훈련합니다:
 
 ```sh
 yarn
 yarn train
 ```
 
-If you have a CUDA-enabled GPU installed on your system, along with all
-the required drivers and libraries, append the `--gpu` flag to the command
-above to let use the GPU for training, which will lead to a significant
-increase in the training speed:
+컴퓨터에 CUDA 지원 GPU가 있고 필요한 드라이버와 라이브러리가 설치되어 있다면 위 명령에 `--gpu` 플래그를
+추가하여 GPU를 사용해 훈련할 수 있습니다. 이렇게 하면 훈련 속도를 크게 높일 수 있습니다:
 
 ```sh
 yarn train --gpu
 ```
 
-To monitor the training progress using TensorBoard, use the `--logDir` flag
-and point it to a log directory,  e.g.,
+텐서보드로 훈련 과정을 모니터링하려면 `--logDir` 플래그를 사용하고 로그 디렉토리를 지정하세요:
 
 ```sh
 yarn train --logDir /tmp/snake_logs
 ```
 
-During the training, you can use TensorBoard to visualize the curves of
-- Cumulative reward values from the games
-- Training speed (game frames per second)
-- Value of the epsilon from the epsilon-greedy algorithm
-and so forth.
+훈련 도중 텐서보드를 사용해 다음 그래프를 볼 수 있습니다:
+- 게임에서 얻은 누적 보상
+- 훈련 속도 (초당 게임 프레임수)
+- 입실론 그리디 알고리즘의 입실론 값
+등등
 
-Specifically, open a separate terminal. In the terminal, install tensorboard and
-launch the backend server of tensorboard:
+별도의 터미널을 열고 텐서보드를 설치한 다음 텐서보드 서버를 실행하세요:
 
 ```sh
 pip install tensorboard
 tensorboard --logdir /tmp/snake_logs
 ```
 
-A detailed TensorBoard training log is hosted and viewable at this
-[TensorBoard.dev link](https://tensorboard.dev/experiment/TJFBWBx3T5WrFBs4Ar76Sw/#scalars).
+자세한 텐서보드 훈련 로그는
+[TensorBoard.dev](https://tensorboard.dev/experiment/TJFBWBx3T5WrFBs4Ar76Sw/#scalars)에서 볼 수 있습니다.
 
-Once started, the tensorboard backend process will print an `http://` URL to the
-console. Open your browser and navigate to the URL to see the logged curves.
+텐서보드가 실행되면 콘솔에 `http://`로 시작하는 URL을 출력합니다.
+브라우저를 열고 이 주소에 접속하면 로그를 확인할 수 있습니다.
 
-## Running the demo in the browser
+## 브라우저에서 데모 실행하기
 
-After the DQN training completes, you can use the following command to
-launch a demo that shows how the network plays the game in the browser:
+DQN 훈련이 완료된 후 다음 명령을 사용해 브라우저에서 데모를 실행하여 네트워크가 게임을
+어떻게 플레이하는지 볼 수 있습니다:
 
 ```sh
-yarn watch
+npx http-server
 ```

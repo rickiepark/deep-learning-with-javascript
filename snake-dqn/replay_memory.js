@@ -17,12 +17,12 @@
 
 import * as tf from '@tensorflow/tfjs';
 
-/** Replay buffer for DQN training. */
+/** DQN 훈련을 위한 재생 버퍼 */
 export class ReplayMemory {
   /**
-   * Constructor of ReplayMemory.
+   * ReplayMemory의 생성자
    *
-   * @param {number} maxLen Maximal buffer length.
+   * @param {number} maxLen 최대 버퍼 길이
    */
   constructor(maxLen) {
     this.maxLen = maxLen;
@@ -40,9 +40,9 @@ export class ReplayMemory {
   }
 
   /**
-   * Append an item to the replay buffer.
+   * 재생 버퍼에 항목 추가하기
    *
-   * @param {any} item The item to append.
+   * @param {any} item 추가할 항목
    */
   append(item) {
     this.buffer[this.index] = item;
@@ -51,17 +51,17 @@ export class ReplayMemory {
   }
 
   /**
-   * Randomly sample a batch of items from the replay buffer.
+   * 재생 버퍼에서 랜덤하게 배치를 샘플링합니다.
    *
-   * The sampling is done *without* replacement.
+   * 샘플링은 중복을 허용하지 않습니다.
    *
-   * @param {number} batchSize Size of the batch.
-   * @return {Array<any>} Sampled items.
+   * @param {number} batchSize 배치 크기
+   * @return {Array<any>} 샘플링된 항목
    */
   sample(batchSize) {
     if (batchSize > this.maxLen) {
       throw new Error(
-          `batchSize (${batchSize}) exceeds buffer length (${this.maxLen})`);
+          `배치 크기(${batchSize})가 버퍼 길이(${this.maxLen})를 초과합니다.`);
     }
     tf.util.shuffle(this.bufferIndices_);
 

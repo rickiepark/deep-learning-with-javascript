@@ -49,43 +49,43 @@ limitations under the License.
 <body>
   <div class='tfjs-example-container centered-container'>
     <section class='title-area'>
-      <h1>TensorFlow.js Reinforcement Learning: Snake DQN</h1>
-      <p class='subtitle'>Deep Q-Network for the Snake Game</p>
+      <h1>TensorFlow.js 예제: 강화 학습 - 스네이크 DQN</h1>
+      <p class='subtitle'>스네이크 게임을 위한 심층 Q-네트워크</p>
     </section>
     <section>
-      <p class='section-head'>Description</p>
+      <p class='section-head'>설명</p>
       <p>
-        This page loads a trained Deep Q-Network (DQN) and use it to play the
-        snake game.
-        The training is done in Node.js using <a href="https://github.com/tensorflow/tfjs-node">tfjs-node</a>.
-        See <a href="https://github.com/tensorflow/tfjs-examples/blob/master/snake-dqn/train.js">train.js</a>.
+        이 페이지는 심층 Q-네크워크(DQN)을 로드하고 이를 사용해 스네이크 게임을 플레이합니다.
+        <a href="https://github.com/tensorflow/tfjs-node">tfjs-node</a>를 사용해 Node.js에서 훈련을 합니다.
+        <a href="https://github.com/rickiepark/deep-learning-with-javascript/blob/main/snake-dqn/train.js">train.js</a>을 참고하세요.
       </p>
     </section>
     <section>
-      <p class='section-head'>Algorithm</p>
+      <p class='section-head'>알고리즘</p>
       <p>
-        A <a href="https://en.wikipedia.org/wiki/Q-learning#Variants">DQN</a> is trained to estimate the value of actions given the current game state.
-        The DQN is a 2D convolutional network. See <a href="https://github.com/tensorflow/tfjs-examples/blob/master/snake-dqn/dqn.js">dqn.js</a>.
-        The epsilon-greedy algorithm is used to balance exploration and exploitation during training.
+        <a href="https://en.wikipedia.org/wiki/Q-learning#Variants">DQN</a>을 훈련하여 현재 게임 상태가 주어지면 행동 가치를 추정합니다.
+        이 DQN은 2D 합성곱 신경망입니다.
+        <a href="https://github.com/rickiepark/deep-learning-with-javascript/blob/main/snake-dqn/dqn.js">dqn.js</a>를 참고하세요.
+        입실론 그리디 알고리즘을 사용해 훈련하는 동안 탐험과 활용 사이의 균형을 맞춥니다.
       </p>
     </section>
 
     <section>
       <div id="load-model-div">
-        <button id="load-hosted-model" width="200px" disabled>Load hosted model</button>
+        <button id="load-hosted-model" width="200px" disabled>원격 모델 로드하기</button>
       </div>
 
       <div>
-        <button id="auto-play-stop" disabled>Auto Play</button>
-        <button id="step" disabled>Step</button>
-        <button id="reset" disabled>Reset</button>
+        <button id="auto-play-stop" disabled>자동 플레이</button>
+        <button id="step" disabled>한 스텝 실행</button>
+        <button id="reset" disabled>리셋</button>
       </div>
       <div id="show-q-values-div">
         <input type="checkbox" id="show-q-values" checked>
-        <span>Show Q-values</span>
+        <span>Q-가치 보기</span>
       </div>
       <div id="game-status-div">
-        <span id="game-status">Game started.</span>
+        <span id="game-status">게임 시작</span>
       </div>
       <div>
         <canvas id="game-canvas" height="400px" width="400px"></canvas>

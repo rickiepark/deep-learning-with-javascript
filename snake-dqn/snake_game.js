@@ -26,11 +26,9 @@ const DEFAULT_WIDTH = 16;
 const DEFAULT_NUM_FRUITS = 1;
 const DEFAULT_INIT_LEN = 4;
 
-// TODO(cais): Tune these parameters.
 export const NO_FRUIT_REWARD = -0.2;
 export const FRUIT_REWARD = 10;
 export const DEATH_REWARD = -10;
-// TODO(cais): Explore adding a "bad fruit" with a negative reward.
 
 export const ACTION_GO_STRAIGHT = 0;
 export const ACTION_TURN_LEFT = 1;
@@ -40,9 +38,9 @@ export const ALL_ACTIONS = [ACTION_GO_STRAIGHT, ACTION_TURN_LEFT, ACTION_TURN_RI
 export const NUM_ACTIONS = ALL_ACTIONS.length;
 
 /**
- * Generate a random action among all possible actions.
+ * 가능한 모든 행동에서 랜덤한 행동 선택하기
  *
- * @return {0 | 1 | 2} Action represented as a number.
+ * @return {0 | 1 | 2} 숫자로 표현된 행동
  */
 export function getRandomAction() {
   return getRandomInteger(0, NUM_ACTIONS);
@@ -50,14 +48,13 @@ export function getRandomAction() {
 
 export class SnakeGame {
   /**
-   * Constructor of SnakeGame.
+   * SnakeGame의 생성자
    *
-   * @param {object} args Configurations for the game. Fields include:
-   *   - height {number} height of the board (positive integer).
-   *   - width {number} width of the board (positive integer).
-   *   - numFruits {number} number of fruits present on the screen
-   *     at any given step.
-   *   - initLen {number} initial length of the snake.
+   * @param {object} args 게임 설정. 다음 필드를 포함합니다:
+   *   - height {number} 보드 높이 (양수)
+   *   - width {number} 보드 너비 (양수)
+   *   - numFruits {number} 어떤 스텝에서 화면에 나타날 과일 개수
+   *   - initLen {number} 스네이크의 초기 길이
    */
   constructor(args) {
     if (args == null) {
@@ -90,10 +87,10 @@ export class SnakeGame {
   }
 
   /**
-   * Reset the state of the game.
+   * 게임 상태를 리셋합니다.
    *
-   * @return {object} Initial state of the game.
-   *   See the documentation of `getState()` for details.
+   * @return {object} 게임의 초기 상태
+   *   자세한 내용은 `getState()` 메서드를 참고하세요.
    */
   reset() {
     this.initializeSnake_();
@@ -103,29 +100,27 @@ export class SnakeGame {
   }
 
   /**
-   * Perform a step of the game.
+   * 게임의 한 스텝을 플레이합니다.
    *
-   * @param {0 | 1 | 2 | 3} action The action to take in the current step.
-   *   The meaning of the possible values:
-   *     0 - left
-   *     1 - top
-   *     2 - right
-   *     3 - bottom
-   * @return {object} Object with the following keys:
-   *   - `reward` {number} the reward value.
-   *     - 0 if no fruit is eaten in this step
-   *     - 1 if a fruit is eaten in this step
-   *   - `state` New state of the game after the step.
-   *   - `fruitEaten` {boolean} Whether a fruit is easten in this step.
-   *   - `done` {boolean} whether the game has ended after this step.
-   *     A game ends when the head of the snake goes off the board or goes
-   *     over its own body.
+   * @param {0 | 1 | 2 | 3} action 현새 스텝에서 선택한 행동
+   *   값의 의미:
+   *     0 - 왼쪽
+   *     1 - 위쪽
+   *     2 - 오른쪽
+   *     3 - 아래쪽
+   * @return {object} 다음 키를 가진 객체:
+   *   - `reward` {number} 보상 값
+   *     - 0: 이 스텝에서 과일을 먹지 못했습니다.
+   *     - 1: 이 스텝에서 과일을 먹었습니다.
+   *   - `state`: 이 스텝 다음의 게임 상태
+   *   - `fruitEaten` {boolean} 이 스텝에서 과일을 먹었는지 여부
+   *   - `done` {boolean} 이 스텝 다음에 게임이 종료되는지 여부
+   *     스네이크 머리가 보드 밖으로 나가거나 자신의 몸통과 부딪히면 게임이 끝납니다.
    */
   step(action) {
     const [headY, headX] = this.snakeSquares_[0];
 
-    // Calculate the coordinates of the new head and check whether it has
-    // gone off the board, in which case the game will end.
+    // 새로운 머리 좌표를 계산하고 보드 밖으로 나갔는지 확인합니다.
     let done;
     let newHeadY;
     let newHeadX;
@@ -149,8 +144,7 @@ export class SnakeGame {
       done = newHeadY >= this.height_;
     }
 
-    // Check if the head goes over the snake's body, in which case the
-    // game will end.
+    // 머리가 몸통에 부딪혔는지 확인합니다.
     for (let i = 1; i < this.snakeSquares_.length; ++i) {
       if (this.snakeSquares_[i][0] === newHeadY &&
           this.snakeSquares_[i][1] === newHeadX) {
@@ -163,10 +157,10 @@ export class SnakeGame {
       return {reward: DEATH_REWARD, done, fruitEaten};
     }
 
-    // Update the position of the snake.
+    // 스네이크의 위치를 업데이트합니다.
     this.snakeSquares_.unshift([newHeadY, newHeadX]);
 
-    // Check if a fruit is eaten.
+    // 과일을 먹었는지 확인합니다.
     let reward = NO_FRUIT_REWARD;
     for (let i = 0; i < this.fruitSquares_.length; ++i) {
       const fruitYX = this.fruitSquares_[i];
@@ -179,8 +173,7 @@ export class SnakeGame {
       }
     }
     if (!fruitEaten) {
-      // Pop the tail off if and only if the snake didn't eat a fruit in this
-      // step.
+      // 과일을 먹지 않았다면 꼬리를 하나 줄입니다.
       this.snakeSquares_.pop();
     }
 
@@ -217,9 +210,9 @@ export class SnakeGame {
   }
 
   /**
-   * Get the current direction of the snake.
+   * 스네이크의 현재 방향을 반환합니다.
    *
-   * @returns {'l' | 'u' | 'r' | 'd'} Current direction of the snake.
+   * @returns {'l' | 'u' | 'r' | 'd'} 스네이크의 현재 방향
    */
   get snakeDirection() {
     return this.snakeDirection_;
@@ -227,17 +220,14 @@ export class SnakeGame {
 
   initializeSnake_() {
     /**
-     * @private {Array<[number, number]>} Squares currently occupied by the
-     * snake.
+     * @private {Array<[number, number]>} 스네이크가 현재 점유한 사각형
      *
-     * Each element is a length-2 array representing the [y, x] coordinates of
-     * the square. The array is ordered such that the first element is the
-     * head of the snake and the last one is the tail.
+     * 각 원소는 사각형의 [y, x] 좌표를 나타내는 길이가 2인 배열입니다.
+     * 배열의 첫 번째 원소는 스네이크의 머리이고 마지막은 꼬리입니다.
      */
     this.snakeSquares_ = [];
 
-    // Currently, the snake will start from a completely-straight and
-    // horizontally-posed state.
+    // 스네이크는 일직선이고 세로 방향으로 놓인 상태로 시작합니다.
     const y = getRandomInteger(0, this.height_);
     let x = getRandomInteger(this.initLen_ - 1, this.width_);
     for (let i = 0; i < this.initLen_; ++i) {
@@ -245,22 +235,20 @@ export class SnakeGame {
     }
 
     /**
-     * Current snake direction {'l' | 'u' | 'r' | 'd'}.
+     * 현재 스테이크 방향 {'l' | 'u' | 'r' | 'd'}.
      *
-     * Currently, the snake will start from a completely-straight and
-     * horizontally-posed state. The initial direction is always right.
+     * 스네이크는 일직선이고 세로 방향으로 놓인 상태로 시작합니다.
+     * 초기 방향은 항상 오른쪽입니다.
      */
     this.snakeDirection_ = 'r';
   }
 
   /**
-   * Generate a number of new fruits at a random locations.
+   * 랜덤한 위치에서 새로운 과일을 생성합니다.
    *
-   * The number of frtuis created is such that the total number of
-   * fruits will be equal to the numFruits specified during the
-   * construction of this object.
+   * 생성된 과일 개수는 생성자에서 지정한 numFruits와 같습니다.
    *
-   * The fruits will be created at unoccupied squares of the board.
+   * 과일은 비어있는 사각형에 생성됩니다.
    */
   makeFruits_() {
     if (this.fruitSquares_ == null) {
@@ -278,12 +266,12 @@ export class SnakeGame {
       }
     }
 
-    // Remove the squares occupied by the snake from the empty indices.
+    // 비어있는 인덱스에서 스네이크가 점유한 사각형을 제거합니다.
     const occupiedIndices = [];
     this.snakeSquares_.forEach(yx => {
       occupiedIndices.push(yx[0] * this.width_ + yx[1]);
     });
-    occupiedIndices.sort((a, b) => a - b);  // TODO(cais): Possible optimization?
+    occupiedIndices.sort((a, b) => a - b);
     for (let i = occupiedIndices.length - 1; i >= 0; --i) {
       emptyIndices.splice(occupiedIndices[i], 1);
     }
@@ -308,15 +296,12 @@ export class SnakeGame {
   }
 
   /**
-   * Get plain JavaScript representation of the game state.
+   * 게임 상태의 자바스크립트 표현
    *
-   * @return An object with two keys:
-   *   - s: {Array<[number, number]>} representing the squares occupied by
-   *        the snake. The array is ordered in such a way that the first
-   *        element corresponds to the head of the snake and the last
-   *        element corresponds to the tail.
-   *   - f: {Array<[number, number]>} representing the squares occupied by
-   *        the fruit(s).
+   * @return 두 개의 키를 가진 객체:
+   *   - s: {Array<[number, number]>} 스네이크가 점유한 사각형
+   *        배열의 첫 번째 원소는 스네이크의 머리이고 마지막은 꼬리입니다.
+   *   - f: {Array<[number, number]>} 과일이 점유한 사각형
    */
   getState() {
     return {
@@ -327,43 +312,39 @@ export class SnakeGame {
 }
 
 /**
- * Get the current state of the game as an image tensor.
+ * 게임의 현재 상태를 이미지 텐서로 반환합니다.
  *
- * @param {object | object[]} state The state object as returned by
- *   `SnakeGame.getState()`, consisting of two keys: `s` for the snake and
- *   `f` for the fruit(s). Can also be an array of such state objects.
- * @param {number} h Height.
- * @param {number} w With.
- * @return {tf.Tensor} A tensor of shape [numExamples, height, width, 2] and
- *   dtype 'float32'
- *   - The first channel uses 0-1-2 values to mark the snake.
- *     - 0 means an empty square.
- *     - 1 means the body of the snake.
- *     - 2 means the haed of the snake.
- *   - The second channel uses 0-1 values to mark the fruits.
- *   - `numExamples` is 1 if `state` argument is a single object or an
- *     array of a single object. Otherwise, it will be equal to the length
- *     of the state-object array.
+ * @param {object | object[]} state `SnakeGame.getState()`가 반환한 상태 객체.
+ *   두 개의 키를 가집니다: `s`는 스네이크이고 `f`는 과일입니다.
+ *   또한 상태 객체의 배열일 수도 있습니다.
+ * @param {number} h 높이
+ * @param {number} w 너비
+ * @return {tf.Tensor} [numExamples, height, width, 2] 크기의 `float32` 텐서
+ *   - 첫 번째 채널은 스네이크를 표시하기 위해 0-1-2 값을 사용합니다.
+ *     - 0: 빈 사각형
+ *     - 1: 스네이크 몸통
+ *     - 2: 스네이크 머리
+ *   - 두 번째 채널은 과일을 표시하기 위해 0-1 값을 사용합니다.
+ *   - `state` 매개변수가 하나의 객체이거나 객체의 배열이면 `numExamples`는 1입니다.
+ *     그렇지 않으면 상태 객체 배열의 길이와 같습니다.
  */
-
 export function getStateTensor(state, h, w) {
   if (!Array.isArray(state)) {
     state = [state];
   }
   const numExamples = state.length;
-  // TODO(cais): Maintain only a single buffer for efficiency.
   const buffer = tf.buffer([numExamples, h, w, 2]);
 
   for (let n = 0; n < numExamples; ++n) {
     if (state[n] == null) {
       continue;
     }
-    // Mark the snake.
+    // 스네이크를 표시합니다.
     state[n].s.forEach((yx, i) => {
       buffer.set(i === 0 ? 2 : 1, n, yx[0], yx[1], 0);
     });
 
-    // Mark the fruit(s).
+    // 과일을 표시합니다.
     state[n].f.forEach(yx => {
       buffer.set(1, n, yx[0], yx[1], 1);
     });

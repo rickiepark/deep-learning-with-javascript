@@ -19,15 +19,15 @@ import * as tf from '@tensorflow/tfjs';
 
 export function createDeepQNetwork(h, w, numActions) {
   if (!(Number.isInteger(h) && h > 0)) {
-    throw new Error(`Expected height to be a positive integer, but got ${h}`);
+    throw new Error(`높이는 양수여야 합니다. 현재 입력된 값: ${h}`);
   }
   if (!(Number.isInteger(w) && w > 0)) {
-    throw new Error(`Expected width to be a positive integer, but got ${w}`);
+    throw new Error(`너비이는 양수여야 합니다. 현재 입력된 값: ${w}`);
   }
   if (!(Number.isInteger(numActions) && numActions > 1)) {
     throw new Error(
-        `Expected numActions to be a integer greater than 1, ` +
-        `but got ${numActions}`);
+        `numActions는 1보다 큰 정수여야 합니다. ` +
+        `현재 입력된 값: ${numActions}`);
   }
 
   const model = tf.sequential();
@@ -61,17 +61,14 @@ export function createDeepQNetwork(h, w, numActions) {
 }
 
 /**
- * Copy the weights from a source deep-Q network to another.
+ * 심층 Q 네트워크의 가중치를 다른 네트워크로 복사합니다.
  *
- * @param {tf.LayersModel} destNetwork The destination network of weight
- *   copying.
- * @param {tf.LayersModel} srcNetwork The source network for weight copying.
+ * @param {tf.LayersModel} destNetwork 가중치를 복사할 목표 네트워크
+ * @param {tf.LayersModel} srcNetwork 가중치를 복사할 소스 네트워크
  */
 export function copyWeights(destNetwork, srcNetwork) {
   // https://github.com/tensorflow/tfjs/issues/1807:
-  // Weight orders are inconsistent when the trainable attribute doesn't
-  // match between two `LayersModel`s. The following is a workaround.
-  // TODO(cais): Remove the workaround once the underlying issue is fixed.
+  // 두 `LayersModel` 객체의 trainable 속성이 동일하지 않으면 가중치 순서가 맞지 않습니다.
   let originalDestNetworkTrainable;
   if (destNetwork.trainable !== srcNetwork.trainable) {
     originalDestNetworkTrainable = destNetwork.trainable;
@@ -80,12 +77,9 @@ export function copyWeights(destNetwork, srcNetwork) {
 
   destNetwork.setWeights(srcNetwork.getWeights());
 
-  // Weight orders are inconsistent when the trainable attribute doesn't
-  // match between two `LayersModel`s. The following is a workaround.
-  // TODO(cais): Remove the workaround once the underlying issue is fixed.
-  // `originalDestNetworkTrainable` is null if and only if the `trainable`
-  // properties of the two LayersModel instances are the same to begin
-  // with, in which case nothing needs to be done below.
+  // 두 `LayersModel` 객체의 trainable 속성이 동일하지 않으면 가중치 순서가 맞지 않습니다.
+  // 두 `LayersModel` 객체의 trainable 속성이 동일하면 `originalDestNetworkTrainable`이
+  // null이고 아무런 작업을 할 필요가 없습니다.
   if (originalDestNetworkTrainable != null) {
     destNetwork.trainable = originalDestNetworkTrainable;
   }

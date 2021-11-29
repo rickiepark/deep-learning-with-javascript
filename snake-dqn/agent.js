@@ -24,20 +24,17 @@ import { assertPositiveInteger } from './utils';
 
 export class SnakeGameAgent {
   /**
-   * Constructor of SnakeGameAgent.
+   * SnakeGameAgent의 생성자
    *
-   * @param {SnakeGame} game A game object.
-   * @param {object} config The configuration object with the following keys:
-   *   - `replayBufferSize` {number} Size of the replay memory. Must be a
-   *     positive integer.
-   *   - `epsilonInit` {number} Initial value of epsilon (for the epsilon-
-   *     greedy algorithm). Must be >= 0 and <= 1.
-   *   - `epsilonFinal` {number} The final value of epsilon. Must be >= 0 and
-   *     <= 1.
-   *   - `epsilonDecayFrames` {number} The # of frames over which the value of
-   *     `epsilon` decreases from `episloInit` to `epsilonFinal`, via a linear
-   *     schedule.
-   *   - `learningRate` {number} The learning rate to use during training.
+   * @param {SnakeGame} game 게임 객체
+   * @param {object} config 다음과 같은 키를 가진 설정 객체
+   *   - `replayBufferSize` {number} 재생 메모리 크기. 양수여야 합니다.
+   *   - `epsilonInit` {number} (입실론 그리디 알고리즘을 위한) 초기 입실론 값.
+   *     0보다 크거나 같고 1보다 작거나 같아야 합니다.
+   *   - `epsilonFinal` {number} 최종 입실론 값. 0보다 크거나 같고 1보다 작거나 같아야 합니다.
+   *   - `epsilonDecayFrames` {number} `episloInit`에서 `epsilonFinal` 까지
+   *     `epsilon` 값을 선형적으로 감소시킬 프레임 수
+   *   - `learningRate` {number} 훈련에서 사용할 학습률
    */
   constructor(game, config) {
     assertPositiveInteger(config.epsilonDecayFrames);
@@ -54,8 +51,7 @@ export class SnakeGameAgent {
         createDeepQNetwork(game.height,  game.width, NUM_ACTIONS);
     this.targetNetwork =
         createDeepQNetwork(game.height,  game.width, NUM_ACTIONS);
-    // Freeze taget network: it's weights are updated only through copying from
-    // the online network.
+    // 타깃 네트워크를 동결합니다: 온라인 네트워크에서 가중치를 업데이트합니다.
     this.targetNetwork.trainable = false;
 
     this.optimizer = tf.train.adam(config.learningRate);
@@ -73,10 +69,10 @@ export class SnakeGameAgent {
   }
 
   /**
-   * Play one step of the game.
+   * 게임의 한 스텝을 플레이합니다.
    *
-   * @returns {number | null} If this step leads to the end of the game,
-   *   the total reward from the game as a plain number. Else, `null`.
+   * @returns {number | null} 이 스텝이 게임을 종료시키면 게임의 총 보상이 반환되고
+   *   그렇지 않으면 `null`이 반환됩니다.
    */
   playStep() {
     this.epsilon = this.frameCount >= this.epsilonDecayFrames ?
@@ -84,14 +80,14 @@ export class SnakeGameAgent {
         this.epsilonInit + this.epsilonIncrement_  * this.frameCount;
     this.frameCount++;
 
-    // The epsilon-greedy algorithm.
+    // 입실론-그리디 알고리즘
     let action;
     const state = this.game.getState();
     if (Math.random() < this.epsilon) {
-      // Pick an action at random.
+      // 랜덤하게 행동을 선택합니다.
       action = getRandomAction();
     } else {
-      // Greedily pick an action based on online DQN output.
+      // 온라인 DQN의 출력을 기반으로 행동을 선택합니다.
       tf.tidy(() => {
         const stateTensor =
             getStateTensor(state, this.game.height, this.game.width)
@@ -121,15 +117,15 @@ export class SnakeGameAgent {
   }
 
   /**
-   * Perform training on a randomly sampled batch from the replay buffer.
+   * 재생 버퍼에서 랜덤하게 선택한 배치에서 훈련을 수행합니다.
    *
-   * @param {number} batchSize Batch size.
-   * @param {number} gamma Reward discount rate. Must be >= 0 and <= 1.
-   * @param {tf.train.Optimizer} optimizer The optimizer object used to update
-   *   the weights of the online network.
+   * @param {number} batchSize 배치 크기
+   * @param {number} gamma 보상 할인 계수. 0보다 크거나 같고 1보다 작거나 같아야 합니다.
+   * @param {tf.train.Optimizer} optimizer 온라인 네트워크의 가중치를 업데이트하기 위해
+   *   사용할 옵티마이저 객체
    */
   trainOnReplayBatch(batchSize, gamma, optimizer) {
-    // Get a batch of examples from the replay buffer.
+    // 재생 버퍼에서 샘플의 배치를 가져옵니다.
     const batch = this.replayMemory.sample(batchSize);
     const lossFunction = () => tf.tidy(() => {
       const stateTensor = getStateTensor(
@@ -151,12 +147,10 @@ export class SnakeGameAgent {
       return tf.losses.meanSquaredError(targetQs, qs);
     });
 
-    // Calculate the gradients of the loss function with repsect to the weights
-    // of the online DQN.
+    // 온라인 DQN의 가중치에 대한 손실 함수의 그레이디언트를 계산합니다.
     const grads = tf.variableGrads(lossFunction);
-    // Use the gradients to update the online DQN's weights.
+    // 이 그레이디언트를 사용해 온라인 DQN의 가중치를 업데이트합니다.
     optimizer.applyGradients(grads.grads);
     tf.dispose(grads);
-    // TODO(cais): Return the loss value here?
   }
 }

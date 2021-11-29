@@ -44,86 +44,81 @@ const trainProgress = document.getElementById('train-progress');
 
 const stepsContainer = document.getElementById('steps-container');
 
-// Module-global instance of policy network.
+// 정책 네트워크 객체
 let policyNet;
 let stopRequested = false;
 
 /**
- * Display a message to the info div.
+ * 정보 div에 메시지를 출력합니다.
  *
- * @param {string} message The message to be displayed.
+ * @param {string} message 출력할 메시지
  */
 function logStatus(message) {
   appStatus.textContent = message;
 }
 
-// Objects and functions to support display of cart pole status during training.
+// 훈련하는 동안 카트-막대 상태 출력을 위한 객체와 함수
 let renderDuringTraining = true;
 export async function maybeRenderDuringTraining(cartPole) {
   if (renderDuringTraining) {
     renderCartPole(cartPole, cartPoleCanvas);
-    await tf.nextFrame();  // Unblock UI thread.
+    await tf.nextFrame();
   }
 }
 
 /**
- * A function invoked at the end of every game during training.
+ * 훈련하는 동안 게임 끝마다 호출될 함수
  *
- * @param {number} gameCount A count of how many games has completed so far in
- *   the current iteration of training.
- * @param {number} totalGames Total number of games to complete in the current
- *   iteration of training.
+ * @param {number} gameCount 현재 훈련 반복에서 지금까지 완료된 게임 횟수
+ * @param {number} totalGames 현재 훈련 반복에서 완료해야할 전체 게임 횟수
  */
 export function onGameEnd(gameCount, totalGames) {
-  iterationStatus.textContent = `Game ${gameCount} of ${totalGames}`;
+  iterationStatus.textContent = `게임: ${gameCount} / ${totalGames}`;
   iterationProgress.value = gameCount / totalGames * 100;
   if (gameCount === totalGames) {
-    iterationStatus.textContent = 'Updating weights...';
+    iterationStatus.textContent = '가중치 업데이트 중...';
   }
 }
 
 /**
- * A function invokved at the end of a training iteration.
+ * 훈련 반복 끝에 호출될 함수
  *
- * @param {number} iterationCount A count of how many iterations has completed
- *   so far in the current round of training.
- * @param {*} totalIterations Total number of iterations to complete in the
- *   current round of training.
+ * @param {number} iterationCount 지금까지 완료된 반복 횟수
+ * @param {*} totalIterations 완료해야 할 전체 반복 횟수
  */
 function onIterationEnd(iterationCount, totalIterations) {
-  trainStatus.textContent = `Iteration ${iterationCount} of ${totalIterations}`;
+  trainStatus.textContent = `반복: ${iterationCount} / ${totalIterations}`;
   trainProgress.value = iterationCount / totalIterations * 100;
 }
 
-// Objects and function to support the plotting of game steps during training.
+// 훈련 도중 게임 스텝을 출력하기 위한 객체와 함수
 let meanStepValues = [];
 function plotSteps() {
   tfvis.render.linechart(stepsContainer, {values: meanStepValues}, {
-    xLabel: 'Training Iteration',
-    yLabel: 'Mean Steps Per Game',
+    xLabel: '훈련 반복',
+    yLabel: '게임 당 평균 스텝수',
     width: 400,
     height: 300,
   });
 }
 
 function disableModelControls() {
-  trainButton.textContent = 'Stop';
+  trainButton.textContent = '중지';
   testButton.disabled = true;
   deleteStoredModelButton.disabled = true;
 }
 
 function enableModelControls() {
-  trainButton.textContent = 'Train';
+  trainButton.textContent = '훈련';
   testButton.disabled = false;
   deleteStoredModelButton.disabled = false;
 }
 
 /**
- * Render the current state of the system on an HTML canvas.
+ * HTML 캔바스에 시스템의 현재 상태를 렌더링합니다.
  *
- * @param {CartPole} cartPole The instance of cart-pole system to render.
- * @param {HTMLCanvasElement} canvas The instance of HTMLCanvasElement on which
- *   the rendering will happen.
+ * @param {CartPole} cartPole 렌더링할 cart-pole 시스템 객체
+ * @param {HTMLCanvasElement} canvas 렌더링이 일어날 HTMLCanvasElement 객체
  */
 function renderCartPole(cartPole, canvas) {
   if (!canvas.style.display) {
@@ -138,7 +133,7 @@ function renderCartPole(cartPole, canvas) {
   context.clearRect(0, 0, canvas.width, canvas.height);
   const halfW = canvas.width / 2;
 
-  // Draw the cart.
+  // 카트 그리기
   const railY = canvas.height * 0.8;
   const cartW = cartPole.cartWidth * scale;
   const cartH = cartPole.cartHeight * scale;
@@ -151,7 +146,7 @@ function renderCartPole(cartPole, canvas) {
   context.rect(cartX - cartW / 2, railY - cartH / 2, cartW, cartH);
   context.stroke();
 
-  // Draw the wheels under the cart.
+  // 카트 아래 바퀴 그리기
   const wheelRadius = cartH / 4;
   for (const offsetX of [-1, 1]) {
     context.beginPath();
@@ -162,7 +157,7 @@ function renderCartPole(cartPole, canvas) {
     context.stroke();
   }
 
-  // Draw the pole.
+  // 막대 그리기
   const angle = cartPole.theta + Math.PI / 2;
   const poleTopX =
       halfW + scale * (cartPole.x + Math.cos(angle) * cartPole.length);
@@ -175,7 +170,7 @@ function renderCartPole(cartPole, canvas) {
   context.lineTo(poleTopX, poleTopY);
   context.stroke();
 
-  // Draw the ground.
+  // 트랙 그리기
   const groundY = railY + cartH / 2 + wheelRadius * 2;
   context.beginPath();
   context.strokeStyle = '#000000';
@@ -196,7 +191,7 @@ function renderCartPole(cartPole, canvas) {
     context.stroke();
   }
 
-  // Draw the left and right limits.
+  // 왼쪽과 오른쪽 경계 그리기
   const limitTopY = groundY - canvas.height / 2;
   context.beginPath();
   context.strokeStyle = '#ff0000';
@@ -213,11 +208,11 @@ function renderCartPole(cartPole, canvas) {
 async function updateUIControlState() {
   const modelInfo = await SaveablePolicyNetwork.checkStoredModelStatus();
   if (modelInfo == null) {
-    storedModelStatusInput.value = 'No stored model.';
+    storedModelStatusInput.value = '저장된 모델이 없습니다.';
     deleteStoredModelButton.disabled = true;
 
   } else {
-    storedModelStatusInput.value = `Saved@${modelInfo.dateSaved.toISOString()}`;
+    storedModelStatusInput.value = `저장@${modelInfo.dateSaved.toISOString()}`;
     deleteStoredModelButton.disabled = false;
     createModelButton.disabled = true;
   }
@@ -249,21 +244,21 @@ export async function setUpUI() {
             const num = Number.parseInt(v.trim());
             if (!(num > 0)) {
               throw new Error(
-                  `Invalid hidden layer sizes string: ` +
+                  `잘못된 은닉층 크기: ` +
                   `${hiddenLayerSizesInput.value}`);
             }
             return num;
           });
       policyNet = new SaveablePolicyNetwork(hiddenLayerSizes);
-      console.log('DONE constructing new instance of SaveablePolicyNetwork');
+      console.log('SaveablePolicyNetwork의 객체 생성 완료');
       await updateUIControlState();
     } catch (err) {
-      logStatus(`ERROR: ${err.message}`);
+      logStatus(`에러: ${err.message}`);
     }
   });
 
   deleteStoredModelButton.addEventListener('click', async () => {
-    if (confirm(`Are you sure you want to delete the locally-stored model?`)) {
+    if (confirm(`정말로 로컬에 저장된 모델을 삭제하시겠습니까?`)) {
       await policyNet.removeModel();
       policyNet = null;
       await updateUIControlState();
@@ -271,7 +266,7 @@ export async function setUpUI() {
   });
 
   trainButton.addEventListener('click', async () => {
-    if (trainButton.textContent === 'Stop') {
+    if (trainButton.textContent === '중지') {
       stopRequested = true;
     } else {
       disableModelControls();
@@ -279,26 +274,26 @@ export async function setUpUI() {
       try {
         const trainIterations = Number.parseInt(numIterationsInput.value);
         if (!(trainIterations > 0)) {
-          throw new Error(`Invalid number of iterations: ${trainIterations}`);
+          throw new Error(`잘못된 반복 횟수: ${trainIterations}`);
         }
         const gamesPerIteration = Number.parseInt(gamesPerIterationInput.value);
         if (!(gamesPerIteration > 0)) {
           throw new Error(
-              `Invalid # of games per iterations: ${gamesPerIteration}`);
+              `잘못된 반복당 게임수: ${gamesPerIteration}`);
         }
         const maxStepsPerGame = Number.parseInt(maxStepsPerGameInput.value);
         if (!(maxStepsPerGame > 1)) {
-          throw new Error(`Invalid max. steps per game: ${maxStepsPerGame}`);
+          throw new Error(`잘못된 게임 당 최대 스텝수: ${maxStepsPerGame}`);
         }
         const discountRate = Number.parseFloat(discountRateInput.value);
         if (!(discountRate > 0 && discountRate < 1)) {
-          throw new Error(`Invalid discount rate: ${discountRate}`);
+          throw new Error(`잘못된 할인 계수: ${discountRate}`);
         }
         const learningRate = Number.parseFloat(learningRateInput.value);
 
         logStatus(
-            'Training policy network... Please wait. ' +
-            'Network is saved to IndexedDB at the end of each iteration.');
+            '정책 네트워크 훈련 중... 잠시 기다려 주세요. ' +
+            '마지막 반복이 종료되면 네트워크를 IndexedDB에 저장합니다.');
         const optimizer = tf.train.adam(learningRate);
 
         meanStepValues = [];
@@ -312,25 +307,25 @@ export async function setUpUI() {
           const t1 = new Date().getTime();
           const stepsPerSecond = sum(gameSteps) / ((t1 - t0) / 1e3);
           t0 = t1;
-          trainSpeed.textContent = `${stepsPerSecond.toFixed(1)} steps/s`
+          trainSpeed.textContent = `${stepsPerSecond.toFixed(1)} 스텝/초`
           meanStepValues.push({x: i + 1, y: mean(gameSteps)});
-          console.log(`# of tensors: ${tf.memory().numTensors}`);
+          console.log(`텐서 개수: ${tf.memory().numTensors}`);
           plotSteps();
           onIterationEnd(i + 1, trainIterations);
-          await tf.nextFrame();  // Unblock UI thread.
+          await tf.nextFrame();
           await policyNet.saveModel();
           await updateUIControlState();
 
           if (stopRequested) {
-            logStatus('Training stopped by user.');
+            logStatus('훈련을 중지합니다.');
             break;
           }
         }
         if (!stopRequested) {
-          logStatus('Training completed.');
+          logStatus('훈련이 완료되었습니다.');
         }
       } catch (err) {
-        logStatus(`ERROR: ${err.message}`);
+        logStatus(`에러: ${err.message}`);
       }
       enableModelControls();
     }
@@ -348,22 +343,22 @@ export async function setUpUI() {
       tf.tidy(() => {
         const action = policyNet.getActions(cartPole.getStateTensor())[0];
         logStatus(
-            `Test in progress. ` +
-            `Action: ${action === 1 ? '<--' : ' -->'} (Step ${steps})`);
+            `테스트 진행 중. ` +
+            `행동: ${action === 1 ? '<--' : ' -->'} (Step ${steps})`);
         isDone = cartPole.update(action);
         renderCartPole(cartPole, cartPoleCanvas);
       });
-      await tf.nextFrame();  // Unblock UI thread.
+      await tf.nextFrame();
       if (stopRequested) {
         break;
       }
     }
     if (stopRequested) {
-      logStatus(`Test stopped by user after ${steps} step(s).`);
+      logStatus(`${steps} 스텝 후에 테스트가 중지되었습니다.`);
     } else {
-      logStatus(`Test finished. Survived ${steps} step(s).`);
+      logStatus(`테스트가 완료되었습니다. ${steps} 스텝을 진행했습니다.`);
     }
-    console.log(`# of tensors: ${tf.memory().numTensors}`);
+    console.log(`텐서 개수: ${tf.memory().numTensors}`);
     enableModelControls();
   });
 }

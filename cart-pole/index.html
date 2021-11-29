@@ -69,106 +69,103 @@ limitations under the License.
   <body>
     <div class="tfjs-example-container centered-container">
       <section class='title-area'>
-        <h1>TensorFlow.js: Reinforcement Learning</h1>
-        <p class='subtitle'>Train a model to balance a pole on a cart using reinforcement learning.</p>
+        <h1>TensorFlow.js 예제: 강화 학습 - 카트 막대 문제</h1>
+        <p class='subtitle'>카트 위에서 막대가 균형을 잡도록 강화 학습을 사용해 모델을 훈련합니다.</p>
       </section>
 
       <section>
-        <p class='section-head'>Description</p>
-        <p>This example illustrates how to use TensorFlow.js to perform simple
-          <a href="https://en.wikipedia.org/wiki/Reinforcement_learning">reinforcement learning</a> (RL).
-          Specifically, it showcases an implementation of the policy-gradient method in TensorFlow.js.
-          This implementation is used to solve the classic <a href="https://en.wikipedia.org/wiki/Inverted_pendulum">cart-pole
-            control problem.</a>
+        <p class='section-head'>설명</p>
+        <p>이 예제는 TensorFlow.js를 사용해 간단한
+          <a href="https://ko.wikipedia.org/wiki/%EA%B0%95%ED%99%94_%ED%95%99%EC%8A%B5">강화 학습</a>(RL)을 수행하는 방법을 보여줍니다.
+          구체적으로 TensorFlow.js로 정책 그레이디언트 방법을 구현합니다.
+          이 구현을 사용해 전통적인 <a href="https://en.wikipedia.org/wiki/Inverted_pendulum">카트-막대 제어 문제</a>를 해결합니다.
         </p>
 
         <p>
-          Through <span class='in-type'>self play</span> the agent will learn to balance
-          the pole for as many <span class=out-example>steps</span> as it can.
+          <span class='in-type'>스스로 플레이</span>하면서 에이전트는 가능한 많은
+          <span class=out-example>스텝</span> 동안 막대가 균형을 잡는 방법을 학습합니다.
         </p>
       </section>
 
       <section>
-        <p class='section-head'>Instructions</p>
+        <p class='section-head'>방법</p>
         <p></p>
         <ul>
           <li>
-            Choose a hidden layer size and click "Create Model".
+            은닉 층 크기를 고르고 "모델 생성"를 클릭하세요.
           </li>
           <li>
-            Select training parameters and then click "Train".
+            훈련 파라미터를 선택한 다음 "훈련" 버튼을 클릭하세요.
           </li>
           <li>
-            Note that while the model is training it periodically saves a copy of itself
-            to local browser storage, this mean you can refresh the page and continue training
-            from the last save point. If at any point you want to start training from scratch, click
-            "Delete stored Model".
+            모델이 훈련되는 동안 주기적으로 로컬 브라우저 저장소에 모델의 복사본을 저장합니다.
+            페이지를 새로 고침하더라도 마지막 저장 지점부터 훈련을 이어갈 수 있다는 것을 의미합니다.
+            처음부터 모델을 훈련하고 싶다면 "저장된 모델 삭제" 버튼을 클릭하세요.
           </li>
           <li>
-            Once the model has finished training you can click "Test" to see how many 'steps' the agent
-            can balance the pole for. You can also click 'Stop' to pause the training after the current iteration
-            ends if you want to test the model sooner.
+            모델 훈련이 끝나면 "테스트" 버튼을 클릭하여 에이전트가 얼마나 많은 스텝 동안 막대의 균형을 잡는지 볼 수 있습니다.
+            현재 훈련 반복 이후에 바로 모델을 테스트하고 싶다면 "중지" 버튼을 클릭하여 훈련을 멈출 수 있습니다.
           </li>
-          <li>During training and testing a small simulation of the agent behaviour will be rendered.</li>
+          <li>훈련과 테스트를 할 때 에이전트 동작의 시뮬레이션이 화면에 렌더링됩니다.</li>
         </ul>
       </section>
 
       <section>
-        <p class='section-head'>Status</p>
+        <p class='section-head'>상태</p>
         <div>
-          <span id="app-status">Standing by.</span>
+          <span id="app-status">대기 중.</span>
         </div>
 
         <div>
-          <p class='section-head'>Initialize Model</p>
+          <p class='section-head'>모델 초기화</p>
           <div class="with-cols">
             <div class="with-rows init-model">
               <div class="input-div with-rows">
-                <label class="input-label">Hidden layer size(s) (e.g.: "256", "32,64"):</label>
+                <label class="input-label">은닉층 크기 (예를 들면: "256", "32,64"):</label>
                 <input id="hidden-layer-sizes" value="128"></input>
               </div>
-              <button id="create-model" disabled="true">Create model</button>
+              <button id="create-model" disabled="true">모델 생성</button>
             </div>
             <div class="with-rows init-model">
               <div class="input-div with-rows">
-                <label class="input-label">Locally-stored model</label>
+                <label class="input-label">로컬에 저장된 모델</label>
                 <input id="stored-model-status" value="N/A" disabled="true" readonly="true"></input>
               </div>
-              <button id="delete-stored-model" disabled="true">Delete stored model</button>
+              <button id="delete-stored-model" disabled="true">저장된 모델 삭제</button>
             </div>
           </div>
 
-          <p class='section-head'>Training Parameters</p>
+          <p class='section-head'>훈련 파라미터</p>
           <div class="with-rows">
             <div class="input-div">
-              <label class="input-label">Number of iterations:</label>
+              <label class="input-label">반복 횟수:</label>
               <input id="num-iterations" value="20"></input>
             </div>
             <div class="input-div">
-              <label class="input-label">Games per iteration:</label>
+              <label class="input-label">반복 당 게임수:</label>
               <input id="games-per-iteration" value="20"></input>
             </div>
             <div class="input-div">
-              <label class="input-label">Max. steps per game:</label>
+              <label class="input-label">게임 당 최대 스텝수:</label>
               <input id="max-steps-per-game" value="500"></input>
             </div>
             <div class="input-div">
-              <label class="input-label">Reward discount rate:</label>
+              <label class="input-label">보상 할인 계수:</label>
               <input id="discount-rate" value="0.95"></input>
             </div>
             <div class="input-div">
-              <label class="input-label">Learning rate:</label>
+              <label class="input-label">학습률:</label>
               <input id="learning-rate" value="0.05"></input>
             </div>
             <div class="input-div">
-              <label class="input-label">Render during training:</label>
+              <label class="input-label">훈련하는 동안 렌더링하기:</label>
               <input type="checkbox" id="render-during-training" />
-              <span class="note">Uncheck me to speed up training.</span>
+              <span class="note">훈련 속도를 높이려면 체크하지 마세요.</span>
             </div>
 
             <div class="buttons-section">
-              <button id="train" disabled="true">Train</button>
-              <button id="test" disabled="true">Test</button>
+              <button id="train" disabled="true">훈련</button>
+              <button id="test" disabled="true">테스트</button>
             </div>
           </div>
 
@@ -177,19 +174,19 @@ limitations under the License.
       </section>
 
       <section>
-        <p class='section-head'>Training Progress</p>
+        <p class='section-head'>훈련 과정</p>
         <div class="with-rows">
           <div class="status">
-            <label id="train-status">Iteration #:</label>
+            <label id="train-status">반복 #:</label>
             <progress value="0" max="100" id="train-progress"></progress>
           </div>
           <div class="status">
-            <label id="iteration-status">Game #:</label>
+            <label id="iteration-status">게임 #:</label>
             <progress value="0" max="100" id="iteration-progress"></progress>
           </div>
 
           <div class="status">
-            <label>Training speed:</label>
+            <label>훈련 속도:</label>
             <span id="train-speed" class="status-span"></span>
           </div>
           <div id="steps-container"></div>
@@ -197,7 +194,7 @@ limitations under the License.
       </section>
 
       <section>
-        <p class='section-head'>Simulation</p>
+        <p class='section-head'>시뮬레이션</p>
         <div>
           <canvas id="cart-pole-canvas" height="150px" width="500px"></canvas>
         </div>

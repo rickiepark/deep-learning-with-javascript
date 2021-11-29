@@ -16,30 +16,29 @@
  */
 
 /**
- * Implementation based on: http://incompleteideas.net/book/code/pole.c
+ * 다음을 기반으로 구현했습니다: http://incompleteideas.net/book/code/pole.c
  */
 
 /**
- * Cart-pole system simulator.
+ * Cart-pole 시스템 시뮬레이터
  *
- * In the control-theory sense, there are four state variables in this system:
+ * 제어 이론 입장에서 이 시스템은 네 가지 상태 변수가 있습니다:
  *
- *   - x: The 1D location of the cart.
- *   - xDot: The velocity of the cart.
- *   - theta: The angle of the pole (in radians). A value of 0 corresponds to
- *     a vertical position.
- *   - thetaDot: The angular velocity of the pole.
+ *   - x: 카트의 1D 위치
+ *   - xDot: 카트의 속도
+ *   - theta: 막대의 각도 (라디안). 0이 수직 위치에 해당합니다.
+ *   - thetaDot: 막대의 각속도
  *
- * The system is controlled through a single action:
+ * 이 시스템은 하나의 행동으로 제어됩니다:
  *
- *   - leftward or rightward force.
+ *   - 왼쪽으로 미는 힘이나 오른쪽으로 미는 힘
  */
 export class CartPole {
   /**
-   * Constructor of CartPole.
+   * CartPole의 생성자
    */
   constructor() {
-    // Constants that characterize the system.
+    // 시스템의 상수
     this.gravity = 9.8;
     this.massCart = 1.0;
     this.massPole = 0.1;
@@ -49,9 +48,9 @@ export class CartPole {
     this.length = 0.5;
     this.poleMoment = this.massPole * this.length;
     this.forceMag = 10.0;
-    this.tau = 0.02;  // Seconds between state updates.
+    this.tau = 0.02;  // 상태 업데이트 시간 간격
 
-    // Threshold values, beyond which a simulation will be marked as failed.
+    // 시뮬레이션을 실패로 표시하기 위한 임곗값
     this.xThreshold = 2.4;
     this.thetaThreshold = 12 / 360 * 2 * Math.PI;
 
@@ -59,32 +58,32 @@ export class CartPole {
   }
 
   /**
-   * Set the state of the cart-pole system randomly.
+   * cart-pole 시스템의 상태를 랜덤하게 설정합니다.
    */
   setRandomState() {
-    // The control-theory state variables of the cart-pole system.
-    // Cart position, meters.
+    // cart-pole 시스템의 제어 이론 상태 변수
+    // 카트 위치 (미터)
     this.x = Math.random() - 0.5;
-    // Cart velocity.
+    // 카트 속도
     this.xDot = (Math.random() - 0.5) * 1;
-    // Pole angle, radians.
+    // 막대 각도 (라디안)
     this.theta = (Math.random() - 0.5) * 2 * (6 / 360 * 2 * Math.PI);
-    // Pole angle velocity.
+    // 막대 각속도
     this.thetaDot =  (Math.random() - 0.5) * 0.5;
   }
 
   /**
-   * Get current state as a tf.Tensor of shape [1, 4].
+   * [1, 4] 크기의 tf.Tensor로 현재 상태를 반환합니다.
    */
   getStateTensor() {
     return tf.tensor2d([[this.x, this.xDot, this.theta, this.thetaDot]]);
   }
 
   /**
-   * Update the cart-pole system using an action.
-   * @param {number} action Only the sign of `action` matters.
-   *   A value > 0 leads to a rightward force of a fixed magnitude.
-   *   A value <= 0 leads to a leftward force of the same fixed magnitude.
+   * 행동을 사용해 cart-pole 시스템을 업데이트합니다.
+   * @param {number} action `action`의 부호만 중요합니다.
+   *   0보다 크면 고정된 크기의 오른쪽으로 미는 힘입니다.
+   *   0보다 작거나 같으면 고정된 크기의 왼쪽으로 미는 힘입니다.
    */
   update(action) {
     const force = action > 0 ? this.forceMag : -this.forceMag;
@@ -100,7 +99,7 @@ export class CartPole {
          (4 / 3 - this.massPole * cosTheta * cosTheta / this.totalMass));
     const xAcc = temp - this.poleMoment * thetaAcc * cosTheta / this.totalMass;
 
-    // Update the four state variables, using Euler's metohd.
+    // 오일러 방법을 사용해 네 개의 상태 변수를 업데이트합니다.
     this.x += this.tau * this.xDot;
     this.xDot += this.tau * xAcc;
     this.theta += this.tau * this.thetaDot;
@@ -110,10 +109,10 @@ export class CartPole {
   }
 
   /**
-   * Determine whether this simulation is done.
+   * 시뮬레이션이 끝났는지 결정합니다.
    *
-   * A simulation is done when `x` (position of the cart) goes out of bound
-   * or when `theta` (angle of the pole) goes out of bound.
+   * `x`(카트의 위치)가 경계를 넘어가거나
+   * `theta`(막대의 각도)가 임계점을 넘어가면 시뮬레이션이 종료됩니다.
    *
    * @returns {bool} Whether the simulation is done.
    */

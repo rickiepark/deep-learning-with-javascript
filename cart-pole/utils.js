@@ -16,25 +16,25 @@
  */
 
 /**
- * Calculate the mean of an Array of numbers.
+ * 숫자 배열의 평균을 계산합니다.
  *
  * @param {number[]} xs
- * @returns {number} The arithmetic mean of `xs`
+ * @returns {number} `xs`의 평균
  */
 export function mean(xs) {
   return sum(xs) / xs.length;
 }
 
 /**
- * Calculate the sum of an Array of numbers.
+ * 숫자 배열의 합을 계산합니다.
  *
  * @param {number[]} xs
- * @returns {number} The sum of `xs`.
- * @throws Error if `xs` is empty.
+ * @returns {number} `xs`의 합
+ * @throws `xs`가 비어있으면 에러가 발생합니다.
  */
 export function sum(xs) {
   if (xs.length === 0) {
-    throw new Error('Expected xs to be a non-empty Array.');
+    throw new Error('xs가 비어있습니다.');
   } else {
     return xs.reduce((x, prev) => prev + x);
   }

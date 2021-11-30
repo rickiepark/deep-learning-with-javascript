@@ -134,7 +134,6 @@ describe('buildModel', () => {
     const vocabSize = 3;
     const embeddingSize = 8;
     expect(() => buildModel('nonsensical', maxLen, vocabSize, embeddingSize))
-        .toThrowError('Unsupported model type: nonsensical');
+        .toThrowError('지원하지 않는 모델 종류입니다: nonsensical');
   });
 });
-

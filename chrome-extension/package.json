@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Use tfjs model.predict in a chrome extension",
   "scripts": {
-    "copy": "cp src/content.js dist/src/ && cp src/imagenet_classes.js dist/src/",
+    "copy": "cp src/content.js dist/src/ && cp src/imagenet_classes.js dist/src/ && cp src/manifest.json dist/",
     "build": "parcel build src/background.js -d dist/src/ -o background --no-minify && npm run copy",
     "watch": "npm run copy && parcel watch src/background.js --hmr-hostname localhost -d dist/src/ -o background"
   },

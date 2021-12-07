@@ -26,18 +26,17 @@ const TOPK_PREDICTIONS = 10;
 
 let mobilenet;
 const mobilenetDemo = async () => {
-  status('Loading model...');
+  status('모델 로딩 중...');
 
   mobilenet = await tf.loadGraphModel(MOBILENET_MODEL_PATH, {fromTFHub: true});
 
-  // Warmup the model. This isn't necessary, but makes the first prediction
-  // faster. Call `dispose` to release the WebGL memory allocated for the return
-  // value of `predict`.
+  // 모델을 워밍업합니다. 필수적이진 않지만 첫 번째 추론 속도를 높일 수 있습니다.
+  // `dispose` 메서드를 호출하여 `predict` 메서드에서 반환한 값에 할당된 WebGL 메모리를 해제합니다.
   mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
 
   status('');
 
-  // Make a prediction through the locally hosted cat.jpg.
+  // 로컬에 있는 cat.jpg 이미지를 사용해 추론을 만듭니다.
   const catElement = document.getElementById('cat');
   if (catElement.complete && catElement.naturalHeight !== 0) {
     predict(catElement);
@@ -53,50 +52,46 @@ const mobilenetDemo = async () => {
 };
 
 /**
- * Given an image element, makes a prediction through mobilenet returning the
- * probabilities of the top K classes.
+ * 이미지 요소에서 top-k 클래스 확률을 반환하는 mobilenet을 사용해 예측을 만듭니다.
  */
 async function predict(imgElement) {
-  status('Predicting...');
+  status('예측 중...');
 
-  // The first start time includes the time it takes to extract the image
-  // from the HTML and preprocess it, in additon to the predict() call.
+  // 첫 번째 시작 시간에는 predict() 호출 이외에도 HTML에서 이미지 추출과 전처리 시간이 포함됩니다.
   const startTime1 = performance.now();
-  // The second start time excludes the extraction and preprocessing and
-  // includes only the predict() call.
+  // 두 번째 시작 시간에서는 추출과 전처리 시간을 제외하고 predict() 호출만 포함합니다.
   let startTime2;
   const logits = tf.tidy(() => {
-    // tf.browser.fromPixels() returns a Tensor from an image element.
+    // tf.browser.fromPixels()은 이미지 요소에서 텐서를 반환합니다.
     const img = tf.cast(tf.browser.fromPixels(imgElement), 'float32');
 
     const offset = tf.scalar(127.5);
-    // Normalize the image from [0, 255] to [-1, 1].
+    // [0, 255] 사이에서 [-1, 1] 사이로 이미지를 정규화합니다.
     const normalized = img.sub(offset).div(offset);
 
-    // Reshape to a single-element batch so we can pass it to predict.
+    // predict() 메서드에 전달할 수 있도록 하나의 원소를 가진 배치로 크기를 바꿉니다.
     const batched = normalized.reshape([1, IMAGE_SIZE, IMAGE_SIZE, 3]);
 
     startTime2 = performance.now();
-    // Make a prediction through mobilenet.
+    // mobilenet으로 예측을 만듭니다.
     return mobilenet.predict(batched);
   });
 
-  // Convert logits to probabilities and class names.
+  // 로짓을 확률과 클래스 이름으로 바꿉니다.
   const classes = await getTopKClasses(logits, TOPK_PREDICTIONS);
   const totalTime1 = performance.now() - startTime1;
   const totalTime2 = performance.now() - startTime2;
-  status(`Done in ${Math.floor(totalTime1)} ms ` +
-      `(not including preprocessing: ${Math.floor(totalTime2)} ms)`);
+  status(`걸린 시간: ${Math.floor(totalTime1)} ms ` +
+      `(전처리 제외한 시간: ${Math.floor(totalTime2)} ms)`);
 
-  // Show the classes in the DOM.
+  // DOM에 클래스를 출력합니다.
   showResults(imgElement, classes);
 }
 
 /**
- * Computes the probabilities of the topK classes given logits by computing
- * softmax to get probabilities and then sorting the probabilities.
- * @param logits Tensor representing the logits from MobileNet.
- * @param topK The number of top predictions to show.
+ * 주어진 로짓을 사용해 소프트맥스를 계산하여 확률을 얻고 소팅하여 top-k 클래스의 확률을 구합니다.
+ * @param logits MobileNet에서 반환한 로짓 텐서
+ * @param topK 출력할 최상위 예측 개수
  */
 export async function getTopKClasses(logits, topK) {
   const values = await logits.data();
@@ -163,15 +158,15 @@ function showResults(imgElement, classes) {
 const filesElement = document.getElementById('files');
 filesElement.addEventListener('change', evt => {
   let files = evt.target.files;
-  // Display thumbnails & issue call to predict each image.
+  // 썸네일을 출력하고 각 이미지에 대해 예측을 수행합니다.
   for (let i = 0, f; f = files[i]; i++) {
-    // Only process image files (skip non image files)
+    // 이미지 파일만 처리합니다(이미지가 아닌 파일은 건너 뜁니다).
     if (!f.type.match('image.*')) {
       continue;
     }
     let reader = new FileReader();
     reader.onload = e => {
-      // Fill the image & call predict.
+      // 이미지를 채우고 예측을 수행합니다.
       let img = document.createElement('img');
       img.src = e.target.result;
       img.width = IMAGE_SIZE;
@@ -179,7 +174,7 @@ filesElement.addEventListener('change', evt => {
       img.onload = () => predict(img);
     };
 
-    // Read in the image file as a data URL.
+    // 데이터 URL로 이미지 파일을 읽습니다.
     reader.readAsDataURL(f);
   }
 });

@@ -18,7 +18,7 @@ limitations under the License.
 <!doctype html>
 
 <head>
-  <title>TensorFlow.js: Using a pretrained MobileNet</title>
+  <title>TensorFlow.js 예제: 사전 훈련된 MobileNet 사용하기</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../shared/tfjs-examples.css" />
@@ -53,31 +53,32 @@ limitations under the License.
 <body>
   <div class="tfjs-example-container">
     <section class='title-area'>
-      <h1>TensorFlow.js: Using a pretrained MobileNet</h1>
+      <h1>TensorFlow.js 예제: 사전 훈련된 MobileNet 사용하기</h1>
     </section>
 
     <section>
-      <p class='section-head'>Description</p>
+      <p class='section-head'>설명</p>
       <p>
-        This demo uses the pretrained MobileNet_25_224 model from Keras which you can find
-        <a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5">here</a>.
+        이 데모는 케라스에서 사전 훈련된 MobileNet_25_224 모델을 사용합니다.
+        이 모델은 <a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5">여기</a>에서 다운로드할 수 있습니다.
 
-        It is not trained to recognize human faces. For best performance, upload images of objects
-        like piano, coffee mugs, bottles, etc. You can see all the objects types it has been trained to recognize in <a
-          href="https://github.com/tensorflow/tfjs-examples/blob/master/mobilenet/imagenet_classes.js">imagenet_classes.js</a>.
+        이 모델은 사람의 얼굴을 인식하도록 훈련되지 않았습니다.
+        가장 좋은 성능을 얻으려면 피아노, 커피 머그, 병 같은 물체 이미지를 업로드하세요.
+        <a href="https://github.com/tensorflow/tfjs-examples/blob/master/mobilenet/imagenet_classes.js">imagenet_classes.js</a>에서
+        훈련에 사용한 물체를 모두 볼 수 있습니다.
       </p>
     </section>
 
     <section>
-      <p class='section-head'>Status</p>
+      <p class='section-head'>상태</p>
       <div id="status"></div>
     </section>
 
     <section>
-      <p class='section-head'>Model Output</p>
+      <p class='section-head'>모델 출력</p>
 
       <div id="file-container" style="display: none">
-        Upload an image: <input type="file" id="files" name="files[]" multiple />
+        이미지 업로드하기: <input type="file" id="files" name="files[]" multiple />
       </div>
 
       <div id="predictions"></div>

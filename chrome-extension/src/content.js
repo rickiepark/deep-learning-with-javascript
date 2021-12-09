@@ -15,46 +15,42 @@
  * =============================================================================
  */
 
-// class name for all text nodes added by this script.
+// 이 스크립트가 추가할 모든 텍스트 노드의 이름
 const TEXT_DIV_CLASSNAME = 'tfjs_mobilenet_extension_text';
-// Thresholds for LOW_CONFIDENCE_THRESHOLD and HIGH_CONFIDENCE_THRESHOLD,
-// controlling which messages are printed.
+// 어떤 메시지를 출력할지 제어하는 LOW_CONFIDENCE_THRESHOLD와 HIGH_CONFIDENCE_THRESHOLD를 위한 임곗값
 const HIGH_CONFIDENCE_THRESHOLD = 0.5;
 const LOW_CONFIDENCE_THRESHOLD = 0.1;
 
 /**
- * Produces a short text string summarizing the prediction
- * Input prediction should be a list of {className: string, prediction: float}
- * objects.
- * @param {[{className: string, predictions: number}]} predictions ordered list
- *     of objects, each with a prediction class and score
+ * 예측을 요약하는 짧은 문자열을 만듭니다.
+ * 입력은 {className: string, prediction: float} 객체의 리스트입니다.
+ * @param {[{className: string, predictions: number}]} predictions 예측 클래스와 점수로 구성된 객체의 정렬된 리스트
  */
 function textContentFromPrediction(predictions) {
   if (!predictions || predictions.length < 1) {
-    return `No prediction 🙁`;
+    return `예측이 없습니다 🙁`;
   }
-  // Confident.
+  // 확신함
   if (predictions[0].probability >= HIGH_CONFIDENCE_THRESHOLD) {
     return `😄 ${predictions[0].className}!`;
   }
-  // Not Confident.
+  // 확신 없음
   if (predictions[0].probability >= LOW_CONFIDENCE_THRESHOLD &&
       predictions[0].probability < HIGH_CONFIDENCE_THRESHOLD) {
-    return `${predictions[0].className}?...\n Maybe ${
+    return `${predictions[0].className}?...\n 아마도 ${
         predictions[1].className}?`;
   }
-  // Very not confident.
+  // 거의 확신하지 못함
   if (predictions[0].probability < LOW_CONFIDENCE_THRESHOLD) {
-    return `😕  ${predictions[0].className}????...\n Maybe ${
+    return `😕  ${predictions[0].className}????...\n 아마도 ${
         predictions[1].className}????`;
   }
 }
 
 /**
- *  Returns a list of all DOM image elements pointing to the provided srcUrl.
- * @param {string} srcUrl which url to search for, including 'http(s)://'
- *     prefix.
- * @returns {HTMLElement[]} all img elements pointing to the provided srcUrl
+ * src URL에 지정된 모든 DOM 이미지 요소를 반환합니다.
+ * @param {string} srcUrl 'http(s)://'를 포함하여 탐색할 url
+ * @returns {HTMLElement[]} srcUrl에서 지정한 모든 img 요소
  */
 function getImageElementsWithSrcUrl(srcUrl) {
   const imgElArr = Array.from(document.getElementsByTagName('img'));
@@ -63,10 +59,7 @@ function getImageElementsWithSrcUrl(srcUrl) {
 }
 
 /**
- * Finds and removes all of the text predictions added by this extension, and
- * removes them from the DOM. Note: This does not undo the containerization.  A
- * cleaner implementation would move the image node back out of the container
- * div.
+ * 이 확장 프로그램이 추가한 모든 텍스트 예측을 찾아 삭제합니다. 그리고 DOM에서 제거합니다.
  */
 function removeTextElements() {
   const textDivs = document.getElementsByClassName(TEXT_DIV_CLASSNAME);
@@ -75,14 +68,11 @@ function removeTextElements() {
   }
 }
 
-
-
 /**
- *  Moves the provided imgNode into a container div, and adds a text div as a
- * peer.  Styles the container div and text div to place the text
- * on top of the image.
- * @param {HTMLElement} imgNode Which image node to write content on.
- * @param {string} textContent What text to write on the image.
+ * imgNode를 콘테이너 div 안으로 이동하고 텍스트 div를 추가합니다.
+ * 이미지 위에 텍스트를 쓰기 위해 콘테이너 div와 텍스트 div 스타일을 조정합니다.
+ * @param {HTMLElement} imgNode 콘텐츠를 쓸 이미지 노드
+ * @param {string} textContent 이미지에 쓸 텍스트
  */
 function addTextElementToImageNode(imgNode, textContent) {
   const originalParent = imgNode.parentElement;
@@ -104,24 +94,23 @@ function addTextElementToImageNode(imgNode, textContent) {
   text.style['-webkit-text-fill-color'] = 'white';
   text.style['-webkit-text-stroke-width'] = '1px';
   text.style['-webkit-text-stroke-color'] = 'black';
-  // Add the containerNode as a peer to the image, right next to the image.
+  // 이미지 바로 옆에 콘테이너 노드를 추가합니다.
   originalParent.insertBefore(container, imgNode);
-  // Move the imageNode to inside the containerNode;
+  // 이미지 노드를 콘테이너 노드 안으로 옮깁니다.
   container.appendChild(imgNode);
-  // Add the text node right after the image node;
+  // 이미지 노드 다음에 텍스트 노드를 추가합니다.
   container.appendChild(text);
   text.textContent = textContent;
 }
 
-// Add a listener to hear from the content.js page when the image is through
-// processing.  The message should contin an action, a url, and predictions (the
-// output of the classifier)
+// 이미지가 처리될 때 content.js 페이지에서 듣기 위한 리스너를 추가합니다.
+// 메시지는 action, url, prediction(분류기 출력)을 포함해야 합니다.
 //
 // message: {action, url, predictions}
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message && message.action === 'IMAGE_CLICK_PROCESSED' && message.url &&
       message.predictions) {
-    // Get the list of images with this srcUrl.
+    // url에 해당하는 이미지 목록을 가져옵니다.
     const imgElements = getImageElementsWithSrcUrl(message.url);
     for (const imgNode of imgElements) {
       const textContent = textContentFromPrediction(message.predictions);
@@ -130,12 +119,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Set up a listener to remove all annotations if the user clicks
-// the left mouse button.  Otherwise, they can easily cloud up the
-// window.
+// 사용자가 왼쪽 마우스 버튼을 클릭하면 모든 주석을 제거하기 위한 리스너를 준비합니다.
+// 그렇지 않으면 쉽게 윈도우가 복잡해 집니다.
 window.addEventListener('click', clickHandler, false);
 /**
- * Removes text elements from DOM on a left click.
+ * 왼쪽 클릭할 때 DOM에서 텍스트 요소를 제거합니다.
  */
 function clickHandler(mouseEvent) {
   if (mouseEvent.button == 0) {

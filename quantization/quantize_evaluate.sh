@@ -15,57 +15,56 @@
 # limitations under the License.
 # =============================================================================
 
-# Quantize a specified model saved from the command `yarn train` and evaluates
-# the test accuracy under different levels of quantization (8-bit and 16-bit).
+# `yarn train` 명령으로 저장한 모델을 양자화하고
+# 여러 양자화 방식(8비트와 16비트)에서 테스트 정확도를 평가합니다.
 
 set -e
 
 MODEL_NAME=$1
 if [[ -z "${MODEL_NAME}" ]]; then
-  echo "Usage: quantize_evaluate <MODEL_NAME>"
+  echo "사용법: quantize_evaluate <MODEL_NAME>"
   exit 1
 fi
 
-# Make sure model is available.
+# 모델 경로
 MODEL_ROOT="models/${MODEL_NAME}"
 MODEL_PATH="${MODEL_ROOT}/original"
 MODEL_JSON_PATH="${MODEL_PATH}/model.json"
 
-# Make sure pip3 is available.
+# pip3 확인
 if [[ -z "$(which pip3)" ]]; then
-  echo "ERROR: Cannot find pip3 on path."
-  echo "       Make sure you have python and pip3 installed."
+  echo "에러: pip3를 찾을 수 없습니다."
+  echo "       파이썬과 pip3를 설치하세요."
   exit 1
 fi
 
 if [[ -z "$(which virtualenv)" ]]; then
-  echo "Installing virtualenv..."
+  echo "virtualenv 설치 중..."
   pip3 install virtualenv
 fi
 
 VENV_DIR="$(mktemp -d)_venv"
-echo "Creating virtualenv at ${VENV_DIR} ..."
+echo "${VENV_DIR}에 가상 환경을 만듭니다..."
 virtualenv "${VENV_DIR}"
 source "${VENV_DIR}/bin/activate"
 
 pip3 install tensorflowjs
 
 if [[ "${MODEL_NAME}" == "MobileNetV2" ]]; then
-  # Save the MobilNetV2 model first.
+  # 먼저 MobilNetV2 모델을 저장합니다.
   if [[ ! -f "${MODEL_JSON_PATH}" ]]; then
     python save_mobilenetv2.py
   fi
 fi
 
 if [[ ! -f "${MODEL_JSON_PATH}" ]]; then
-  echo "ERROR: Cannot find model JSON file at ${MODEL_JSON_PATH}"
-  echo "       Make sure you train and save a model with the"
-  echo "       following command first: yarn train"
+  echo "에러: ${MODEL_JSON_PATH}에서 JSON 파일을 찾을 수 없습니다."
+  echo "       먼저 yarn train 명령으로 모델을 훈련하고 저장하세요."
   rm -rf "${VENV_DIR}"
   exit 1
 fi
 
-# Perform 16-bit quantization.
+# 16비트 양자화 수행
 MODEL_PATH_16BIT="${MODEL_ROOT}/quantized-16bit"
 rm -rf "${MODEL_PATH_16BIT}"
 tensorflowjs_converter \
@@ -74,7 +73,7 @@ tensorflowjs_converter \
     --quantization_bytes 2 \
     "${MODEL_JSON_PATH}" "${MODEL_PATH_16BIT}"
 
-# Perform 8-bit quantization.
+# 8비트 양자화 수행
 MODEL_PATH_8BIT="${MODEL_ROOT}/quantized-8bit"
 rm -rf "${MODEL_PATH_8BIT}"
 tensorflowjs_converter \
@@ -83,13 +82,13 @@ tensorflowjs_converter \
     --quantization_bytes 1 \
     "${MODEL_JSON_PATH}" "${MODEL_PATH_8BIT}"
 
-# Clean up the virtualenv
+# virtualenv 삭제
 rm -rf "${VENV_DIR}"
 
 yarn
 
 if [[ "${MODEL_NAME}" == "MobileNetV2" ]]; then
-  # Download the data required for evaluating MobileNetV2.
+  # MobileNetV2 평가에 필요한 데이터를 다운로드합니다.
   IMAGENET_1000_SAMPLES_DIR="imagenet-1000-samples"
 
   if [[ ! -d "${IMAGENET_1000_SAMPLES_DIR}" ]]; then
@@ -100,32 +99,31 @@ if [[ "${MODEL_NAME}" == "MobileNetV2" ]]; then
     rm imagenet-1000-samples.tar.gz
   fi
 
-  # Evaluate accuracy under no quantization (i.e., full 32-bit weight precision).
-  echo "=== Accuracy evalution: No quantization ==="
+  # 양자화를 사용하지 않았을 때 정확도를 평가합니다(즉, 32비트 정밀도의 가중치).
+  echo "=== 정확도 평가: 양자화 없음 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_JSON_PATH}" \
       "${IMAGENET_1000_SAMPLES_DIR}"
 
-
-  # Evaluate accuracy under 16-bit quantization.
-  echo "=== Accuracy evalution: 16-bit quantization ==="
+  # 16비트 양자화의 정확도를 평가합니다.
+  echo "=== 정확도 평가: 16비트 양자화 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_PATH_16BIT}/model.json" \
       "${IMAGENET_1000_SAMPLES_DIR}"
 
-  # Evaluate accuracy under 8-bit quantization.
-  echo "=== Accuracy evalution: 8-bit quantization ==="
+  # 8비트 양자화의 정확도를 평가합니다.
+  echo "=== 정확도 평가: 8비트 양자화 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_PATH_8BIT}/model.json" \
       "${IMAGENET_1000_SAMPLES_DIR}"
 else
-  # Evaluate accuracy under no quantization (i.e., full 32-bit weight precision).
-  echo "=== Accuracy evalution: No quantization ==="
+  # 양자화를 사용하지 않았을 때 정확도를 평가합니다(즉, 32비트 정밀도의 가중치).
+  echo "=== 정확도 평가: 양자화 없음 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_JSON_PATH}"
 
-  # Evaluate accuracy under 16-bit quantization.
-  echo "=== Accuracy evalution: 16-bit quantization ==="
+  # 16비트 양자화의 정확도를 평가합니다.
+  echo "=== 정확도 평가: 16비트 양자화 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_PATH_16BIT}/model.json"
 
-  # Evaluate accuracy under 8-bit quantization.
-  echo "=== Accuracy evalution: 8-bit quantization ==="
+  # 8비트 양자화의 정확도를 평가합니다.
+  echo "=== 정확도 평가: 8비트 양자화 ==="
   yarn "eval-${MODEL_NAME}" "${MODEL_PATH_8BIT}/model.json"
 fi
 
@@ -137,23 +135,23 @@ function calc_gzip_ratio() {
   ZIP_RATIO="$(awk "BEGIN { print(${ORIGINAL_FILES_SIZE_BYTES} / ${TARBALL_SIZE}) }")"
   rm "${TEMP_TARBALL}"
 
-  echo "  Total file size: ${ORIGINAL_FILES_SIZE_BYTES} bytes"
-  echo "  gzipped tarball size: ${TARBALL_SIZE} bytes"
-  echo "  gzip ratio: ${ZIP_RATIO}"
+  echo "  전체 파일 크기: ${ORIGINAL_FILES_SIZE_BYTES} bytes"
+  echo "  gzip 압축 크기: ${TARBALL_SIZE} bytes"
+  echo "  gzip 비율: ${ZIP_RATIO}"
   echo
 }
 
 echo
-echo "=== gzip ratios ==="
+echo "=== gzip 비율 ==="
 
-# Calculate the gzip ratio of the original (unquantized) model.
-echo "Original model (No quantization):"
+# 원본 모델의 gzip 비율을 계산합니다.
+echo "원본 모델 (양자화 없음):"
 calc_gzip_ratio "${MODEL_PATH}"
 
-# Calculate the gzip ratio of the 16-bit-quantized model.
-echo "16-bit-quantized model:"
+# 16비트 양자화된 모델의 gzip 비율을 계산합니다.
+echo "16비트 양자화 모델:"
 calc_gzip_ratio "${MODEL_PATH_16BIT}"
 
-# Calculate the gzip ratio of the 8-bit-quantized model.
-echo "8-bit-quantized model:"
+# 8비트 양자화된 모델의 gzip 비율을 계산합니다.
+echo "8비트 양자화 모델:"
 calc_gzip_ratio "${MODEL_PATH_8BIT}"

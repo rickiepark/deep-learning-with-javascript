@@ -23,28 +23,26 @@ const ProgressBar = require('progress');
 
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
-// The `tf` module will be loaded dynamically depending on whether
-// `--gpu` is specified in the command-line flags.
+// `--gpu` 플래그 지정에 따라 동적으로 tf를 임포트합니다.
 let tf;
 
 function parseArgs() {
   const parser = new argparse.ArgumentParser({
     description:
-        'TensorFlow.js Quantization Example: Evaluating an MNIST Model',
+        'TensorFlow.js 양자화 예제: MobileNetV2 모델 평가하기',
     addHelp: true
   });
   parser.addArgument('modelSavePath', {
     type: 'string',
-    help: 'Path at which the model to be evaluated is saved.'
+    help: '평가할 모델을 저장할 경로'
   });
   parser.addArgument('imageDir', {
     type: 'string',
-    help: 'Path at the directory under which the test images are stored.'
+    help: '테스트 이미지가 저장된 경로'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use tfjs-node-gpu for evaluation (requires CUDA-enabled ' +
-    'GPU and supporting drivers and libraries.'
+    help: 'tfjs-node-gpu를 사용해 평가합니다(CUDA 가능 GPU, 지원 드라이버와 라이브러리가 필요).'
   });
   return parser.parseArgs();
 }
@@ -78,17 +76,17 @@ async function main() {
     tf = require('@tensorflow/tfjs-node');
   }
 
-  console.log(`Loading model from ${args.modelSavePath}...`);
+  console.log(`${args.modelSavePath}에서 모델 로딩 중...`);
   const model = await tf.loadLayersModel(`file://${args.modelSavePath}`);
 
   const imageH = model.inputs[0].shape[2];
   const imageW = model.inputs[0].shape[2];
 
-  // Load the images into a tensor.
+  // 이미지를 텐서로 로딩합니다.
   const dirContent = fs.readdirSync(args.imageDir);
   dirContent.sort();
   const numImages = dirContent.length;
-  console.log(`Reading ${numImages} images...`);
+  console.log(`${numImages} 개의 이미지 읽는 중...`);
   const progressBar = new ProgressBar('[:bar]', {
     total: numImages,
     width: 80,
@@ -107,7 +105,7 @@ async function main() {
   }
 
   const stackedImageTensor = tf.concat(imageTensors, 0);
-  console.log('Calling model.predict()...');
+  console.log('model.predict() 호출 중...');
   const t0 = new Date().getTime();
   const {top1Indices, top5Indices} = tf.tidy(() => {
     const probs = model.predict(stackedImageTensor, {batchSize: 64});
@@ -116,7 +114,7 @@ async function main() {
       top5Indices: probs.topk(5).indices.arraySync()
     };
   });
-  console.log(`model.predict() took ${(new Date().getTime() - t0).toFixed(2)} ms`);
+  console.log(`model.predict() 걸린 시간: ${(new Date().getTime() - t0).toFixed(2)} ms`);
 
   let numCorrectTop1 = 0;
   let numCorrectTop5 = 0;
@@ -133,10 +131,10 @@ async function main() {
     }
   });
   console.log(
-      `#total = ${numImages}; #correct(top-1) = ${numCorrectTop1}; ` +
-      `accuracy(top-1) = ${(numCorrectTop1 / numImages).toFixed(3)}; ` +
-      `#correct(top-5) = ${numCorrectTop5}; ` +
-      `accuracy(top-5) = ${(numCorrectTop5 / numImages).toFixed(3)}\n`);
+      `총 개수 = ${numImages}; top-1 정답 개수 = ${numCorrectTop1}; ` +
+      `top-1 정확도 = ${(numCorrectTop1 / numImages).toFixed(3)}; ` +
+      `top-5 정답 개수 = ${numCorrectTop5}; ` +
+      `top-5 정확도 = ${(numCorrectTop5 / numImages).toFixed(3)}\n`);
   tf.dispose([imageTensors, stackedImageTensor]);
 }
 

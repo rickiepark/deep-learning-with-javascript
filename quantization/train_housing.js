@@ -23,45 +23,42 @@ import * as shelljs from 'shelljs';
 import {getDatasetStats, getNormalizedDatasets} from './data_housing';
 import {createModel} from './model_housing';
 
-// tf will be imported dynamically depending on whether the flag `--gpu` is
-// set.
+// `--gpu` 플래그 지정에 따라 동적으로 tf를 임포트합니다.
 let tf;
 
 function parseArgs() {
   const parser = new argparse.ArgumentParser({
-    description: 'TensorFlow.js Quantization Example: Training an MLP for the ' +
-    'California Housing Price dataset.',
+    description: 'TensorFlow.js 양자화 예제: 캘리포니아 주택 가격 모델 평가하기',
     addHelp: true
   });
   parser.addArgument('--epochs', {
     type: 'int',
     defaultValue: 200,
-    help: 'Number of epochs to train the model for.'
+    help: '모델을 훈련할 에포크 횟수'
   });
   parser.addArgument('--batchSize', {
     type: 'int',
     defaultValue: 128,
-    help: 'Batch size to be used during model training.'
+    help: '훈련에 사용할 배치 크기'
   });
   parser.addArgument('--validationSplit', {
     type: 'float',
     defaultValue: 0.2,
-    help: 'Validation split used for training.'
+    help: '훈련에 사용할 검증 세트 비율'
   });
   parser.addArgument('--evaluationSplit', {
     type: 'float',
     defaultValue: 0.1,
-    help: 'Validation split used for testing after training (evaluation).'
+    help: '훈련 후 평가에 사용할 테스트 세트 비율'
   });
   parser.addArgument('--modelSavePath', {
     type: 'string',
     defaultValue: './models/housing/original',
-    help: 'Path to which the model will be saved after training.'
+    help: '훈련 후 모델을 저장할 경로'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use tfjs-node-gpu for training (requires CUDA-enabled ' +
-    'GPU and supporting drivers and libraries.'
+    help: 'tfjs-node-gpu를 사용해 평가합니다(CUDA 가능 GPU, 지원 드라이버와 라이브러리가 필요).'
   });
   return parser.parseArgs();
 }
@@ -92,15 +89,15 @@ async function main() {
 
   const evalOutput = model.evaluate(evalXs, evalYs);
   console.log(
-      `\nEvaluation result:\n` +
-      `  Loss = ${evalOutput.dataSync()[0].toFixed(6)}`);
+      `\n평가 결과:\n` +
+      `  손실 = ${evalOutput.dataSync()[0].toFixed(6)}`);
 
   if (args.modelSavePath != null) {
     if (!fs.existsSync(path.dirname(args.modelSavePath))) {
       shelljs.mkdir('-p', path.dirname(args.modelSavePath));
     }
     await model.save(`file://${args.modelSavePath}`);
-    console.log(`Saved model to path: ${args.modelSavePath}`);
+    console.log(`모델 저장 경로: ${args.modelSavePath}`);
   }
 }
 

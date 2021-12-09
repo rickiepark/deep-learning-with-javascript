@@ -20,24 +20,21 @@ import * as argparse from 'argparse';
 import {getDatasetStats, getNormalizedDatasets} from './data_housing';
 import {compileModel} from './model_housing';
 
-// tf will be imported dynamically depending on whether the flag `--gpu` is
-// set.
+// `--gpu` 플래그 지정에 따라 동적으로 tf를 임포트합니다.
 let tf;
 
 function parseArgs() {
   const parser = new argparse.ArgumentParser({
-    description: 'TensorFlow.js Quantization Example: Training an MLP for the ' +
-    'California Housing Price dataset.',
+    description: 'TensorFlow.js 양자화 예제: 캘리포니아 주택 가격 모델 평가하기',
     addHelp: true
   });
   parser.addArgument('modelSavePath', {
     type: 'string',
-    help: 'Path at which the model to be evaluated is saved.'
+    help: '평가할 모델을 저장할 경로'
   });
   parser.addArgument('--gpu', {
     action: 'storeTrue',
-    help: 'Use tfjs-node-gpu for training (requires CUDA-enabled ' +
-    'GPU and supporting drivers and libraries.'
+    help: 'tfjs-node-gpu를 사용해 평가합니다(CUDA 가능 GPU, 지원 드라이버와 라이브러리가 필요).'
   });
   return parser.parseArgs();
 }
@@ -60,18 +57,18 @@ async function main() {
           count, featureMeans, featureStddevs, labelMean, labelStddev,
           validationSplit, evaluationSplit);
 
-  console.log(`Loading model from ${args.modelSavePath}...`);
+  console.log(`${args.modelSavePath}에서 모델 로딩 중...`);
   const model = await tf.loadLayersModel(`file://${args.modelSavePath}`);
   compileModel(model);
 
-  console.log(`Performing evaluation...`);
+  console.log(`평가 수행 중...`);
   const t0 = tf.util.now();
   const evalOutput = model.evaluate(evalXs, evalYs);
   const t1 = tf.util.now();
-  console.log(`\nEvaluation took ${(t1 - t0).toFixed(2)} ms.`);
+  console.log(`\n평가 시간: ${(t1 - t0).toFixed(2)} ms.`);
   console.log(
-      `\nEvaluation result:\n` +
-      `  Loss = ${evalOutput.dataSync()[0].toFixed(6)}`);
+      `\n평가 결과:\n` +
+      `  손실 = ${evalOutput.dataSync()[0].toFixed(6)}`);
 }
 
 if (require.main === module) {

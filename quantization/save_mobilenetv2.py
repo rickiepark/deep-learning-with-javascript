@@ -13,7 +13,7 @@
 # limitations under the License.
 # =============================================================================
 
-# This script saves MobileNetV2 in TensorFlow.js LayersModel format.
+# 이 스크립트는 TensorFlow.js LayersModel 포맷으로 MobileNetV2 모델을 저장합니다.
 
 import os
 
@@ -29,7 +29,7 @@ def main():
   if not os.path.isdir(model_save_dir):
     os.makedirs(model_save_dir)
   tfjs.converters.save_keras_model(model, MODEL_SAVE_PATH)
-  print('Saved MobileNetV2 in tfjs_layer_model format at %s' % MODEL_SAVE_PATH)
+  print('tfjs_layer_model 포맷으로 MobileNetV2을 저장했습니다: %s' % MODEL_SAVE_PATH)
 
 
 if __name__ == '__main__':

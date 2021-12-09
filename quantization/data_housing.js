@@ -25,16 +25,14 @@ export const featureColumns = [
 const labelColumn = 'median_house_value';
 
 /**
- * Calculate the column-by-column statistics of the housing CSV dataset.
+ * 주택 CSV 데이터셋의 열 통계를 계산합니다.
  *
- * @return An object consisting of the following fields:
- *   count {number} Number of data rows.
- *   featureMeans {number[]} Each element is the arithmetic mean over all values
- *     in a column. Ordered by the feature columns in the CSV dataset.
- *   featureStddevs {number[]} Each element is the standard deviation over all
- *     values in a column. Ordered by the columsn in the in the CSV dataset.
- *   labelMean {number} The arithmetic mean of the label column.
- *   labeStddev {number} The standard deviation of the albel column.
+ * @return 다음 필드를 포함하는 객체:
+ *   count {number} 행 개수
+ *   featureMeans {number[]} 각 원소는 열의 평균. CSV 데이터셋에 있는 특성 열 순서대로 정렬됨.
+ *   featureStddevs {number[]} 각 원소는 열의 표준편차. CSV 데이터셋에 있는 특성 열 순서대로 정렬됨.
+ *   labelMean {number} 레이블 열의 평균
+ *   labeStddev {number} 레이블 열의 표준편차
  */
 export async function getDatasetStats() {
   const featureValues = {};
@@ -59,7 +57,7 @@ export async function getDatasetStats() {
     }
     featureColumns.forEach(feature => {
       if (item.value.xs[feature] == null) {
-        throw new Error(`item #{count} lacks feature ${feature}`);
+        throw new Error(`#{count}번째 샘플에 ${feature} 특성이 누락되어 있습니다.`);
       }
       featureValues[feature].push(item.value.xs[feature]);
     });
@@ -90,43 +88,38 @@ export async function getDatasetStats() {
 }
 
 /**
- * Get a dataset with the features and label z-normalized,
- * the dataset is split into three xs-ys tensor pairs: for training,
- * validation and evaluation.
+ * z 점수로 정규화한 특성과 레이블 데이터셋을 반환합니다.
+ * 훈련, 검증, 평가를 위해 세 개의 xs-ys 텐서 쌍으로 데이터셋을 분할합니다.
  *
- * @param {number} count Number of rows in the CSV dataset, computed beforehand.
- * @param {{[feature: string]: number}} featureMeans Arithmetic means of the
- *   features. Use for normalization.
- * @param {[feature: string]: number} featureStddevs Standard deviations of the
- *   features. Used for normalization.
- * @param {number} labelMean Arithmetic mean of the label. Used for
- *   normalization.
- * @param {number} labelStddev Standard deviation of the label. Used for
- *   normalization.
- * @param {number} validationSplit Validation spilt, must be >0 and <1.
- * @param {number} evaluationSplit Evaluation split, must be >0 and <1.
- * @returns An object consisting of the following keys:
- *   trainXs {tf.Tensor} training feature tensor
- *   trainYs {tf.Tensor} training label tensor
- *   valXs {tf.Tensor} validation feature tensor
- *   valYs {tf.Tensor} validation label tensor
- *   evalXs {tf.Tensor} evaluation feature tensor
- *   evalYs {tf.Tensor} evaluation label tensor.
+ * @param {number} count CSV 데이터셋의 행 개수
+ * @param {{[feature: string]: number}} featureMeans 특성의 평균
+ * @param {[feature: string]: number} featureStddevs 특성의 표준편차
+ * @param {number} labelMean 레이블의 평균
+ * @param {number} labelStddev 레이블의 표준편차
+ * @param {number} validationSplit 검증 분할 비율. 0< 그리고 <1
+ * @param {number} evaluationSplit 평가 분할 비율. 0< 그리고 <1
+ * @returns 다음 키를 포함한 객체:
+ *   trainXs {tf.Tensor} 훈련 특성 텐서
+ *   trainYs {tf.Tensor} 훈련 레이블 텐서
+ *   valXs {tf.Tensor} 검증 특성 텐서
+ *   valYs {tf.Tensor} 검증 레이블 텐서
+ *   evalXs {tf.Tensor} 평가 특성 텐서
+ *   evalYs {tf.Tensor} 평가 레이블 텐서
  */
 export async function getNormalizedDatasets(
     count, featureMeans, featureStddevs, labelMean, labelStddev,
     validationSplit, evaluationSplit) {
   tf.util.assert(
       validationSplit > 0 && validationSplit < 1,
-      () => `validationSplit is expected to be >0 and <1, ` +
-            `but got ${validationSplit}`);
+      () => `validationSplit는 0보다 크고 1보다 작아야 합니다. ` +
+            `입력된 값: ${validationSplit}`);
   tf.util.assert(
       evaluationSplit > 0 && evaluationSplit < 1,
-      () => `evaluationSplit is expected to be >0 and <1, ` +
-            `but got ${evaluationSplit}`);
+      () => `evaluationSplit는 0보다 크고 1보다 작아야 합니다. ` +
+            `입력된 값: ${evaluationSplit}`);
   tf.util.assert(
       validationSplit + evaluationSplit < 1,
-      () => `The sum of validationSplit and evaluationSplit exceeds 1`);
+      () => `validationSplit와 evaluationSplit의 합이 1보다 작아야 합니다.`);
 
   const dataset = tf.data.csv(HOUSING_CSV_URL, {
     columnConfigs: {
@@ -157,8 +150,7 @@ export async function getNormalizedDatasets(
   const xs = tf.tensor2d(featureValues, [count, featureColumns.length]);
   const ys = tf.tensor2d(labelValues, [count, 1]);
 
-  // Set random seed to fix shuffling order and therefore to fix the
-  // training, validation, and evaluation splits.
+  // 셔플링 순서를 고정해서 훈련, 검증, 평가 분할을 일정하게 유지하기 위해 랜덤 시드를 지정합니다.
   Math.seedrandom('1337');
   tf.util.shuffle(indices);
 

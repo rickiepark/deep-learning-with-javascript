@@ -1,182 +1,156 @@
-# TensorFlow.js Example: Effects of Post-Training Weight Quantization
+# TensorFlow.js 예제: 훈련 후 가중치 양자화 효과
 
-Post-training quantization is a model-size reducing technique useful for
-deploying model on the web and in storage-limited environments such as
-mobile devices. TensorFlow.js's
-[converter module](https://github.com/tensorflow/tfjs-converter)
-supports reducing the numeric precision of weights to 16-bit and 8-bit
-integers after the completion of the model training, which leads to
-approximately 50% and 75% reduction in model size, respectively.
+훈련 후 양자화는 모델을 웹이나 모바일 장치 같이 저장 공간이 부족한 환경에 배포할 때 유용한 모델 크기 감소 기술입니다.
+TensorFlow.js의 [컨버터 모듈](https://github.com/tensorflow/tfjs-converter)은
+훈련이 끝난 모델의 가중치 정밀도를 16비트와 8비트 정수로 줄일 수 있습니다.
+이는 모델 크기를 약 50%와 75% 정도로 줄입니다.
 
-The following figure provides an intuitive understanding of the degree
-to which weight values are discretized under the 16- and 8-bit quantization
-regimes. The figure is based on a zoomed-in view of a sinusoidal wave.
+다음은 16비트 양자화와 8비트 양자화의 가중치 값 이산화를 이해하기 위한 그림입니다.
+이 그림은 sine 곡선을 확대한 것입니다.
 
-![Weight quantization: 16-bit and 8-bit](./quantization.png)
+![가중치 양자화: 16비트와 8비트](./quantization.png)
 
-This example focuses on how such quantization of weights affect the
-model's predicton accuracy.
+이 예제는 가중치 양자화가 모델의 예측 정확도에 미치는 영향에 초점을 맞춥니다.
 
-## What's in this demo
+## 데모 소개
 
-This demo on quantization consists of four examples:
-1. housing: this demo evaluates the effect of quantization on the accuracy
-   of a multi-layer perceptron regression model.
-2. mnist: this demo evaluates the effect of quantization on the accuracy
-   of a relatively small deep convnet trained on the MNIST handwritten digits
-   dataset. Without quantization, the convnet can achieve close-to-perfect
-   (i.e., ~99.5%) test accuracy.
-3. fashion-mnist: this demo evaluates the effect of quantization on the
-   accuracy of another small deep convnet traind on a problem slightly harder
-   than MNIST. In particular, it is based on the Fashion MNIST dataset. The
-   original, non-quantized model has an accuracy of 92%-93%.
-4. MobileNetV2: this demo evaluates quantized and non-quantizd versions of
-   MobeilNetV2 (width = 1.0) on a sample of 1000 images from the
-   [ImageNet](http://www.image-net.org/) dataset. This subset is based on the
-   sampling done by https://github.com/ajschumacher/imagen.
+이 양자화 데모는 네 개의 예제로 구성됩니다:
+1. housing: 이 데모는 다층 퍼셉트론 회귀 모델의 성능에 대한 양자화 영향을 평가합니다.
+2. mnist: 이 데모는 MNIST 손글씨 숫자 데이터셋에서 훈련한 비교적 작은 심층 합성곱 신경망의 정확도에 대한
+   양자화의 요과를 평가합니다. 양자화를 사용하지 않고 이 합성곱 신경망은
+   거의 완벽한(즉 ~99.5%) 테스트 정확도를 달성할 수 있습니다.
+3. fashion-mnist: 이 데모는 MNIST 보다 조금 더 어려운 패션 MNIST 데이터셋에서 훈련한 작은 심층 합성곱 신경망의
+   정확도에 대한 양자화의 영향을 평가합니다. 양자화를 적용하지 않은 원본 모델의 정확도는 92~93%입니다.
+4. MobileNetV2: 이 데모는 MobeilNetV2(너비 = 1.0)의 양자화된 버전과 양자화되지 않은 버전을
+   [ImageNet](http://www.image-net.org/) 데이터셋에 있는 1,000개 이미지로 평가합니다.
+   이 샘플은 https://github.com/ajschumacher/imagen 을 기반으로 합니다.
 
-In the first three demos, quantizing the weights to 16 or 8 bits does not
-have any significant effect on the accuracy. In the MobileNetV2 demo, however,
-quantizing the weights to 8 bits leads to a significant deterioration in
-accuracy, as measured by the top-1 and top-5 accuracies. See example results
-in the table below:
+처음 세 개의 데모에서 16비트나 8비트 가중치 양자화는 정확도에 큰 영향을 미치지 않습니다.
+하지만 MobileNetV2 데모에서는 8비트 가중치 양자화는 top-1과 top-5 정확도를 크게 감소시킵니다.
+다음 표에 결과가 나타나있습니다:
 
-| Dataset and Model      | Original (no-quantization) | 16-bit quantization | 8-bit quantization |
+| 데이터셋과 모델      | 원본 (양자화 없음) | 16비트 양자화 | 8비트 양자화 |
 | ---------------------- | -------------------------- | ------------------- | ------------------ |
-| housing: multi-layer regressor  |  MAE=0.311984     | MAE=0.311983        | MAE=0.312780       |
-| MNIST: convnet         | accuracy=0.9952            | accuracy=0.9952     | accuracy=0.9952    |
-| Fashion MNIST: convnet | accuracy=0.922             | accuracy=0.922      | accuracy=0.9211    |
-| MobileNetV2            | top-1 accuracy=0.618; top-5 accuracy=0.788 | top-1 accuracy=0.624; top-5 accuracy=0.789 | top-1 accuracy=0.280; top-5 accuracy=0.490 |
+| housing: MLP 회귀 모델  |  MAE=0.311984     | MAE=0.311983        | MAE=0.312780       |
+| MNIST: 합성곱 신경망         | 정확도=0.9952            | 정확도=0.9952     | 정확도=0.9952    |
+| 패션 MNIST: 합성곱 신경망 | 정확도=0.922             | 정확도=0.922      | 정확도=0.9211    |
+| MobileNetV2            | top-1 정확도=0.618; top-5 정확도=0.788 | top-1 정확도=0.624; top-5 정확도=0.789 | top-1 정확도=0.280; top-5 정확도=0.490 |
 
-MAE Stands for mean absolute error (lower is better).
+MAE는 평균 절댓값 오차입니다(낮을수록 좋습니다).
 
-They demonstrate different effects of the same quantization technique
-on different problems.
+이 데모는 동일한 양자화 기술이 문제마다 미치는 영향이 다르다는 것을 보여줍니다.
 
-### Effect of quantization on gzip compression ratio
+### gzip 압축 비율에 대한 양자화 효과
 
-An additional factor affecting the over-the-wire size of models
-under quantization is the gzip ratio. This factor should be taken into
-account because gzip is widely used to transmit large files over the
-web.
+양자화로 모델의 크기가 영향을 받는 또 다른 요소는 gzip 비율입니다.
+gzip이 웹에서 대용량 파일을 전송하는데 널리 사용되기 때문에 중요하게 고려되어야 합니다.
 
-Most non-quantized models (i.e.,
-models with 32-bit float weights) are not very compressible, due to
-the noise-like variation in their weight parameters, which contain
-few repeating patterns. The same is true for models with weights
-quantized at the 16-bit precision. However, when models are quantized
-at the 8-bit precision, there is usually a significant increase in the
-gzip compression ratio. The `yarn quantize-and-evalute*` commands in
-this example (see sections below) not only evaluates accuracy, but also
-calculates the gzip compression ratio of model files under different
-levels of quantization. The table below summarizes the compression ratios
-from the four models covered by this example (higher is better):
+양자화되지 않은 대부분의 모델(즉 32비트 부동 소수점 가중치를 가진 모델)은 가중치 파라미터에
+잡음과 같은 변동이 있어 반복되는 패턴이 드물기 때문에 압축률이 좋지 않습니다.
+16비트 정밀도로 양자화된 가중치를 가진 모델도 마찬가지입니다.
+하지만 8비트 정밀도로 모델을 양자화하면 gzip 압출 비율을 크게 높일 수 있습니다.
+이 예제의 `yarn quantize-and-evalute*` 명령(아래 참조)은 정확도를 평가할 뿐만 아니라
+여러 양자화 수준에서 모델 파일의 gzip 압축 비율을 계산합니다.
+다음 테이블은 이 예제에서 다루는 네 가지 모델의 압축 비율을 요약한 것입니다(높을수록 좋습니다):
 
-gzip compression ratio:
-`(total size of the model.json and weight files) / (size of gzipped tar ball)`
+gzip 압축 비율:
+`(model.json과 가중치 파일의 전체 크기) / (gzip 압축된 크기)`
 
-| Model      | Original (no-quantization) | 16-bit quantization | 8-bit quantization |
+| 모델      | 원본 (양자화 없음) | 16비트 양자화 | 8비트 양자화 |
 | ---------- | -------------------------- | ------------------- | ------------------ |
-| housing: multi-layer regressor  | 1.121 | 1.161               | 1.388              |
-| MNIST: convnet         | 1.082          | 1.037               | 1.184              |
-| Fashion MNIST: convnet | 1.078          | 1.048               | 1.229              |
+| housing: MLP 회귀 모델  | 1.121 | 1.161               | 1.388              |
+| MNIST: 합성곱 신경망         | 1.082          | 1.037               | 1.184              |
+| 패션 MNIST: 합성곱 신경망 | 1.078          | 1.048               | 1.229              |
 | MobileNetV2            | 1.085          | 1.063               | 1.271              |
 
-## Running the housing quantization demo
+## housing 양자화 데모
 
-In preparation, do:
+준비:
 
 ```sh
 yarn
 ```
 
-To run the train and save the model from scratch, do:
+처음부터 모델을 훈련하고 저장하기:
 ```sh
 yarn train-housing
 ```
 
-If you are running on a Linux system that is [CUDA compatible](https://www.tensorflow.org/install/install_linux), try installing the GPU:
+[CUDA 지원](https://www.tensorflow.org/install/install_linux) GPU를 가진 리눅스 시스템에서 실행한다면
+다음 명령을 사용하세요:
 
 ```sh
 yarn train-housing --gpu
 ```
 
-To perform quantization on the model saved in the `yarn train` step
-and evaluate the effects on the model's test accuracy, do:
+`yarn train` 단계에서 저장한 모델에 양자화를 수행하고 모델의 테스트 정확도에 대한 영향을 평가하기:
 
 ```
 yarn quantize-and-evaluate-housing
 ```
 
-## Running the MNIST quantization demo
+## MNIST 양자화 데모
 
-In preparation, do:
+준비:
 
 ```sh
 yarn
 ```
 
-To run the train and save the model from scratch, do:
+처음부터 모델을 훈련하고 저장하기:
 ```sh
 yarn train-mnist
 ```
 
-or with CUDA acceleration:
+또는 CUDA 가속 사용하기:
 
 ```sh
 yarn train-mnist --gpu
 ```
 
-To perform quantization on the model saved in the `yarn train` step
-and evaluate the effects on the model's test accuracy, do:
+`yarn train` 단계에서 저장한 모델에 양자화를 수행하고 모델의 테스트 정확도에 대한 영향을 평가하기:
 
 ```
 yarn quantize-and-evaluate-mnist
 ```
 
-The command also calculates the ratio of gzip compression for the
-model's saved artifacts under the three different levels of quantization
-(no-quantization, 16-bit, and 8-bit).
+이 명령은 여러 가지 양자화 수준(양자화 없음, 16비트, 8비트)에서 모델 파일의 gzip 압축 비율을 계산합니다.
 
-## Running the Fashion-MNIST quantization demo
+## 패션-MNIST 양자화 데모
 
-In preparation, do:
+준비:
 
 ```sh
 yarn
 ```
 
-To run the train and save the model from scratch, do:
+처음부터 모델을 훈련하고 저장하기:
 ```sh
 yarn train-fashion-mnist
 ```
 
-or with CUDA acceleration:
+또는 CUDA 가속 사용하기:
 
 ```sh
 yarn train-fashion-mnist --gpu
 ```
 
-To perform quantization on the model saved in the `yarn train` step
-and evaluate the effects on the model's test accuracy, do:
+`yarn train` 단계에서 저장한 모델에 양자화를 수행하고 모델의 테스트 정확도에 대한 영향을 평가하기:
 
 ```
 yarn quantize-and-evaluate-fashion-mnist
 ```
 
-## Running the MobileNetV2 quantization demo
+## MobileNetV2 양자화 데모
 
-Unlike the previous three demos, the MobileNetV2 demo doesn't involve
-a model training step. Instead, the model is loaded as a Keras application
-and converted to the TensorFlow.js format for quantization and evaluation.
+앞선 세 개의 데모와 달리 MobilNetV2 데모는 모델 훈련 단계가 없습니다.
+대신 케라스 애플리케이션으로 모델을 로드한 다음 TensorFlow.js 포맷으로 변경하여 양자와화 평가를 수행합니다.
 
-The non-quantized and quantized versions of MobileNetV2 are evaluated
-on a sample of 1000 images from the [ImageNet](http://www.image-net.org/)
-dataset. The image files are downloaded from the hosted location on the
-web. This subset is based on the sampling done by
-https://github.com/ajschumacher/imagen.
+MobilNetV2에 양자화를 적용하지 않은 모델과 양자화 모델을 [ImageNet](http://www.image-net.org/)
+데이터셋에 있는 1,000개 이미지에서 평가합니다.
+이 샘플은 https://github.com/ajschumacher/imagen 을 기반으로 합니다.
 
-All these steps can be performed with a single command:
+다음 명령으로 이런 작업을 모두 수행할 수 있습니다:
 
 ```sh
 yarn quantize-and-evaluate-MobileNetV2

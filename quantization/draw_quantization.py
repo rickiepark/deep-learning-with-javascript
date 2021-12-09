@@ -13,8 +13,7 @@
 # limitations under the License.
 # =============================================================================
 
-# Draws diargams to provide an intuitive understanding of the discretization
-# that result from 16-bit and 8-bit weight quantization.
+# 16비트와 8비트 가중치 양자화의 이산화를 직관적으로 이해하기 위한 그림을 그립니다.
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -22,30 +21,29 @@ import numpy as np
 
 def quantize(w, bits):
   """
-  Simulate weight quantization.
+  가중치 양자화를 시뮬레이션합니다.
 
   Args:
-    w: (a numpy.ndarray) The weight to be quantized.
-    bits: (int) number of bits used for the quantization: 8 or 16.
+    w: (a numpy.ndarray) 양자화할 가중치
+    bits: (int) 양자화에 사용할 비트 수: 8 또는 16
 
   Returns:
-    A tuple with three elements:
-      w_quantized: the quantized version of w, represented as an uint8-
-        or uint16-type numpy.ndarray.
-      w_min: Minimum value of w, required for dequantization.
-      w_max: Maximum value of w, required for dequantization.
+    세 개의 원소를 가진 튜플:
+      w_quantized: uint8 또는 uint16 타입의 numpy.ndarray로 표현된 w의 양자화 버전
+      w_min: 역양자화에 필요한 w의 최솟값
+      w_max: 역양자화에 필요한 w의 최댓값
   """
   if bits == 8:
     dtype = np.uint8
   elif bits == 16:
     dtype = np.uint16
   else:
-    raise ValueError('Unsupported bits of quantization: %s' % bits)
+    raise ValueError('지원하지 않는 양자화 비트입니다: %s' % bits)
 
   w_min = np.min(w)
   w_max = np.max(w)
   if w_max == w_min:
-    raise ValueError('Cannot perform quantization because w has a range of 0')
+    raise ValueError('w가 모두 동일한 값이기 때문에 양자화를 수행할 수 없습니다')
   w_quantized = np.array(
        np.floor((w - w_min) / (w_max - w_min) * np.power(2, bits)), dtype)
   return w_quantized, w_min, w_max
@@ -53,18 +51,15 @@ def quantize(w, bits):
 
 def dequantize(w_quantized, w_min, w_max):
   """
-  Simulate weight de-quantization.
+  가중치 역양자화를 시뮬레이션합니다.
 
   Args:
-    w: (a numpy.ndarray) The weight to be quantized.
-    bits: (int) number of bits used for the quantization: 8 or 16.
+    w_quantized: uint8 또는 uint16 타입의 numpy.ndarray로 표현된 w의 양자화 버전
+    w_min: 역양자화에 필요한 w의 최솟값
+    w_max: 역양자화에 필요한 w의 최댓값
 
   Returns:
-    A tuple with three elements:
-      w_quantized: the quantized version of w, represented as an uint8-
-        or uint16-type numpy.ndarray.
-      w_min: Minimum value of w, required for dequantization.
-      w_max: Maximum value of w, required for dequantization.
+    w: (numpy.ndarray) 역양자화된 가중치
   """
   if w_quantized.dtype == np.uint8:
     bits = 8
@@ -72,13 +67,13 @@ def dequantize(w_quantized, w_min, w_max):
     bits = 16
   else:
     raise ValueError(
-        'Unsupported dtype in quantized values: %s' % w_quantized.dtype)
+        '지원하지 않는 양자화 값입니다: %s' % w_quantized.dtype)
   return (w_min +
           w_quantized.astype(np.float64) / np.power(2, bits) * (w_max - w_min))
 
 
 def main():
-  # Number of points along the x-axis used to draw the sine wave.
+  # sine 곡선을 그리기 위해 사용하는 x 축의 포인트 개수
   n_points = 1e6
   xs = np.linspace(-np.pi, np.pi, n_points).astype(np.float64)
   w = xs

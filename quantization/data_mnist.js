@@ -33,7 +33,7 @@ const mkdir = util.promisify(fs.mkdir);
 const readFile = util.promisify(fs.readFile);
 const rename = util.promisify(fs.rename);
 
-// Shared specs for the MNIST and Fashion MNIST datasets.
+// MNIST와 패션 MNIST 데이터셋 스펙
 const IMAGE_HEADER_MAGIC_NUM = 2051;
 const IMAGE_HEADER_BYTES = 16;
 const IMAGE_HEIGHT = 28;
@@ -44,7 +44,7 @@ const LABEL_HEADER_BYTES = 8;
 const LABEL_RECORD_BYTE = 1;
 const LABEL_FLAT_SIZE = 10;
 
-// Downloads a test file only once and returns the buffer for the file.
+// 파일을 한 번 다운로드하고 파일 버퍼를 반환합니다.
 export async function fetchOnceAndSaveToDiskWithBuffer(
     baseURL, destDir, filename) {
 
@@ -56,14 +56,14 @@ export async function fetchOnceAndSaveToDiskWithBuffer(
       return;
     }
     const file = fs.createWriteStream(filename);
-    console.log(`  * Downloading from: ${url}`);
+    console.log(`  * 다운로드 중: ${url}`);
     let httpModule;
     if (url.indexOf('https://') === 0) {
       httpModule = https;
     } else if (url.indexOf('http://') === 0) {
       httpModule =  http;
     } else {
-      return reject(`Unrecognized protocol in URL: ${url}`);
+      return reject(`알 수 없는 URL 프로토콜: ${url}`);
     }
 
     httpModule.get(url, (response) => {
@@ -80,7 +80,7 @@ export async function fetchOnceAndSaveToDiskWithBuffer(
 function loadHeaderValues(buffer, headerLength) {
   const headerValues = [];
   for (let i = 0; i < headerLength / 4; i++) {
-    // Header data is stored in-order (aka big-endian)
+    // 헤더 데이터는 빅엔디안으로 저장되어 있습니다.
     headerValues[i] = buffer.readUInt32BE(i * 4);
   }
   return headerValues;
@@ -96,23 +96,22 @@ async function loadImages(baseURL, destDir, filename) {
   const headerValues = loadHeaderValues(buffer, headerBytes);
   tf.util.assert(
       headerValues[0] === IMAGE_HEADER_MAGIC_NUM,
-      () => `Image file header doesn't match expected magic num.`);
+      () => `이미지 파일 헤더가 매직 넘버와 맞지 않습니다.`);
   tf.util.assert(
       headerValues[2] === IMAGE_HEIGHT,
-      () => `Value in file header (${headerValues[2]}) doesn't ` +
-      `match the expected image height ${IMAGE_HEIGHT}`);
+      () => `파일 헤더에 있는 값(${headerValues[2]})이 ` +
+      `이미지 높이 ${IMAGE_HEIGHT}와 맞지 않습니다.`);
   tf.util.assert(
       headerValues[3] === IMAGE_WIDTH,
-      () => `Value in file header (${headerValues[3]}) doesn't ` +
-      `match the expected image height ${IMAGE_WIDTH}`);
+      () => `파일 헤더에 있는 값(${headerValues[3]})이 ` +
+      `이미지 너비 ${IMAGE_WIDTH}와 맞지 않습니다.`);
 
   const images = [];
   let index = headerBytes;
   while (index < buffer.byteLength) {
     const array = new Float32Array(recordBytes);
     for (let i = 0; i < recordBytes; i++) {
-      // Normalize the pixel values into the 0-1 interval, from
-      // the original 0-255 interval.
+      // 픽셀 값을 0~255 범위에서 0~1 범위로 정규화합니다.
       array[i] = buffer.readUInt8(index++) / 255;
     }
     images.push(array);
@@ -120,8 +119,8 @@ async function loadImages(baseURL, destDir, filename) {
 
   tf.util.assert(
       images.length === headerValues[1],
-      () => `Actual images length (${images.length} doesn't match ` +
-      `value in header (${headerValues[1]})`);
+      () => `실제 이미지 길이(${images.length}가 ` +
+      `헤더에 있는 값(${headerValues[1]})과 맞지 않습니다.`);
   return images;
 }
 
@@ -135,7 +134,7 @@ async function loadLabels(baseURL, destDir, filename) {
   const headerValues = loadHeaderValues(buffer, headerBytes);
   tf.util.assert(
       headerValues[0] === LABEL_HEADER_MAGIC_NUM,
-      () => `Label file header doesn't match expected magic num.`);
+      () => `레이블 파일 헤더가 매직 넘버와 맞지 않습니다.`);
 
   const labels = [];
   let index = headerBytes;
@@ -149,14 +148,14 @@ async function loadLabels(baseURL, destDir, filename) {
 
   tf.util.assert(
       labels.length === headerValues[1],
-      () => `Actual labels length (${images.length} doesn't match ` +
-      `value in header (${headerValues[1]})`);
+      () => `실제 레이블 길이(${images.length})가 ` +
+      `헤더에 있는 값(${headerValues[1]})과 맞지 않습니다.`);
   return labels;
 }
 
-/** Helper class to handle loading training and test data. */
+/** 훈련 데이터와 테스트 데이터 로딩을 위한 헬퍼 클래스 */
 export class MnistDataset {
-  // MNIST data constants:
+  // MNIST 데이터 상수:
   constructor() {
     this.dataset = null;
     this.trainSize = 0;
@@ -176,7 +175,7 @@ export class MnistDataset {
     }
   }
 
-  /** Loads training and test data. */
+  /** 훈련 데이터와 테스트 데이터를 로드합니다. */
   async loadData() {
     const baseUrlAndFilePaths = this.getBaseUrlAndFilePaths();
     const baseUrl = baseUrlAndFilePaths.baseUrl;
@@ -216,10 +215,10 @@ export class MnistDataset {
     const size = this.dataset[imagesIndex].length;
     tf.util.assert(
         this.dataset[labelsIndex].length === size,
-        `Mismatch in the number of images (${size}) and ` +
-            `the number of labels (${this.dataset[labelsIndex].length})`);
+        `이미지 개수(${size})와 ` +
+            `레이블 개수(${this.dataset[labelsIndex].length})가 일치하지 않습니다.`);
 
-    // Only create one big array to hold batch of images.
+    // 이미지 배치를 담을 배열을 만듭니다.
     const imagesShape = [size, IMAGE_HEIGHT, IMAGE_WIDTH, 1];
     const images = new Float32Array(tf.util.sizeFromShape(imagesShape));
     const labels = new Int32Array(tf.util.sizeFromShape([size, 1]));

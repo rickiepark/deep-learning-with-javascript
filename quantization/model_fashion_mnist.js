@@ -18,9 +18,9 @@
 import * as tf from '@tensorflow/tfjs';
 
 /**
- * Create a model for the Fashion-MNIST image classification problem.
+ * 패션 MNIST 이미지 분류 문제를 위한 모델을 만듭니다.
  *
- * Based on:
+ * 참고:
  *   https://github.com/cmasch/zalando-fashion-mnist/blob/master/Simple_Convolutional_Neural_Network_Fashion-MNIST.ipynb
  */
 export function createModel() {

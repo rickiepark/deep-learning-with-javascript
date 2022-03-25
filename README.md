@@ -2,11 +2,11 @@
 
 ![cover](https://tensorflowkorea.files.wordpress.com/2022/03/e18480e185aee18480e185b3e186afe18487e185b3e18485e185a6e1848be185b5e186abe18490e185b5e186b7e1848be185a6e18480e185a6e18487e185a2e1848be185aee18482e185b3e186abe18483e185b5e186b8e18485e185a5-1.jpg?w=600)
 
-이 저장소는 <[구글 브레인 팀에게 배우는 딥러닝 with TensorFlow.js](https://bit.ly/tfjs-home)>(길벗, 2022)의 코드를 담고 있습니다. 온라인 [데모 사이트](https://bit.ly/tfjs-demo)에서 예제를 직접 실행해 볼 수도 있습니다!
+이 저장소는 <[구글 브레인 팀에게 배우는 딥러닝 with TensorFlow.js](https://bit.ly/tfjs-book)>(길벗, 2022)의 코드를 담고 있습니다. 온라인 [데모 사이트](https://bit.ly/tfjs-demo)에서 예제를 직접 실행해 볼 수도 있습니다!
 
-* 2장: [보스턴 주택 가격 예측](./boston-housing)
-* 3장: [웹사이트 피싱 감지](./website-phishing)
-* 3장: [붓꽃 품종 분류](./iris)
+* 2장: [보스턴 주택 가격 예측](boston-housing)
+* 3장: [웹사이트 피싱 감지](website-phishing)
+* 3장: [붓꽃 품종 분류](iris)
 * 4장: [MNIST 손글씨 숫자 분류](mnist)
 * 4장: [Node.js로 훈련 속도 높이기](mnist-node)
 * 4장: [단어 음성 인식](speech-commands)
